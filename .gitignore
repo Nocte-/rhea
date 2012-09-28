@@ -10,3 +10,25 @@
 *.lai
 *.la
 *.a
+
+# Backup files
+*~
+*.bak
+*.log
+.*.sw[a-z]
+\#*\#
+.\#*
+*.tmp
+
+# CMake cruft
+/build/
+CMakeFiles/*
+Makefile
+CPackConfig.cmake
+CPackSourceConfig.cmake
+CMakeCache.txt
+tags
+
+# Generated headers
+src/version.hpp
+
