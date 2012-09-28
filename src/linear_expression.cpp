@@ -88,9 +88,10 @@ linear_expression& linear_expression::operator+= (const linear_expression& x)
 linear_expression& linear_expression::operator+= (const term& x)
 {
     auto i (terms_.find(x.first));
-    if (i == terms_.end() && !near_zero(x.second))
+    if (i == terms_.end())
     {
-        terms_[x.first] = x.second;
+        if (!near_zero(x.second))
+            terms_[x.first] = x.second;
     }
     else if (near_zero(i->second += x.second))
     {
@@ -138,10 +139,13 @@ linear_expression::add(const variable& v, t c, const variable& subject,
                        tableau& solver)
 {
     auto i (terms_.find(v));
-    if (i == terms_.end() && !near_zero(c))
+    if (i == terms_.end())
     {
-        terms_[v] = c;
-        solver.note_added_variable(v, subject);
+        if(!near_zero(c))
+        {
+            terms_[v] = c;
+            solver.note_added_variable(v, subject);
+        }
     }
     else if (near_zero(i->second += c))
     {
@@ -186,7 +190,7 @@ double linear_expression::evaluate() const
 // Note that the term involving subject has been dropped.
 //
 // Returns the reciprocal, so that NewSubject can be used by ChangeSubject
-double linear_expression::new_subject(variable subj)
+double linear_expression::new_subject(const variable& subj)
 {
     auto i (terms_.find(subj));
     assert(i != terms_.end());
@@ -217,7 +221,8 @@ double linear_expression::new_subject(variable subj)
 // equal to the expression, then Resolve the equation for NewSubject,
 // and destructively make the expression what NewSubject is then equal to
 void
-linear_expression::change_subject(variable old_subj, variable new_subj)
+linear_expression::change_subject(const variable& old_subj,
+                                  const variable& new_subj)
 {
     assert(!new_subj.is_nil());
     assert(!near_zero(coefficient(new_subj)));
@@ -234,8 +239,9 @@ linear_expression::change_subject(variable old_subj, variable new_subj)
 // PRECONDITIONS:
 //   var occurs with a non-Zero coefficient in this expression.
 void
-linear_expression::substitute_out(variable var, const linear_expression& expr,
-                                  variable subj, tableau& solver)
+linear_expression::substitute_out(const variable& var,
+                                  const linear_expression& expr,
+                                  const variable& subj, tableau& solver)
 {
     auto it (terms_.find(var));
     assert(it != terms_.end());

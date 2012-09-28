@@ -83,9 +83,9 @@ public:
         return add_constraint(constraint_ref(ptr));
     }
 
-    simplex_solver& add_constraint(constraint_ref c);
+    simplex_solver& add_constraint(const constraint_ref& c);
 
-    simplex_solver& remove_constraint(constraint_ref c);
+    simplex_solver& remove_constraint(const constraint_ref& c);
 
     simplex_solver& add_edit_var(const variable& v,
                                  const strength& s = strength::strong(),
@@ -94,7 +94,7 @@ public:
         return add_constraint(new edit_constraint(v, s, weight));
     }
 
-    simplex_solver& remove_edit_var(variable v);
+    simplex_solver& remove_edit_var(const variable& v);
 
     simplex_solver& begin_edit()
     {
@@ -149,7 +149,7 @@ public:
     // and BeginEdit() needs to be called before this is called.
     // The tableau will not be solved completely until
     // after Resolve() has been called
-    simplex_solver& suggest_value(variable v, double x);
+    simplex_solver& suggest_value(const variable& v, double x);
 
     // If autosolving has been turned off, client code needs
     // to explicitly call solve() before accessing variables
@@ -199,7 +199,7 @@ public:
     const var_to_constraint_map& marker_map() const
         { return constraints_marked_; }
 
-    bool is_constraint_satisfied(constraint_ref c) const;
+    bool is_constraint_satisfied(const constraint_ref& c) const;
 
 
     // re-set all the external variables to their current values
@@ -282,7 +282,7 @@ protected:
     // Normalize if necessary so that the Constant is non-negative.  If
     // the constraint is non-required give its error variables an
     // appropriate weight in the objective function.
-    expression_result make_expression(constraint_ref c);
+    expression_result make_expression(const constraint_ref& c);
 
 
     // Add the constraint expr=0 to the inequality tableau using an
@@ -338,7 +338,7 @@ protected:
     // (This comment was for resetEditConstants(), but that is now
     // gone since it was part of the screwey vector-based interface
     // to resolveing. --02/15/99 gjb)
-    void delta_edit_constant(double delta, variable v1, variable v2);
+    void delta_edit_constant(double delta, const variable& v1, const variable& v2);
 
     // We have set new values for the constants in the edit constraints.
     // Re-Optimize using the dual simplex algorithm.
@@ -346,11 +346,11 @@ protected:
 
     // Minimize the value of the objective.  (The tableau should already
     // be feasible.)
-    void optimize(variable z);
+    void optimize(const variable& z);
 
     // Do a Pivot.  Move entryVar into the basis (i.e. make it a basic variable),
     // and move exitVar out of the basis (i.e., make it a parametric variable)
-    void pivot(variable entryVar, variable exitVar);
+    void pivot(const variable& entry, const variable& exit);
 
     // Set the external variables known to this solver to their appropriate values.
     // Set each external basic variable to its value, and set each
@@ -366,7 +366,7 @@ protected:
 
     // this gets called by RemoveConstraint and by AddConstraint when the
     // contraint we're trying to Add is inconsistent
-    simplex_solver& remove_constraint_internal(constraint_ref c);
+    simplex_solver& remove_constraint_internal(const constraint_ref& c);
 
     void change(variable& v, double n)
     {

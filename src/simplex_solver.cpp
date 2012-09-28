@@ -34,7 +34,7 @@ void remove_from_container_if(container& c, func pred)
 }
 
 simplex_solver::expression_result
-simplex_solver::make_expression(constraint_ref c)
+simplex_solver::make_expression(const constraint_ref& c)
 {
     expression_result result;
 
@@ -138,7 +138,7 @@ simplex_solver::make_expression(constraint_ref c)
 }
 
 simplex_solver&
-simplex_solver::add_constraint(constraint_ref c)
+simplex_solver::add_constraint(const constraint_ref& c)
 {
     if (c->is_strict_inequality())
         throw strict_inequality_not_allowed();
@@ -226,7 +226,7 @@ simplex_solver::add_point_stay(const point& pt, const strength& s, double weight
 }
 
 simplex_solver&
-simplex_solver::remove_constraint_internal(constraint_ref c)
+simplex_solver::remove_constraint_internal(const constraint_ref& c)
 {
     needs_solving_ = true;
     reset_stay_constants();
@@ -400,7 +400,7 @@ simplex_solver::resolve()
 }
 
 simplex_solver&
-simplex_solver::suggest_value(variable v, double x)
+simplex_solver::suggest_value(const variable& v, double x)
 {
     auto ei (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
     if (ei == edit_info_list_.end())
@@ -540,7 +540,7 @@ simplex_solver::try_adding_directly(linear_expression& expr)
 }
 
 simplex_solver&
-simplex_solver::remove_edit_var(variable v)
+simplex_solver::remove_edit_var(const variable& v)
 {
     auto i (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
     if (i == edit_info_list_.end())
@@ -659,7 +659,7 @@ simplex_solver::choose_subject(linear_expression& expr)
 
 // Minimize the value of the objective.  (The tableau should already
 // be feasible.)
-void simplex_solver::optimize(variable v)
+void simplex_solver::optimize(const variable& v)
 {
     auto& row (row_expression(v));
 
@@ -741,7 +741,8 @@ void simplex_solver::optimize(variable v)
 // gone since it was part of the screwey vector-based interface
 // to resolveing. --02/15/99 gjb)
 void
-simplex_solver::delta_edit_constant(double delta, variable plus, variable minus)
+simplex_solver::delta_edit_constant(double delta, const variable& plus,
+                                    const variable& minus)
 {
     // Check if the variables are basic
     if (is_basic_var(plus))
@@ -826,7 +827,7 @@ simplex_solver::dual_optimize()
 // Do a Pivot.  Move entryVar into the basis (i.e. make it a basic variable),
 // and move exitVar out of the basis (i.e., make it a parametric variable)
 void
-simplex_solver::pivot(variable entry, variable exit)
+simplex_solver::pivot(const variable& entry, const variable& exit)
 {
     // The entryVar might be non-pivotable if we're doing a RemoveConstraint --
     // otherwise it should be a pivotable variable -- enforced at call sites,
@@ -905,7 +906,7 @@ simplex_solver::set_external_variables()
 }
 
 bool
-simplex_solver::is_constraint_satisfied(constraint_ref c) const
+simplex_solver::is_constraint_satisfied(const constraint_ref& c) const
 {
     if (marker_vars_.count(c) == 0)
         throw constraint_not_found();
@@ -926,7 +927,7 @@ simplex_solver::is_constraint_satisfied(constraint_ref c) const
 }
 
 simplex_solver&
-simplex_solver::remove_constraint(constraint_ref c)
+simplex_solver::remove_constraint(const constraint_ref& c)
 {
     remove_constraint_internal(c);
     c->removed_from(*this);

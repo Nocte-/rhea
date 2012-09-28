@@ -87,8 +87,8 @@ public:
     // because it now has a coefficient of 0, inform the solver.
     // PRECONDITIONS:
     //   var occurs with a non-Zero coefficient in this expression.
-    void substitute_out(variable v, const linear_expression& expr,
-                        variable subj, tableau& solver);
+    void substitute_out(const variable& v, const linear_expression& expr,
+                        const variable& subj, tableau& solver);
 
     // This linear expression currently represents the equation
     // oldSubject=self.  Destructively modify it so that it represents
@@ -105,7 +105,7 @@ public:
     //   The new equation will be
     //        NewSubject = -c/a + oldSubject/a - (a1/a)*v1 - ... - (an/a)*vn.
     //   Note that the term involving NewSubject has been dropped.
-    void change_subject(variable old_subj, variable new_subj);
+    void change_subject(const variable& old_subj, const variable& new_subj);
 
     // This linear expression currently represents the equation self=0.
     // Destructively modify it so
@@ -124,7 +124,7 @@ public:
     //
     // Note that the term involving subject has been dropped.
     // Returns the reciprocal, so ChangeSubject can use it, too
-    t new_subject(variable new_subj);
+    t new_subject(const variable& new_subj);
 
     t evaluate() const;
 
