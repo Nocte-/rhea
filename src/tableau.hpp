@@ -80,7 +80,7 @@ public:
 
     const rows_map& rows() const { return rows_; }
 
-    bool columns_has_key(variable subj) const
+    bool columns_has_key(const variable& subj) const
         { return columns_.count(subj) > 0; }
 
     const linear_expression& row_expression(const variable& v) const

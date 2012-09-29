@@ -20,6 +20,7 @@
 #pragma once
 
 #include <unordered_map>
+#include "approx.hpp"
 #include "variable.hpp"
 
 namespace rhea {
@@ -55,8 +56,7 @@ public:
 
     linear_expression& set(const variable& v, double x)
         {
-            assert(x != 0.0);
-            terms_[v] = x;
+            if (!near_zero(x)) terms_[v] = x;
             return *this;
         }
 

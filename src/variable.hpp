@@ -58,14 +58,6 @@ public:
         : p_(std::make_shared<float_variable>(name, value))
     { }
 
-    variable(const variable& m)
-        : p_(m.p_)
-    { }
-
-    variable(variable&& m)
-        : p_(std::move(m.p_))
-    { }
-
   //  operator double() const
   //      { return value(); }
 

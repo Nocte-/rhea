@@ -32,20 +32,20 @@ public:
         : linear_constraint(std::move(e), s, weight)
     { }
 
-    linear_equation(variable v, linear_expression e,
+    linear_equation(const variable& v, linear_expression e,
                     strength s = strength::required(),
                     double weight = 1.0)
         : linear_constraint(std::move(e), s, weight)
     {
-        expr_ -= v;
+        expr_.set(v, -1);
     }
 
-    linear_equation(linear_expression e, variable v,
+    linear_equation(linear_expression e, const variable& v,
                     strength s = strength::required(),
                     double weight = 1.0)
         : linear_constraint(std::move(e), s, weight)
     {
-        expr_ -= v;
+        expr_.set(v, -1);
     }
 
     linear_equation(linear_expression lhs, const linear_expression& rhs,
