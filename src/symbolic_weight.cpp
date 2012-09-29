@@ -21,20 +21,17 @@
 
 namespace rhea {
 
-symbolic_weight::symbolic_weight(int levels, double value)
-    : values_(levels, value)
-{ }
+symbolic_weight::symbolic_weight()
+{
+    values_[0] = values_[1] = values_[2] = 0;
+}
 
 symbolic_weight::symbolic_weight(double w1, double w2, double w3)
 {
-    values_.push_back(w1);
-    values_.push_back(w2);
-    values_.push_back(w3);
+    values_[0] = w1;
+    values_[1] = w2;
+    values_[2] = w3;
 }
-
-symbolic_weight::symbolic_weight(std::vector<double> init)
-    : values_(init)
-{ }
 
 symbolic_weight symbolic_weight::zero()
 {

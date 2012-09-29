@@ -22,6 +22,7 @@
 #include <functional>
 #include <list>
 #include <stack>
+#include <vector>
 
 #include "edit_constraint.hpp"
 #include "linear_expression.hpp"
@@ -53,11 +54,10 @@ public:
     simplex_solver()
         : solver()
         , objective_(new objective_variable("z"))
-        , epsilon_ (1e-8)
         , needs_solving_ (true)
         , explain_failure_ (false)
     {
-        rows_[objective_];
+        rows_[objective_]; // Create an empty row for the objective
         cedcns_.push(0);
     }
 
@@ -91,27 +91,11 @@ public:
 
     simplex_solver& remove_edit_var(const variable& v);
 
-    simplex_solver& begin_edit()
-    {
-        if (edit_info_list_.empty())
-            throw edit_misuse("begin_edit called with no edit variables");
+    simplex_solver& begin_edit();
 
-        infeasible_rows_.clear();
-        reset_stay_constants();
-        cedcns_.push(edit_info_list_.size());
-        return *this;
-    }
+    simplex_solver& end_edit();
 
-    simplex_solver& end_edit()
-    {
-        if (edit_info_list_.empty())
-            throw edit_misuse("end_edit called with no edit variables");
-
-        resolve();
-        cedcns_.pop();
-        remove_edit_vars_to(cedcns_.top());
-        return *this;
-    }
+    simplex_solver& remove_edit_vars_to(size_t n);
 
     simplex_solver& remove_all_edit_vars()
     {
@@ -119,7 +103,6 @@ public:
         return *this;
     }
 
-    simplex_solver& remove_edit_vars_to(size_t n);
 
     simplex_solver& add_point_stays(const std::vector<point>& points,
                                     const strength& s = strength::weak(),
@@ -143,12 +126,12 @@ public:
     // the variable needs to be added as an edit variable
     // and BeginEdit() needs to be called before this is called.
     // The tableau will not be solved completely until
-    // after Resolve() has been called
+    // after Resolve() has been called.
     simplex_solver& suggest_value(const variable& v, double x);
 
     // If autosolving has been turned off, client code needs
     // to explicitly call solve() before accessing variables
-    // values
+    // values.
     simplex_solver& solve()
     {
         if (needs_solving_)
@@ -380,13 +363,11 @@ private:
     constraint_to_var_map       marker_vars_;
     var_to_constraint_map       constraints_marked_;
 
-    variable  objective_;
+    variable    objective_;
 
     // Map edit variables to their constraints, errors, and prior
     // values
     std::list<edit_info>  edit_info_list_;
-
-    const double epsilon_;
 
     bool        auto_reset_stay_constants_;
     bool        needs_solving_;
@@ -394,5 +375,20 @@ private:
 
     std::stack<size_t> cedcns_;
 };
+
+/** Scoped edit action.
+ *  This class calls begin_edit() on a simplex_solver upon construction,
+ *  and end_edit() as it goes out of scope.  This can be used as an
+ *  alternative to calling these two functions manually. */
+class scoped_edit
+{
+public:
+    scoped_edit(simplex_solver& s) : s_(s.begin_edit()) { }
+    ~scoped_edit() { s_.end_edit(); }
+
+private:
+    simplex_solver& s_;
+};
+
 
 } // namespace rhea

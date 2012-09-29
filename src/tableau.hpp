@@ -44,37 +44,25 @@ public:
 
     bool is_valid() const;
 
-void print() const
-{
-    std::cout << "Columns:" << std::endl;
-    for (auto& p : columns_)
-    {
-        std::cout << p.first.description() << " => ";
-        for (auto& v : p.second)
-            std::cout << v.description() << " , ";
-
-        std::cout << std::endl;
-    }
-
-    std::cout << "Rows:" << std::endl;
-    for (auto& p : rows_)
-    {
-        std::cout << p.first.description() << " => " << p.second.to_string() << std::endl;
-    }
-}
-
 public:
     tableau() { }
 
     virtual ~tableau() { }
 
-    void add_row(variable v, const linear_expression& e);
+    void add_row(const variable& v, const linear_expression& e);
 
-    variable remove_column(variable v);
+    bool remove_column(const variable& v);
 
-    linear_expression remove_row(variable v);
+    linear_expression remove_row(const variable& v);
 
-    void substitute_out(variable old_var, const linear_expression& e);
+    /** Replace all occurrences of \a old_var with \a expr, and update
+     ** column cross indices.
+     *  \a old_var should now be a basic variable.
+     *  This function calls substitute_out on each row that has old_var
+     *  in it.
+     * @post old_var is no longer a basic variable */
+    void substitute_out(const variable& old_var,
+                        const linear_expression& expr);
 
     const columns_map& columns() const { return columns_; }
 

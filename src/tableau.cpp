@@ -20,7 +20,7 @@
 
 namespace rhea {
 
-void tableau::add_row(variable var, const linear_expression& expr)
+void tableau::add_row(const variable& var, const linear_expression& expr)
 {
     assert(!var.is_nil());
     rows_[var] = expr;
@@ -36,12 +36,12 @@ void tableau::add_row(variable var, const linear_expression& expr)
         external_rows_.insert(var);
 }
 
-variable tableau::remove_column(variable var)
+bool tableau::remove_column(const variable& var)
 {
     assert(!var.is_nil());
     auto ic (columns_.find(var));
     if (ic == columns_.end())
-        return var;
+        return false;
 
     for (const variable& v : ic->second)
         rows_[v].erase(var);
@@ -53,10 +53,10 @@ variable tableau::remove_column(variable var)
     }
     columns_.erase(ic);
 
-    return var;
+    return true;
 }
 
-linear_expression tableau::remove_row(variable var)
+linear_expression tableau::remove_row(const variable& var)
 {
     assert(!var.is_nil());
     auto ir (rows_.find(var));
@@ -80,18 +80,13 @@ linear_expression tableau::remove_row(variable var)
         external_parametric_vars_.erase(var);
     }
 
-    linear_expression result (ir->second);
+    linear_expression result (std::move(ir->second));
     rows_.erase(ir);
 
     return result;
 }
 
-// Replace all occurrences of oldVar with expr, and update column cross indices
-// oldVar should now be a basic variable
-// Uses the Columns data structure and calls SubstituteOut on each
-// row that has oldVar in it
-// oldVar is leaving the basis, and becoming parametric
-void tableau::substitute_out(variable old, const linear_expression& expr)
+void tableau::substitute_out(const variable& old, const linear_expression& expr)
 {
     auto ic (columns_.find(old));
     if (ic == columns_.end())
@@ -104,7 +99,10 @@ void tableau::substitute_out(variable old, const linear_expression& expr)
         if (v.is_restricted() && row.constant() < 0)
             infeasible_rows_.insert(v);
     }
+
+    // columns_.erase(ic); <-works in theory.
     columns_.erase(old);
+
     if (old.is_external())
     {
         if (!columns_[old].empty())
@@ -144,7 +142,7 @@ void tableau::note_removed_variable(const variable& v, const variable& subj)
     auto& column (columns_[v]);
     auto i (column.find(subj));
     if (i == column.end())
-        throw internal_error("note_removed_variable");
+        throw internal_error("note_removed_variable: subject not in column");
 
     column.erase(i);
     if (column.empty())

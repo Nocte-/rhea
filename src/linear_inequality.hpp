@@ -31,11 +31,11 @@ public:
     linear_inequality (linear_expression expr,
                        strength s = strength::required(),
                        double weight = 1.0)
-        : linear_constraint(expr, s, weight)
+        : linear_constraint(std::move(expr), s, weight)
         , strict_inequality_(false)
     { }
 
-    linear_inequality(variable v, relation op, linear_expression expr,
+    linear_inequality(const variable& v, relation op, linear_expression expr,
                       strength s = strength::required(),
                       double weight = 1.0)
         : linear_constraint(std::move(expr), s, weight)

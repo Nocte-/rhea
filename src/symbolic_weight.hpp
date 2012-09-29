@@ -20,16 +20,16 @@
 #pragma once
 
 #include <cstddef>
-#include <vector>
+#include <array>
+#include "approx.hpp"
 
 namespace rhea {
 
 class symbolic_weight
 {
 public:
-    symbolic_weight(int levels = 3, double value = 0.0);
+    symbolic_weight();
     symbolic_weight(double w1, double w2, double w3);
-    symbolic_weight(std::vector<double> weights);
 
     static symbolic_weight zero();
 
@@ -59,36 +59,25 @@ public:
         return sum;
     }
 
-    size_t levels() const
-        { return values_.size(); }
-
-    bool approx(const symbolic_weight& w, double n)
+    bool approx(double n)
     {
-        auto i (w.values_.begin());
-        if (!approx(*i, n))
+        auto i (values_.begin());
+        if (!rhea::approx(*i, n))
             return false;
 
-        for (++i; i != w.values_.end(); ++i)
+        for (++i; i != values_.end(); ++i)
         {
-            if (!approx(*i, 0))
+            if (!rhea::approx(*i, 0))
                 return false;
         }
         return true;
     }
 
-    bool approx(const symbolic_weight& w1, const symbolic_weight& w2)
-    {
-        auto i1 (w1.values_.begin()), i2 (w2.values_.begin());
-        for (; i1 != w1.values_.end() && i2 != w2.values_.end(); ++i1, ++i2)
-        {
-            if (!approx(*i1, *i2))
-                return false;
-        }
-        return i1 == w1.values_.end() && i2 == w2.values_.end();
-    }
+    size_t levels() const
+        { return values_.size(); }
 
 private:
-    std::vector<double> values_;
+    std::array<double, 3> values_;
 };
 
 inline symbolic_weight operator* (symbolic_weight w, double n)

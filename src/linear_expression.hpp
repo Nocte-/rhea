@@ -166,6 +166,7 @@ private:
     variable_to_number_map terms_;
 };
 
+//--------------------------------------------------------------------------
 
 inline linear_expression
 operator* (linear_expression e, double x)
@@ -207,6 +208,44 @@ inline linear_expression
 operator- (linear_expression e, const linear_expression& x)
 {
     return e -= x;
+}
+
+//--------------------------------------------------------------------------
+
+inline linear_expression
+operator* (const variable& v, double x)
+{
+    return linear_expression(v, x);
+}
+
+inline linear_expression
+operator/ (const variable& v, double x)
+{
+    return linear_expression(v, 1.0/x);
+}
+
+inline linear_expression
+operator+ (const variable& v, double x)
+{
+    return linear_expression(v, 1, x);
+}
+
+inline linear_expression
+operator- (const variable& v, double x)
+{
+    return linear_expression(v, -1, x);
+}
+
+inline linear_expression
+operator+ (const variable& v, const variable& w)
+{
+    return linear_expression(v) += w;
+}
+
+inline linear_expression
+operator- (const variable& v, const variable& w)
+{
+    return linear_expression(v) -= w;
 }
 
 } // namespace rhea

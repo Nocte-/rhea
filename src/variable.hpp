@@ -34,28 +34,43 @@ namespace rhea {
 
 class variable
 {
-protected:
-    struct nil_tag {};
-    variable(nil_tag) : p_(nullptr) { }
-
 public:
-    explicit variable(abstract_variable* p)
+    variable() { }
+
+    static variable nil() { return variable(); }
+
+    variable(abstract_variable* p)
         : p_(p)
     {
         assert(p != nullptr);
     }
-    explicit variable(std::shared_ptr<abstract_variable> p)
-        : p_(p)
+
+    variable(std::shared_ptr<abstract_variable> p)
+        : p_(std::move(p))
     { }
 
-    static variable nil() { return variable(nil_tag()); }
+    variable(const variable& copy)
+        : p_(copy.p_)
+    { }
 
-    variable(double value = 0.0)
+    variable(int value)
+        : p_(std::make_shared<float_variable>(value))
+    { }
+
+    variable(unsigned int value)
+        : p_(std::make_shared<float_variable>(value))
+    { }
+
+    variable(float value)
+        : p_(std::make_shared<float_variable>(value))
+    { }
+
+    variable(double value)
         : p_(std::make_shared<float_variable>(value))
     { }
 
     variable(std::string name, double value = 0.0)
-        : p_(std::make_shared<float_variable>(name, value))
+        : p_(std::make_shared<float_variable>(std::move(name), value))
     { }
 
   //  operator double() const
@@ -92,7 +107,7 @@ public:
         { p_->change_value(x); }
 
     std::string name() const
-        { return p_->name(); }
+        { return is_nil() ? "NIL" : p_->name(); }
 
     bool is_nil() const
         { return p_ == nullptr; }

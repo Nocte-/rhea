@@ -22,7 +22,7 @@ int main (int argc, char** argv)
 {
     using namespace rhea;
 
-    size_t cns (500), resolves (100), solvers (10);
+    size_t cns (500), resolves (500), solvers (10);
 
     const double ineq_prob (0.12);
     const unsigned int max_vars (3), nr_vars (cns);
@@ -32,10 +32,10 @@ int main (int argc, char** argv)
     std::vector<simplex_solver> slv (solvers);
     for (auto& s : slv) s.set_autosolve(false);
 
-    std::vector<variable>       vars  (nr_vars);
+    std::vector<variable>       vars;
     for (size_t i (0); i < nr_vars; ++i)
     {
-        vars[i].set_value(i);
+        vars.emplace_back((int)i);
         for (auto& s : slv) s.add_stay(vars[i]);
     }
 
@@ -63,7 +63,7 @@ int main (int argc, char** argv)
     for (auto& s : slv)
     {
         size_t added(0), exceptions(0);
-        for (size_t j (0); j < cns_made; ++j)
+        for (size_t j (0); added < cns && j < cns_made; ++j)
         {
             try
             {

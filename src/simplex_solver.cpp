@@ -52,15 +52,15 @@ simplex_solver::make_expression(const constraint& c)
 
     if (c.is_inequality())
     {
-        // cn is an inequality, so Add a slack variable.  The original
+        // cn is an inequality, so add a slack variable.  The original
         // constraint is expr>=0, so that the resulting equality is
-        // expr-slackVar=0.  If cn is also non-required Add a negative
-        // error variable, giving
-        //    expr-slackVar = -errorVar, in other words
-        //    expr-slackVar+errorVar=0.
-        // Since both of these variables are newly created we can just Add
-        // them to the Expression (they can't be basic).
-        variable slack (std::make_shared<slack_variable>("s"));
+        // expr-slackVar=0.  If cn is also non-required, add a negative
+        // error variable, giving:
+        //    expr - slackVar = -errorVar
+        //    expr - slackVar + errorVar = 0.
+        // Since both of these variables are newly created we can just add
+        // them to the expression (they can't be basic).
+        variable slack (std::make_shared<slack_variable>());
         expr.set(slack, -1);
         marker_vars_[c] = slack;
         constraints_marked_[slack] = c;
@@ -199,8 +199,6 @@ simplex_solver::add_constraint(const constraint& c)
         set_external_variables();
     }
 
-    //c.added_to(*this);
-
     return *this;
 }
 
@@ -336,12 +334,10 @@ simplex_solver::remove_constraint_internal(const constraint& c)
                     }
                 }
             }
-            assert(exit_var_set);
         }
 
         if (exit_var_set)
             pivot(marker, exit_var);
-
     }
 
     if (is_basic_var(marker))
@@ -551,24 +547,6 @@ simplex_solver::remove_edit_var(const variable& v)
     return *this;
 }
 
-// We are trying to Add the constraint expr=0 to the tableaux.  Try
-// to choose a subject (a variable to become basic) from among the
-// current variables in expr.  If expr contains any unrestricted
-// variables, then we must choose an unrestricted variable as the
-// subject.  Also, if the subject is new to the solver we won't have
-// to do any substitutions, so we prefer new variables to ones that
-// are currently noted as parametric.  If expr contains only
-// restricted variables, if there is a restricted variable with a
-// negative coefficient that is new to the solver we can make that
-// the subject.  Otherwise we can't find a subject, so return nil.
-// (In this last case we have to Add an artificial variable and use
-// that variable as the subject -- this is done outside this method
-// though.)
-//
-// Note: in checking for variables that are new to the solver, we
-// ignore whether a variable occurs in the objective function, since
-// new slack variables are added to the objective function by
-// 'NewExpression:', which is called before this method.
 variable
 simplex_solver::choose_subject(linear_expression& expr)
 {
@@ -642,15 +620,15 @@ simplex_solver::choose_subject(linear_expression& expr)
         }
     }
 
-    // If we get this far, all of the variables in the Expression should
-    // be dummy variables.  If the Constant is nonzero we are trying to
-    // Add an unsatisfiable required constraint.  (Remember that dummy
-    // variables must take on a value of 0.)  Otherwise, if the Constant
-    // is Zero, multiply by -1 if necessary to make the coefficient for
-    // the subject negative."
-    if (near_zero(expr.constant()))
+    // If we get this far, all of the variables in the expression should
+    // be dummy variables.  If the constant is nonzero we are trying to
+    // add an unsatisfiable required constraint.  (Remember that dummy
+    // variables must take on a value of 0.)
+    if (!near_zero(expr.constant()))
         throw required_failure();
 
+    // Otherwise, if the constant is zero, multiply by -1 if necessary to
+    // make the coefficient for the subject negative.
     if (coeff > 0)
         expr *= -1;
 
@@ -686,7 +664,7 @@ void simplex_solver::optimize(const variable& v)
 
         // If all coefficients were positive (or if the objective
         // function has no pivotable variables) we are at an optimum.
-        if (coeff >= -epsilon_)
+        if (coeff >= -1e-8)
             return;
 
         // Choose which variable to move out of the basis.
@@ -788,7 +766,7 @@ simplex_solver::dual_optimize()
         auto ii (infeasible_rows_.begin());
         variable exit_var (*ii);
         infeasible_rows_.erase(ii);
-        variable entry_var;
+        variable entry_var (variable::nil());
 
         // exit_var might have become basic after some other pivoting
         // so allow for the case of its not being there any longer.
@@ -818,7 +796,7 @@ simplex_solver::dual_optimize()
         }
 
         if (ratio == std::numeric_limits<double>::max())
-            throw internal_error("ratio == dbl_max");
+            throw internal_error("dual_optimize: no pivot found");
 
         pivot(entry_var, exit_var);
     }
@@ -975,14 +953,42 @@ simplex_solver::change_strength_and_weight(constraint c,
     }
 }
 
-void simplex_solver::change_strength(constraint c, const strength& s)
+void
+simplex_solver::change_strength(constraint c, const strength& s)
 {
     change_strength_and_weight(c, s, c.weight());
 }
 
-void simplex_solver::change_weight(constraint c, double weight)
+void
+simplex_solver::change_weight(constraint c, double weight)
 {
     change_strength_and_weight(c, c.get_strength(), weight);
+}
+
+simplex_solver&
+simplex_solver::begin_edit()
+{
+    if (edit_info_list_.empty())
+        throw edit_misuse("begin_edit called with no edit variables");
+
+    infeasible_rows_.clear();
+    reset_stay_constants();
+    cedcns_.push(edit_info_list_.size());
+
+    return *this;
+}
+
+simplex_solver&
+simplex_solver::end_edit()
+{
+    if (edit_info_list_.empty())
+        throw edit_misuse("end_edit called with no edit variables");
+
+    resolve();
+    cedcns_.pop();
+    remove_edit_vars_to(cedcns_.top());
+
+    return *this;
 }
 
 } // namespace rhea
