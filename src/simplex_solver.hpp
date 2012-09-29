@@ -45,9 +45,9 @@ public:
     event_cb    on_resolve;
     variable_cb on_variable_change;
 
-    typedef std::unordered_map<constraint_ref, variable_set> constraint_to_varset_map;
-    typedef std::unordered_map<constraint_ref, variable>   constraint_to_var_map;
-    typedef std::unordered_map<variable, constraint_ref>   var_to_constraint_map;
+    typedef std::unordered_map<constraint, variable_set> constraint_to_varset_map;
+    typedef std::unordered_map<constraint, variable>   constraint_to_var_map;
+    typedef std::unordered_map<variable, constraint>   var_to_constraint_map;
 
 public:
     simplex_solver()
@@ -78,14 +78,9 @@ public:
         return add_lower_bound(v, lower).add_upper_bound(v, upper);
     }
 
-    simplex_solver& add_constraint(constraint* ptr)
-    {
-        return add_constraint(constraint_ref(ptr));
-    }
+    simplex_solver& add_constraint(const constraint& c);
 
-    simplex_solver& add_constraint(const constraint_ref& c);
-
-    simplex_solver& remove_constraint(const constraint_ref& c);
+    simplex_solver& remove_constraint(const constraint& c);
 
     simplex_solver& add_edit_var(const variable& v,
                                  const strength& s = strength::strong(),
@@ -199,7 +194,7 @@ public:
     const var_to_constraint_map& marker_map() const
         { return constraints_marked_; }
 
-    bool is_constraint_satisfied(const constraint_ref& c) const;
+    bool is_constraint_satisfied(const constraint& c) const;
 
 
     // re-set all the external variables to their current values
@@ -209,9 +204,9 @@ public:
     void update_external_variables()
         { set_external_variables(); }
 
-    void change_strength_and_weight(constraint_ref c, const strength& s, double weight);
-    void change_strength(constraint_ref c, const strength& s);
-    void change_weight(constraint_ref c, double weight);
+    void change_strength_and_weight(constraint c, const strength& s, double weight);
+    void change_strength(constraint c, const strength& s);
+    void change_weight(constraint c, double weight);
 
     // Each of the non-required stays will be represented by an equation
     // of the form
@@ -249,7 +244,7 @@ protected:
     // constants from the Smalltalk version of the code.
     struct edit_info
     {
-        edit_info(const variable& v_, constraint_ref c_,
+        edit_info(const variable& v_, constraint c_,
                   variable plus_, variable minus_, double prev_constant_)
             : v(v_), c(c_), plus(plus_), minus(minus_), prev_constant(prev_constant_)
         { }
@@ -257,7 +252,7 @@ protected:
         bool operator== (variable comp) const { return v == comp; }
 
         variable v;
-        constraint_ref c;
+        constraint c;
         variable plus;
         variable minus;
         double prev_constant;
@@ -282,7 +277,7 @@ protected:
     // Normalize if necessary so that the Constant is non-negative.  If
     // the constraint is non-required give its error variables an
     // appropriate weight in the objective function.
-    expression_result make_expression(const constraint_ref& c);
+    expression_result make_expression(const constraint& c);
 
 
     // Add the constraint expr=0 to the inequality tableau using an
@@ -366,7 +361,7 @@ protected:
 
     // this gets called by RemoveConstraint and by AddConstraint when the
     // contraint we're trying to Add is inconsistent
-    simplex_solver& remove_constraint_internal(const constraint_ref& c);
+    simplex_solver& remove_constraint_internal(const constraint& c);
 
     void change(variable& v, double n)
     {

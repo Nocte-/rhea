@@ -19,17 +19,17 @@
 //---------------------------------------------------------------------------
 #pragma once
 
-#include "constraint.hpp"
+#include "abstract_constraint.hpp"
 #include "linear_expression.hpp"
 
 namespace rhea {
 
-class edit_or_stay_constraint : public constraint
+class edit_or_stay_constraint : public abstract_constraint
 {
 public:
     edit_or_stay_constraint(const variable& v, strength s = strength::required(),
                             double weight = 1.0)
-        : constraint(s, weight)
+        : abstract_constraint(s, weight)
         , var_(v)
     { }
 

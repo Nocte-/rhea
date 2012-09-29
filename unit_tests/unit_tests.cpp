@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE (simple1_test)
 
     simplex_solver solver;
 
-    constraint_ref c (new linear_equation(x, linear_expression(y)));
+    constraint c (new linear_equation(x, linear_expression(y)));
     solver.add_var(x);
     solver.add_var(y);
     solver.add_constraint(c);
@@ -164,8 +164,8 @@ BOOST_AUTO_TEST_CASE (delete1_test)
     solver.add_constraint(new linear_equation(x, 100, strength::weak()));
     BOOST_CHECK_EQUAL(x.value(), 100.0);
 
-    constraint_ref c10 (std::make_shared<linear_inequality>(x, relation::leq, 10.0)),
-                   c20 (std::make_shared<linear_inequality>(x, relation::leq, 20.0));
+    constraint c10 (std::make_shared<linear_inequality>(x, relation::leq, 10.0)),
+               c20 (std::make_shared<linear_inequality>(x, relation::leq, 20.0));
 
     solver.add_constraint(c10).add_constraint(c20);
 
@@ -192,8 +192,8 @@ BOOST_AUTO_TEST_CASE (delete2_test)
     BOOST_CHECK_EQUAL(x.value(), 100);
     BOOST_CHECK_EQUAL(y.value(), 120);
 
-    constraint_ref c10 (std::make_shared<linear_inequality>(x, relation::leq, 10.0)),
-                   c20 (std::make_shared<linear_inequality>(x, relation::leq, 20.0));
+    constraint c10 (std::make_shared<linear_inequality>(x, relation::leq, 10.0)),
+               c20 (std::make_shared<linear_inequality>(x, relation::leq, 20.0));
 
     solver.add_constraint(c10).add_constraint(c20);
 
@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE (delete2_test)
     solver.remove_constraint(c10);
     BOOST_CHECK_EQUAL(x.value(), 20);
 
-    constraint_ref cxy (std::make_shared<linear_equation>(linear_expression(x) * 2, y));
+    constraint cxy (std::make_shared<linear_equation>(linear_expression(x) * 2, y));
     solver.add_constraint(cxy);
 
     BOOST_CHECK_EQUAL(x.value(), 20);

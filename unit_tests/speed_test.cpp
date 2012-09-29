@@ -4,8 +4,8 @@
 #include <iostream>
 #include <vector>
 
-#include <rhea/simplex_solver.hpp>
-#include <rhea/linear_equation.hpp>
+#include "../src/simplex_solver.hpp"
+#include "../src/linear_equation.hpp"
 
 inline
 double uniform_rand()
@@ -40,7 +40,7 @@ int main (int argc, char** argv)
     }
 
     size_t cns_made (cns * 2);
-    std::vector<constraint_ref> constraints (cns_made);
+    std::vector<constraint> constraints (cns_made);
 
     for (size_t j (0); j < cns_made; ++j)
     {
@@ -52,9 +52,9 @@ int main (int argc, char** argv)
             expr += linear_expression(vars[uniform_rand()*nr_vars]) * coeff;
         }
         if (uniform_rand() < ineq_prob)
-            constraints[j].reset(new linear_inequality(std::move(expr)));
+            constraints[j] = new linear_inequality(std::move(expr));
         else
-            constraints[j].reset(new linear_equation(std::move(expr)));
+            constraints[j] = new linear_equation(std::move(expr));
 
         std::cout << "Created constraint " << j << std::endl;
     }

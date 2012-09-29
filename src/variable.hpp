@@ -155,4 +155,4 @@ struct hash<rhea::variable>
         { return v.hash(); }
 };
 
-}
+} // namespace std

@@ -20,6 +20,4 @@
 
 namespace rhea {
 
-size_t abstract_variable::var_nr_ = 0;
-
 } // namespace rhea

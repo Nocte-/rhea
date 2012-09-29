@@ -20,124 +20,129 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include "linear_expression.hpp"
-#include "strength.hpp"
-#include "variable.hpp"
+#include "abstract_constraint.hpp"
 
 namespace rhea {
 
-class solver;
-
 class constraint
 {
-    friend class solver;
-    friend class simplex_solver;
-
 public:
-    constraint(strength str = strength::required(), double weight = 1.0)
-        : strength_(str)
-        , weight_(weight)
-        , times_added_(0)
+    constraint() { }
+
+    constraint (std::shared_ptr<abstract_constraint>&& p)
+        : p_(std::move(p))
     { }
 
-    virtual ~constraint() { }
+    constraint (abstract_constraint* p)
+        : p_(p)
+    { }
 
-    virtual linear_expression expression() const = 0;
+public:
+    linear_expression expression() const
+        { return p_->expression(); }
 
-    virtual bool is_edit_constraint() const
-        { return false; }
+    bool is_edit_constraint() const
+        { return p_->is_edit_constraint(); }
 
-    virtual bool is_inequality() const
-        { return false; }
+    bool is_inequality() const
+        { return p_->is_inequality(); }
 
-    virtual bool is_strict_inequality() const
-        { return false; }
+    bool is_strict_inequality() const
+        { return p_->is_strict_inequality(); }
 
-    virtual bool is_required() const
-        { return strength_.is_required(); }
+    bool is_required() const
+        { return p_->is_required(); }
 
-    virtual bool is_stay_constraint() const
-        { return false; }
+    bool is_stay_constraint() const
+        { return p_->is_stay_constraint(); }
 
     const strength& get_strength() const
-        { return strength_; }
+        { return p_->get_strength(); }
 
-    virtual double weight() const
-        { return weight_; }
+    double weight() const
+        { return p_->weight(); }
 
     const variable_set& read_only_variables() const
-        { return readonly_vars_; }
+        { return p_->read_only_variables(); }
 
-public:
-    virtual bool is_satisfied() const = 0;
+    bool is_satisfied() const
+        { return p_->is_satisfied(); }
 
-    virtual bool is_in_solver() const
-        { return times_added_ != 0; }
+    bool is_in_solver() const
+        { return p_->is_in_solver(); }
 
-    virtual bool is_okay_for_simplex_solver() const
-        { return true; }
+    bool is_okay_for_simplex_solver() const
+        { return p_->is_okay_for_simplex_solver(); }
 
-    virtual bool is_read_only(variable v) const
-        { return readonly_vars_.count(v) != 0; }
+    bool is_read_only(const variable& v) const
+        { return p_->is_read_only(v); }
 
-public:
     void change_strength(const strength& new_strength)
-    {
-        if (times_added_ == 0)
-            strength_ = new_strength;
-        else
-            throw too_difficult();
-    }
+        { p_->change_strength(new_strength); }
 
     void change_weight(double new_weight)
-    {
-        if (times_added_ == 0)
-            weight_ = new_weight;
-        else
-            throw too_difficult();
-    }
+        { p_->change_weight(new_weight); }
 
     constraint& add_readonly_vars(const variable_set& vars)
-    {
-        readonly_vars_.insert(vars.begin(), vars.end());
-        return *this;
-    }
+        { p_->add_readonly_vars(vars); return *this; }
 
     symbolic_weight get_symbolic_weight() const
-        { return strength_.weight(); }
+        { return p_->get_symbolic_weight(); }
+
 
     double adjusted_symbolic_weight() const
-        { return (get_symbolic_weight() * weight()).as_double(); }
+        { return p_->adjusted_symbolic_weight(); }
 
-    std::string to_string() const
-    {
-        return std::string("w{") + std::to_string(weight_) + "} refcount{"
-           + std::to_string(times_added_) + "} "
-           + expression().to_string();
-    }
-
-protected:
     void set_strength(const strength& n)
-        { strength_ = n; }
+        { p_->set_strength(n); }
 
     void set_weight(double n)
-        { weight_ = n; }
+        { p_->set_weight(n); }
 
-    void added_to(const solver&)
-        { ++times_added_; }
+    void add_to(solver& s)
+        { p_->add_to(s); }
 
-    void removed_from(const solver&)
-        { --times_added_; }
+    void remove_from(solver& s)
+        { p_->remove_from(s); }
+
+    template <typename t>
+    t* try_cast() { return dynamic_cast<t*>(p_.get()); }
+
+    template <typename t>
+    const t* try_cast() const { return dynamic_cast<const t*>(p_.get()); }
+
+public:
+    constraint& operator= (abstract_constraint* ptr)
+        {
+            p_.reset(ptr);
+            return *this;
+        }
+
+    bool operator== (const constraint& other) const
+        { return p_ == other.p_; }
+
+    bool operator!= (const constraint& other) const
+        { return p_ != other.p_; }
+
+    size_t hash() const
+        { return std::hash<std::shared_ptr<abstract_constraint>>()(p_); }
 
 private:
-    strength        strength_;
-    variable_set    readonly_vars_;
-    double          weight_;
-    unsigned short  times_added_;
+    std::shared_ptr<abstract_constraint> p_;
 };
-
-typedef std::shared_ptr<constraint> constraint_ref;
 
 } // namespace rhea
 
+
+namespace std {
+
+/** Hash function, required for std::unordered_map. */
+template<>
+struct hash<rhea::constraint>
+    : public unary_function<rhea::constraint, size_t>
+{
+    size_t operator() (const rhea::constraint& c) const
+        { return c.hash(); }
+};
+
+} // namespace std

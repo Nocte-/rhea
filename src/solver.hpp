@@ -34,8 +34,8 @@ public:
 
     virtual ~solver() { }
 
-    virtual solver& add_constraint(const constraint_ref& c) = 0;
-    virtual solver& remove_constraint(const constraint_ref& c) = 0;
+    virtual solver& add_constraint(const constraint& c) = 0;
+    virtual solver& remove_constraint(const constraint& c) = 0;
 
     virtual solver& solve() { return *this; }
 

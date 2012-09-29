@@ -34,12 +34,12 @@ void remove_from_container_if(container& c, func pred)
 }
 
 simplex_solver::expression_result
-simplex_solver::make_expression(const constraint_ref& c)
+simplex_solver::make_expression(const constraint& c)
 {
     expression_result result;
 
     auto& expr (result.expr);
-    auto cexpr (c->expression());
+    auto cexpr (c.expression());
     expr.set_constant(cexpr.constant());
 
     for (const auto& term : cexpr.terms())
@@ -50,7 +50,7 @@ simplex_solver::make_expression(const constraint_ref& c)
             expr += term;
     }
 
-    if (c->is_inequality())
+    if (c.is_inequality())
     {
         // cn is an inequality, so Add a slack variable.  The original
         // constraint is expr>=0, so that the resulting equality is
@@ -65,12 +65,12 @@ simplex_solver::make_expression(const constraint_ref& c)
         marker_vars_[c] = slack;
         constraints_marked_[slack] = c;
 
-        if (!c->is_required())
+        if (!c.is_required())
         {
             variable eminus (std::make_shared<slack_variable>("em"));
             expr.set(eminus, 1);
             linear_expression&  row (row_expression(objective_));
-            double              sw  (c->adjusted_symbolic_weight());
+            double              sw  (c.adjusted_symbolic_weight());
             row += linear_expression::term(eminus, sw);
             error_vars_[c].insert(eminus);
             note_added_variable(eminus, objective_);
@@ -79,7 +79,7 @@ simplex_solver::make_expression(const constraint_ref& c)
     else
     {
         // c is an equality
-        if (c->is_required())
+        if (c.is_required())
         {
             // Add a dummy variable to the Expression to serve as a marker
             // for this constraint.  The dummy variable is never allowed to
@@ -105,7 +105,7 @@ simplex_solver::make_expression(const constraint_ref& c)
             constraints_marked_[eplus] = c;
 
             auto& rowexp (row_expression(objective_));
-            double coeff (c->adjusted_symbolic_weight());
+            double coeff (c.adjusted_symbolic_weight());
 
             rowexp.set(eplus, coeff);
             note_added_variable(eplus, objective_);
@@ -115,12 +115,12 @@ simplex_solver::make_expression(const constraint_ref& c)
             note_added_variable(eminus, objective_);
             error_vars_[c].insert(eminus);
 
-            if (c->is_stay_constraint())
+            if (c.is_stay_constraint())
             {
                 stay_plus_error_vars_.push_back(eplus);
                 stay_minus_error_vars_.push_back(eminus);
             }
-            else if (c->is_edit_constraint())
+            else if (c.is_edit_constraint())
             {
                 result.plus  = eplus;
                 result.minus = eminus;
@@ -138,19 +138,19 @@ simplex_solver::make_expression(const constraint_ref& c)
 }
 
 simplex_solver&
-simplex_solver::add_constraint(const constraint_ref& c)
+simplex_solver::add_constraint(const constraint& c)
 {
-    if (c->is_strict_inequality())
+    if (c.is_strict_inequality())
         throw strict_inequality_not_allowed();
 
-    if (!c->read_only_variables().empty())
+    if (!c.read_only_variables().empty())
         throw readonly_not_allowed();
 
-    auto ptr (dynamic_cast<edit_constraint*>(c.get()));
+    auto ptr (c.try_cast<edit_constraint>());
     if (ptr != nullptr)
     {
-        assert(c->is_edit_constraint());
-        edit_constraint& ec (*ptr);
+        assert(c.is_edit_constraint());
+        const edit_constraint& ec (*ptr);
         const auto& v (ec.var());
         if (!v.is_external() || (!is_basic_var(v) && !columns_has_key(v)))
             throw edit_misuse("edit constraints on variable not in tableau");
@@ -189,7 +189,7 @@ simplex_solver::add_constraint(const constraint_ref& c)
 
     if (ptr != nullptr)
     {
-        edit_constraint& ec (*ptr);
+        const edit_constraint& ec (*ptr);
         edit_info_list_.emplace_back(ec.var(), c, r.plus, r.minus, r.previous_constant);
     }
 
@@ -199,7 +199,7 @@ simplex_solver::add_constraint(const constraint_ref& c)
         set_external_variables();
     }
 
-    c->added_to(*this);
+    //c.added_to(*this);
 
     return *this;
 }
@@ -226,7 +226,7 @@ simplex_solver::add_point_stay(const point& pt, const strength& s, double weight
 }
 
 simplex_solver&
-simplex_solver::remove_constraint_internal(const constraint_ref& c)
+simplex_solver::remove_constraint_internal(const constraint& c)
 {
     needs_solving_ = true;
     reset_stay_constants();
@@ -240,12 +240,12 @@ simplex_solver::remove_constraint_internal(const constraint_ref& c)
             if (is_basic_var(var))
             {
                 const linear_expression& expr (row_expression(var));
-                rowexpr.add(expr * -c->adjusted_symbolic_weight(),
+                rowexpr.add(expr * -c.adjusted_symbolic_weight(),
                             objective_, *this);
             }
             else
             {
-                rowexpr.add(var, -c->adjusted_symbolic_weight(),
+                rowexpr.add(var, -c.adjusted_symbolic_weight(),
                             objective_, *this);
             }
         }
@@ -359,7 +359,7 @@ simplex_solver::remove_constraint_internal(const constraint_ref& c)
         }
     }
 
-    if (c->is_stay_constraint())
+    if (c.is_stay_constraint())
     {
         if (i != error_vars_.end())
         {
@@ -368,9 +368,9 @@ simplex_solver::remove_constraint_internal(const constraint_ref& c)
             remove_from_container_if(stay_minus_error_vars_, pred);
         }
     }
-    else if (c->is_edit_constraint())
+    else if (c.is_edit_constraint())
     {
-        auto& ec (*dynamic_cast<edit_constraint*>(c.get()));
+        auto& ec (*c.try_cast<edit_constraint>());
         auto ei (std::find(edit_info_list_.begin(), edit_info_list_.end(), ec.var()));
         assert(ei != edit_info_list_.end());
         remove_column(ei->minus); // plus is a marker var and gets removed later
@@ -906,7 +906,7 @@ simplex_solver::set_external_variables()
 }
 
 bool
-simplex_solver::is_constraint_satisfied(const constraint_ref& c) const
+simplex_solver::is_constraint_satisfied(const constraint& c) const
 {
     if (marker_vars_.count(c) == 0)
         throw constraint_not_found();
@@ -927,15 +927,15 @@ simplex_solver::is_constraint_satisfied(const constraint_ref& c) const
 }
 
 simplex_solver&
-simplex_solver::remove_constraint(const constraint_ref& c)
+simplex_solver::remove_constraint(const constraint& c)
 {
     remove_constraint_internal(c);
-    c->removed_from(*this);
+    //c.removed_from(*this);
     return *this;
 }
 
 void
-simplex_solver::change_strength_and_weight(constraint_ref c,
+simplex_solver::change_strength_and_weight(constraint c,
                                            const strength& s,
                                            double weight)
 {
@@ -943,10 +943,10 @@ simplex_solver::change_strength_and_weight(constraint_ref c,
     if (ie == error_vars_.end())
         return;
 
-    double old_coeff (c->adjusted_symbolic_weight());
-    c->set_strength(s);
-    c->set_weight(weight);
-    double new_coeff (c->adjusted_symbolic_weight());
+    double old_coeff (c.adjusted_symbolic_weight());
+    c.set_strength(s);
+    c.set_weight(weight);
+    double new_coeff (c.adjusted_symbolic_weight());
 
     if (new_coeff == old_coeff)
         return;
@@ -957,13 +957,13 @@ simplex_solver::change_strength_and_weight(constraint_ref c,
         if (!is_basic_var(v))
         {
             row.add(v, -old_coeff, objective_, *this);
-            row.add(v, new_coeff, objective_, *this);
+            row.add(v,  new_coeff, objective_, *this);
         }
         else
         {
             const linear_expression& expr (row_expression(v));
             row.add(expr * -old_coeff, objective_, *this);
-            row.add(expr * new_coeff, objective_, *this);
+            row.add(expr *  new_coeff, objective_, *this);
         }
     }
     needs_solving_ = true;
@@ -975,14 +975,14 @@ simplex_solver::change_strength_and_weight(constraint_ref c,
     }
 }
 
-void simplex_solver::change_strength(constraint_ref c, const strength& s)
+void simplex_solver::change_strength(constraint c, const strength& s)
 {
-    change_strength_and_weight(c, s, c->weight());
+    change_strength_and_weight(c, s, c.weight());
 }
 
-void simplex_solver::change_weight(constraint_ref c, double weight)
+void simplex_solver::change_weight(constraint c, double weight)
 {
-    change_strength_and_weight(c, c->get_strength(), weight);
+    change_strength_and_weight(c, c.get_strength(), weight);
 }
 
 } // namespace rhea

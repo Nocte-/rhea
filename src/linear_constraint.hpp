@@ -19,18 +19,18 @@
 //---------------------------------------------------------------------------
 #pragma once
 
-#include "constraint.hpp"
+#include "abstract_constraint.hpp"
 #include "linear_expression.hpp"
 
 namespace rhea {
 
-class linear_constraint : public constraint
+class linear_constraint : public abstract_constraint
 {
 public:
     linear_constraint(linear_expression expr,
                       strength s = strength::required(),
                       double weight = 1.0)
-        : constraint(s, weight)
+        : abstract_constraint(s, weight)
         , expr_(std::move(expr))
     { }
 

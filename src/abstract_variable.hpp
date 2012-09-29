@@ -29,14 +29,11 @@ class abstract_variable
 {
 public:
     abstract_variable()
-        : name_(std::to_string(++var_nr_))
     { }
 
     abstract_variable(std::string name)
         : name_(name)
-    {
-        ++var_nr_;
-    }
+    { }
 
     virtual ~abstract_variable() { }
 
@@ -88,7 +85,6 @@ public:
 
 private:
     std::string name_;
-    static size_t var_nr_;
 };
 
 } // namespace rhea
