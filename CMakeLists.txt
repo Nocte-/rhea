@@ -1,7 +1,11 @@
 project(rhea)
 cmake_minimum_required(VERSION 2.8.3)
 set(CPACK_PACKAGE_NAME "rhea")
-set(VERSION "0.1.0")
+
+set(VERSION_MAJOR "0")
+set(VERSION_MINOR "1")
+set(VERSION_PATCH "0")
+set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
@@ -17,13 +21,13 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /MP /EHsc /wd4244 /wd4996 ")
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DNDEBUG /MT /MP /GS- /Ox /Ob2 /Oi /Oy /arch:SSE /fp:fast /Zi")
-    set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} /DEBUG /OPT:REF /SUBSYSTEM:WINDOWS")
+    set(CMAKE_LIB_LINKER_FLAGS  "${CMAKE_LB_LINKER_FLAGS} /DEBUG /OPT:REF /SUBSYSTEM:WINDOWS")
     
 else() # Most likely gcc or clang
     set(CMAKE_CXX_FLAGS "-std=c++0x -pedantic -Wall -Wno-strict-aliasing")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG   "-g")
-    set(LINK_FLAGS "-s")    
+    set(CMAKE_LIB_LINKER_FLAGS "-s")    
 endif()
 
 add_subdirectory(src)
