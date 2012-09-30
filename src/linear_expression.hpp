@@ -27,6 +27,20 @@ namespace rhea {
 
 class tableau;
 
+/** Linear expression.
+ * Expressions have the form \f$av_0 + bv_1 + \ell + c = 0\f$, where \f$v_n\f$
+ * is a variable, \f$a, b, \ell{}\f$ are factors, and \f$c\f$ is a constant.
+ *
+ * Expressions can be built from variables in a natural way:
+ *
+ * \code
+
+variable x (3), y (5);
+auto expr (x * 5 + y + 2);
+expr.evaluate(); // Returns '22'
+
+ * \endcode
+ */
 class linear_expression
 {
 public:
@@ -226,6 +240,18 @@ operator* (const variable& v, int x)
 }
 
 inline linear_expression
+operator* (double x, const variable& v)
+{
+    return linear_expression(v, x);
+}
+
+inline linear_expression
+operator* (int x, const variable& v)
+{
+    return linear_expression(v, x);
+}
+
+inline linear_expression
 operator/ (const variable& v, double x)
 {
     return linear_expression(v, 1.0/x);
@@ -278,6 +304,7 @@ operator- (const variable& v, const variable& w)
 {
     return linear_expression(v) -= w;
 }
+
 
 } // namespace rhea
 

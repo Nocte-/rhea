@@ -36,6 +36,7 @@ namespace rhea {
  * Variables don't use the normal C++ copy semantics: objects are actually
  * counted references to an abstract_variable.  The following example
  * illustrates this:
+ *
  * \code
 
 variable x (1), y;
@@ -48,7 +49,25 @@ x.set_value(2);
 
  * \endcode
  * Also note that a variable is nullable.  A variable that has been
- * constructed without a type cannot be used in expressions. */
+ * constructed without a type cannot be used in expressions.
+ *
+ * Another caveat: "x == y" is not a boolean, but a linear_equality that
+ * can be evaluated and used in constraints.  There are two ways to compare
+ * two variables, depending on whether you want to test for equality or
+ * equivalence:
+ *
+ * \code
+
+variable x (2), y (x), z (2);
+
+x.is(y); // True: y was constructed from x
+x.is(z); // False: x and z both have the value 2, but they are different variables
+
+x.value() == y.value(); // True
+x.value() == z.value(); // Also true
+
+ * \endcode
+ * */
 class variable
 {
 public:
@@ -122,9 +141,7 @@ public:
         : p_(std::make_shared<float_variable>(std::move(name), value))
     { }
 
-    // Haven't decided yet whether this is a good idea or not;
-    //operator double() const
-    //    { return value(); }
+
 
     /** Check if this variable is of the type float_variable. */
     bool is_float() const
@@ -194,41 +211,14 @@ public:
      *  to have the same value.  Example:
      * \code
      variable x (3), y (3), z;
-     x == y; // False!
+     x.is(y); // False!
      z = x;  // z now refers to x
      z.set_value(5);
-     x == z; // True! (x.value() == 5 as well)
+     x.is(z); // True (x.value() == 5 as well)
      * \endcode
      */
-    bool operator== (const variable& other) const
-        { return p_ == other.p_; }
-
-    /** Check if two variables do not refer to the same abstract_variable.
-     *  This will not return 'false' for two distinct variables that happen
-     *  to have the same value.  Example:
-     * \code
-     variable x (3), y (3), z;
-     x != y; // True!
-     z = x;  // z now refers to x
-     z.set_value(5);
-     x != z; // False! (x.value() == 5 as well)
-     * \endcode
-     */
-    bool operator!= (const variable& other) const
-        { return p_ != other.p_; }
-
-private:
-    bool operator< (const variable& other) const
-        { return p_ < other.p_; }
-
-    bool operator<= (const variable& other) const
-        { return p_ < other.p_ || p_ == other.p_; }
-
-    bool operator>= (const variable& other) const
-        { return !(p_ < other.p_); }
-
-    bool operator> (const variable& other) const
-        { return (!(p_ < other.p_)) && p_ != other.p_; }
+    bool is(const variable& x) const
+        { return p_ == x.p_; }
 
 private:
     /** Refernce counted pointer to the "real" variable. */
@@ -237,7 +227,7 @@ private:
 
 
 /** Convenience typedef for sets of variables. */
-typedef std::unordered_set<variable>            variable_set;
+typedef std::unordered_set<variable>    variable_set;
 
 } // namespace rhea
 
@@ -245,13 +235,22 @@ typedef std::unordered_set<variable>            variable_set;
 
 namespace std {
 
-/** Hash function, required for std::unordered_map. */
+/** Hash function, required for std::unordered_map and -set. */
 template<>
 struct hash<rhea::variable>
     : public unary_function<rhea::variable, size_t>
 {
     size_t operator() (const rhea::variable& v) const
         { return v.hash(); }
+};
+
+/** Equality test, required for std::unordered_map and -set. */
+template<>
+struct equal_to<rhea::variable>
+    : public binary_function<rhea::variable, rhea::variable, bool>
+{
+    bool operator()(const rhea::variable& a, const rhea::variable& b) const
+        { return a.is(b); }
 };
 
 } // namespace std

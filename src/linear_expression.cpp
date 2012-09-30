@@ -191,7 +191,7 @@ linear_expression::change_subject(const variable& old_subj,
 {
     assert(!new_subj.is_nil());
     assert(!near_zero(coefficient(new_subj)));
-    if (old_subj == new_subj)
+    if (old_subj.is(new_subj))
         return;
 
     terms_[old_subj] = new_subject(new_subj);

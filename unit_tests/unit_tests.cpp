@@ -41,9 +41,9 @@ BOOST_AUTO_TEST_CASE (variable_test)
 
     std::hash<variable> h;
     BOOST_CHECK_EQUAL(h(x), h(y));
-    BOOST_CHECK(x == y);
+    BOOST_CHECK(x.is(y));
     BOOST_CHECK(h(x) != h(z));
-    BOOST_CHECK(x != z);
+    BOOST_CHECK(!x.is(z));
 
     y.set_value(4);
     BOOST_CHECK_EQUAL(x.value(), 4);
@@ -133,6 +133,16 @@ BOOST_AUTO_TEST_CASE (linear_equation1_test)
     BOOST_CHECK(!eq3.is_satisfied());
 }
 
+BOOST_AUTO_TEST_CASE (linear_equation2_test)
+{
+    variable x (2.0), y (3.0);
+
+    BOOST_CHECK((x == y - 1).is_satisfied());
+    BOOST_CHECK(!(x == y).is_satisfied());
+    BOOST_CHECK((x * 2 == y + 1).is_satisfied());
+    BOOST_CHECK(!(x * 3 == y * 4).is_satisfied());
+}
+
 BOOST_AUTO_TEST_CASE (linear_inequality1_test)
 {
     variable x (2.0);
@@ -143,6 +153,16 @@ BOOST_AUTO_TEST_CASE (linear_inequality1_test)
     BOOST_CHECK(eq1.is_satisfied());
     x.set_value(0);
     BOOST_CHECK(!eq1.is_satisfied());
+}
+
+BOOST_AUTO_TEST_CASE (linear_inequality2_test)
+{
+    variable x (2.0), y (3.0);
+    BOOST_CHECK((x < y).is_satisfied());
+    BOOST_CHECK((x + 1 <= y).is_satisfied());
+    BOOST_CHECK((x * 2 + y > 4).is_satisfied());
+    BOOST_CHECK((x * 3 >= y * 2).is_satisfied());
+    BOOST_CHECK(!(x > y).is_satisfied());
 }
 
 //-------------------------------------------------------------------------
@@ -190,8 +210,8 @@ BOOST_AUTO_TEST_CASE (juststay1_test)
     simplex_solver solver;
     solver.add_stay(x).add_stay(y);
 
-    BOOST_CHECK_EQUAL(x.value(), 5.0);
-    BOOST_CHECK_EQUAL(y.value(), 10.0);
+    BOOST_CHECK_EQUAL(x.value(), 5);
+    BOOST_CHECK_EQUAL(y.value(), 10);
 }
 
 BOOST_AUTO_TEST_CASE (delete1_test)
@@ -199,11 +219,11 @@ BOOST_AUTO_TEST_CASE (delete1_test)
     variable x ("x");
     simplex_solver solver;
 
-    solver.add_constraint(new linear_equation(x, 100, strength::weak()));
-    BOOST_CHECK_EQUAL(x.value(), 100.0);
+    solver.add_constraint(x == 100, strength::weak());
+    BOOST_CHECK_EQUAL(x.value(), 100);
 
-    constraint c10 (std::make_shared<linear_inequality>(x, relation::leq, 10.0)),
-               c20 (std::make_shared<linear_inequality>(x, relation::leq, 20.0));
+    constraint c10 (x <= 10),
+               c20 (x <= 20);
 
     solver.add_constraint(c10).add_constraint(c20);
 
@@ -224,14 +244,13 @@ BOOST_AUTO_TEST_CASE (delete2_test)
     variable x ("x"), y ("y");
     simplex_solver solver;
 
-    solver.add_constraint(new linear_equation(x, 100, strength::weak()))
-          .add_constraint(new linear_equation(y, 120, strength::strong()));
+    solver.add_constraint(x == 100, strength::weak())
+          .add_constraint(y == 120, strength::strong());
 
     BOOST_CHECK_EQUAL(x.value(), 100);
     BOOST_CHECK_EQUAL(y.value(), 120);
 
-    constraint c10 (std::make_shared<linear_inequality>(x, relation::leq, 10.0)),
-               c20 (std::make_shared<linear_inequality>(x, relation::leq, 20.0));
+    constraint c10 (x <= 10), c20 (x <= 20);
 
     solver.add_constraint(c10).add_constraint(c20);
 
@@ -239,7 +258,7 @@ BOOST_AUTO_TEST_CASE (delete2_test)
     solver.remove_constraint(c10);
     BOOST_CHECK_EQUAL(x.value(), 20);
 
-    constraint cxy (std::make_shared<linear_equation>(x * 2, y));
+    constraint cxy (x * 2 == y);
     solver.add_constraint(cxy);
 
     BOOST_CHECK_EQUAL(x.value(), 20);
@@ -259,10 +278,10 @@ BOOST_AUTO_TEST_CASE (casso1_test)
     variable x ("x"), y ("y");
     simplex_solver solver;
 
-    solver.add_constraint(new linear_inequality(x, relation::leq, y))
-          .add_constraint(new linear_equation(y, x + 3))
-          .add_constraint(new linear_equation(x, 10.0, strength::weak()))
-          .add_constraint(new linear_equation(y, 10.0, strength::weak()));
+    solver.add_constraint(x <= y)
+          .add_constraint(y == x + 3)
+          .add_constraint(x == 10.0, strength::weak())
+          .add_constraint(y == 10.0, strength::weak());
 
     BOOST_CHECK(   (x.value() == 10 && y.value() == 13)
                 || (x.value() == 7  && y.value() == 10));
@@ -273,9 +292,9 @@ BOOST_AUTO_TEST_CASE (inconsistent1_test)
     variable x ("x");
     simplex_solver solver;
 
-    solver.add_constraint(new linear_equation(x, 10));
+    solver.add_constraint(x == 10);
 
-    BOOST_CHECK_THROW(solver.add_constraint(new linear_equation(x, 5)),
+    BOOST_CHECK_THROW(solver.add_constraint(x == 5),
                       required_failure);
 
 }
@@ -285,8 +304,8 @@ BOOST_AUTO_TEST_CASE (inconsistent2_test)
     variable x ("x");
     simplex_solver solver;
 
-    BOOST_CHECK_THROW(solver.add_constraint(new linear_inequality(x, relation::geq, 10))
-                            .add_constraint(new linear_inequality(x, relation::leq, 5)),
+    BOOST_CHECK_THROW(solver.add_constraint(x >= 10)
+                            .add_constraint(x <= 5),
                       required_failure);
 
 }
@@ -296,13 +315,12 @@ BOOST_AUTO_TEST_CASE (inconsistent3_test)
     variable v ("v"), w ("w"), x ("x"), y ("y");
     simplex_solver solver;
 
-    solver.add_constraint(new linear_inequality(v, relation::geq, 10))
-          .add_constraint(new linear_inequality(w, relation::geq, v))
-          .add_constraint(new linear_inequality(x, relation::geq, w))
-          .add_constraint(new linear_inequality(y, relation::geq, x));
+    solver.add_constraint(v >= 10)
+          .add_constraint(w >= v)
+          .add_constraint(x >= w)
+          .add_constraint(y >= x);
 
-    BOOST_CHECK_THROW(solver.add_constraint(new linear_inequality(y, relation::leq, 5)),
-                      required_failure);
+    BOOST_CHECK_THROW(solver.add_constraint(y <= 5), required_failure);
 }
 
 BOOST_AUTO_TEST_CASE (multiedit1_test)
@@ -389,8 +407,14 @@ BOOST_AUTO_TEST_CASE (multiedit2_test)
 BOOST_AUTO_TEST_CASE (bounds_test)
 {
     variable x(1);
-    simplex_solver s;
-    s.add_bounds(x, 0, 10);
+    simplex_solver solver;
+
+    solver.add_var(x).add_bounds(x, 0, 10);
+
+    BOOST_CHECK_EQUAL(x.value(), 1);
+    solver.add_edit_var(x);
+    solver.begin_edit().suggest_value(x, 20).end_edit();
+    BOOST_CHECK_EQUAL(x.value(), 10);
 }
 
 BOOST_AUTO_TEST_CASE (bug0_test)
@@ -426,17 +450,17 @@ BOOST_AUTO_TEST_CASE (quad_test)
     for (int i (0); i < 4; ++i)
     {
         int j ((i + 1) % 4);
-        solver.add_constraint(new linear_equation(m[i].x, (c[i].x + c[j].x) / 2))
-              .add_constraint(new linear_equation(m[i].y, (c[i].y + c[j].y) / 2));
+        solver.add_constraint(m[i].x == (c[i].x + c[j].x) / 2)
+              .add_constraint(m[i].y == (c[i].y + c[j].y) / 2);
     }
 
     // Don't turn inside out
     typedef std::vector<std::pair<int,int>> pairs;
     for (auto a : pairs{{0,2},{0,3},{1,2},{1,3}})
-        solver.add_constraint(new linear_inequality(c[a.first].x + 1, relation::leq, c[a.second].x));
+        solver.add_constraint(c[a.first].x + 1 <= c[a.second].x);
 
     for (auto a : pairs{{0,1},{0,2},{3,1},{3,2}})
-        solver.add_constraint(new linear_inequality(c[a.first].y + 1, relation::leq, c[a.second].y));
+        solver.add_constraint(c[a.first].y + 1 <= c[a.second].y);
 
     // Limits
     for (int i (0); i < 4; ++i)
@@ -444,7 +468,6 @@ BOOST_AUTO_TEST_CASE (quad_test)
         solver.add_bounds(c[i].x, 0, 300);
         solver.add_bounds(c[i].y, 0, 300);
     }
-
 
     // Now for the actual tests
     BOOST_CHECK_EQUAL(c[0].value(), point(50, 50).value());
@@ -477,9 +500,4 @@ BOOST_AUTO_TEST_CASE (quad_test)
     BOOST_CHECK_EQUAL(m[0].value(), point(50, 150).value());
     BOOST_CHECK_EQUAL(m[3].value(), point(150, 50).value());
 }
-
-
-
-
-
 

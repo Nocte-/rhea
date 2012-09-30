@@ -21,6 +21,8 @@
 
 #include <memory>
 #include "abstract_constraint.hpp"
+#include "linear_equation.hpp"
+#include "linear_inequality.hpp"
 
 namespace rhea {
 
@@ -29,12 +31,28 @@ class constraint
 public:
     constraint() { }
 
-    constraint (std::shared_ptr<abstract_constraint> p)
+    constraint(std::shared_ptr<abstract_constraint> p)
         : p_(std::move(p))
     { }
 
-    constraint (abstract_constraint* p)
+    constraint(abstract_constraint* p)
         : p_(p)
+    { }
+
+    constraint(const linear_equation& eq)
+        : p_(std::make_shared<linear_equation>(eq))
+    { }
+
+    constraint(const linear_equation& eq, strength s, double weight = 1)
+        : p_(std::make_shared<linear_equation>(eq.expression(), std::move(s), weight))
+    { }
+
+    constraint(const linear_inequality& eq)
+        : p_(std::make_shared<linear_inequality>(eq))
+    { }
+
+    constraint(const linear_inequality& eq, strength s, double weight = 1)
+        : p_(std::make_shared<linear_inequality>(eq.expression(), std::move(s), weight))
     { }
 
 public:

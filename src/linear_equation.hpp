@@ -62,4 +62,36 @@ public:
         { return expr_.evaluate() == 0.0; }
 };
 
+//--------------------------------------------------------------------------
+
+inline linear_equation
+operator== (linear_expression lhs, const variable& rhs)
+{
+    return lhs -= rhs;
+}
+
+inline linear_equation
+operator== (linear_expression lhs, const linear_expression& rhs)
+{
+    return lhs -= rhs;
+}
+
+inline linear_equation
+operator== (const variable& lhs, const linear_expression& rhs)
+{
+    return rhs - lhs;
+}
+
+inline linear_equation
+operator== (const variable& lhs, const variable& rhs)
+{
+    return linear_expression(lhs) -= rhs;
+}
+
+inline linear_equation
+operator== (const variable& lhs, double rhs)
+{
+    return linear_expression(lhs, 1, -rhs);
+}
+
 } // namespace rhea

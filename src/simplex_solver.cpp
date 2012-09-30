@@ -327,7 +327,7 @@ simplex_solver::remove_constraint_internal(const constraint& c)
             {
                 for (auto& v : col)
                 {
-                    if (v != objective_)
+                    if (!v.is(objective_))
                     {
                         exit_var = v;
                         exit_var_set = true;
@@ -351,7 +351,7 @@ simplex_solver::remove_constraint_internal(const constraint& c)
     {
         for (const auto& v : i->second)
         {
-            if (v != marker)
+            if (!v.is(marker))
                 remove_column(v);
         }
     }

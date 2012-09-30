@@ -81,6 +81,22 @@ public:
 
     simplex_solver& add_constraint(const constraint& c);
 
+    simplex_solver& add_constraint(const linear_equation& c,
+                                   const strength& s = strength::required(),
+                                   double weight = 1.0)
+    {
+        return add_constraint(constraint(c, s, weight));
+    }
+
+    simplex_solver& add_constraint(const linear_inequality& c,
+                                   const strength& s = strength::required(),
+                                   double weight = 1.0)
+    {
+        return add_constraint(constraint(c, s, weight));
+    }
+
+
+
     simplex_solver& remove_constraint(const constraint& c);
 
     simplex_solver& add_edit_var(const variable& v,
@@ -247,7 +263,8 @@ protected:
             : v(v_), c(c_), plus(plus_), minus(minus_), prev_constant(prev_constant_)
         { }
 
-        bool operator== (variable comp) const { return v == comp; }
+        bool operator== (const variable& comp) const
+            { return v.is(comp); }
 
         variable v;
         constraint c;
