@@ -65,12 +65,12 @@ public:
 
     simplex_solver& add_lower_bound(const variable& v, double lower)
     {
-        return add_constraint(new linear_inequality(linear_expression(v - lower)));
+        return add_constraint(new linear_inequality(v - lower));
     }
 
     simplex_solver& add_upper_bound(const variable& v, double upper)
     {
-        return add_constraint(new linear_inequality(linear_expression(upper - v)));
+        return add_constraint(new linear_inequality(upper - v));
     }
 
     simplex_solver& add_bounds(const variable& v, double lower, double upper)
@@ -87,6 +87,14 @@ public:
                                  double weight = 1.0)
     {
         return add_constraint(new edit_constraint(v, s, weight));
+    }
+
+    simplex_solver& add_edit_var(const point& p,
+                                 const strength& s = strength::strong(),
+                                 double weight = 1.0)
+    {
+        return  add_constraint(new edit_constraint(p.x, s, weight))
+               .add_constraint(new edit_constraint(p.y, s, weight));
     }
 
     simplex_solver& remove_edit_var(const variable& v);
@@ -128,6 +136,11 @@ public:
     // The tableau will not be solved completely until
     // after Resolve() has been called.
     simplex_solver& suggest_value(const variable& v, double x);
+
+    simplex_solver& suggest_value(const point& p, double x, double y)
+    {
+        return suggest_value(p.x, x).suggest_value(p.y, y);
+    }
 
     // If autosolving has been turned off, client code needs
     // to explicitly call solve() before accessing variables

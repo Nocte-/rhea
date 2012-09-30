@@ -29,7 +29,7 @@ class constraint
 public:
     constraint() { }
 
-    explicit constraint (std::shared_ptr<abstract_constraint>&& p)
+    constraint (std::shared_ptr<abstract_constraint> p)
         : p_(std::move(p))
     { }
 

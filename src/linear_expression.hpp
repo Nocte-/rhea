@@ -233,7 +233,7 @@ operator+ (const variable& v, double x)
 inline linear_expression
 operator- (const variable& v, double x)
 {
-    return linear_expression(v, -1, x);
+    return linear_expression(v, 1, -x);
 }
 
 inline linear_expression

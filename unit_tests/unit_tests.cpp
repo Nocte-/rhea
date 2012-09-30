@@ -11,6 +11,15 @@
 
 using namespace rhea;
 
+namespace std
+{
+    template <typename a, typename b>
+    std::ostream& operator<< (std::ostream& s, const std::pair<a,b>& p)
+    {
+        return s << p.first << "," << p.second;
+    }
+}
+
 BOOST_AUTO_TEST_CASE (strength_test)
 {
     BOOST_CHECK(strength::required().is_required());
@@ -100,6 +109,11 @@ BOOST_AUTO_TEST_CASE (linearexpr3_test)
 
     x.set_value(4);
     BOOST_CHECK_EQUAL(expr.evaluate(), 9);
+
+    BOOST_CHECK_EQUAL((x + 3).evaluate(), 7);
+    BOOST_CHECK_EQUAL((x - 2).evaluate(), 2);
+    BOOST_CHECK_EQUAL((x + y).evaluate(), 6);
+    BOOST_CHECK_EQUAL((x - y).evaluate(), 2);
 }
 
 BOOST_AUTO_TEST_CASE (linear_equation1_test)
@@ -293,7 +307,7 @@ BOOST_AUTO_TEST_CASE (inconsistent3_test)
 
 BOOST_AUTO_TEST_CASE (multiedit1_test)
 {
-    variable x(0), y(0), w(0), h(0);
+    variable x(3), y(-5), w(0), h(0);
     simplex_solver solver;
 
     solver.add_stay(x).add_stay(y).add_stay(w).add_stay(h);
@@ -334,7 +348,7 @@ BOOST_AUTO_TEST_CASE (multiedit1_test)
 
 BOOST_AUTO_TEST_CASE (multiedit2_test)
 {
-    variable x(0), y(0), w(0), h(0);
+    variable x(3), y(0), w(0), h(0);
     simplex_solver solver;
 
     solver.add_stay(x).add_stay(y).add_stay(w).add_stay(h);
@@ -399,4 +413,73 @@ BOOST_AUTO_TEST_CASE (bug0_test)
 
     solver.end_edit();
 }
+
+BOOST_AUTO_TEST_CASE (quad_test)
+{
+    std::vector<point> c { {50, 50}, {50, 250}, {250, 250}, {250, 50} };
+    std::vector<point> m (4);
+    simplex_solver solver;
+
+    solver.add_point_stays(c);
+
+    // Midpoint constraints
+    for (int i (0); i < 4; ++i)
+    {
+        int j ((i + 1) % 4);
+        solver.add_constraint(new linear_equation(m[i].x, (c[i].x + c[j].x) / 2))
+              .add_constraint(new linear_equation(m[i].y, (c[i].y + c[j].y) / 2));
+    }
+
+    // Don't turn inside out
+    typedef std::vector<std::pair<int,int>> pairs;
+    for (auto a : pairs{{0,2},{0,3},{1,2},{1,3}})
+        solver.add_constraint(new linear_inequality(c[a.first].x + 1, relation::leq, c[a.second].x));
+
+    for (auto a : pairs{{0,1},{0,2},{3,1},{3,2}})
+        solver.add_constraint(new linear_inequality(c[a.first].y + 1, relation::leq, c[a.second].y));
+
+    // Limits
+    for (int i (0); i < 4; ++i)
+    {
+        solver.add_bounds(c[i].x, 0, 300);
+        solver.add_bounds(c[i].y, 0, 300);
+    }
+
+
+    // Now for the actual tests
+    BOOST_CHECK_EQUAL(c[0].value(), point(50, 50).value());
+    BOOST_CHECK_EQUAL(m[0].value(), point(50, 150).value());
+    BOOST_CHECK_EQUAL(c[1].value(), point(50, 250).value());
+    BOOST_CHECK_EQUAL(m[1].value(), point(150, 250).value());
+    BOOST_CHECK_EQUAL(c[2].value(), point(250, 250).value());
+    BOOST_CHECK_EQUAL(m[2].value(), point(250, 150).value());
+
+    // Move one of the corners
+    solver.add_edit_var(c[0].x);
+    solver.begin_edit();
+    solver.suggest_value(c[0].x, 100);
+    solver.end_edit();
+
+    BOOST_CHECK_EQUAL(c[0].value(), point(100, 50).value());
+    BOOST_CHECK_EQUAL(m[0].value(), point(75, 150).value());
+    BOOST_CHECK_EQUAL(c[1].value(), point(50, 250).value());
+    BOOST_CHECK_EQUAL(m[1].value(), point(150, 250).value());
+    BOOST_CHECK_EQUAL(c[3].value(), point(250, 50).value());
+    BOOST_CHECK_EQUAL(m[3].value(), point(175, 50).value());
+
+    // Move one of the midpoints
+    solver.add_edit_var(m[0]);
+    solver.begin_edit();
+    solver.suggest_value(m[0], 50, 150);
+    solver.end_edit();
+
+    BOOST_CHECK_EQUAL(c[0].value(), point(50, 50).value());
+    BOOST_CHECK_EQUAL(m[0].value(), point(50, 150).value());
+    BOOST_CHECK_EQUAL(m[3].value(), point(150, 50).value());
+}
+
+
+
+
+
 

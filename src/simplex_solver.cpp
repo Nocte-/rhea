@@ -124,7 +124,7 @@ simplex_solver::make_expression(const constraint& c)
             {
                 result.plus  = eplus;
                 result.minus = eminus;
-                result.previous_constant = expr.constant();
+                result.previous_constant = c.expression().constant();
             }
         }
     }
@@ -158,7 +158,8 @@ simplex_solver::add_constraint(const constraint& c)
         auto i (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
         if (i != edit_info_list_.end())
         {
-            edit_info_list_.emplace_back(v, nullptr, variable::nil(), variable::nil(), 0);
+            edit_info_list_.emplace_back(v, constraint(), variable::nil(),
+                                         variable::nil(), 0);
             return *this;
         }
     }
@@ -170,7 +171,7 @@ simplex_solver::add_constraint(const constraint& c)
     {
         added_ok_directly = try_adding_directly(r.expr);
     }
-    catch(required_failure& e)
+    catch(required_failure&)
     {
         remove_constraint_internal(c);
         throw;

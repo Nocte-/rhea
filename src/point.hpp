@@ -19,6 +19,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
+#include <utility>
 #include "variable.hpp"
 
 namespace rhea {
@@ -30,8 +31,12 @@ public:
     variable y;
 
 public:
+    point()
+        : x (0.0), y (0.0)
+    { }
+
     point (variable ix, variable iy)
-        : x (ix), y (iy)
+        : x (std::move(ix)), y (std::move(iy))
     { }
 
     point& set_xy(double ix, double iy)
@@ -40,8 +45,10 @@ public:
         return *this;
     }
 
-    double x_value() const { return x.value(); }
-    double y_value() const { return y.value(); }
+    std::pair<double, double> value() const
+    {
+        return std::make_pair(x.value(), y.value());
+    }
 };
 
 } // namespace rhea
