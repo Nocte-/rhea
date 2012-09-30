@@ -83,12 +83,14 @@ public:
     void change_weight(double new_weight)
         { p_->change_weight(new_weight); }
 
-    constraint& add_readonly_vars(const variable_set& vars)
-        { p_->add_readonly_vars(vars); return *this; }
+    constraint& mark_as_readonly(const variable& v)
+        { p_->mark_as_readonly(v); return *this; }
+
+    constraint& mark_as_readonly(const variable_set& vars)
+        { p_->mark_as_readonly(vars); return *this; }
 
     symbolic_weight get_symbolic_weight() const
         { return p_->get_symbolic_weight(); }
-
 
     double adjusted_symbolic_weight() const
         { return p_->adjusted_symbolic_weight(); }

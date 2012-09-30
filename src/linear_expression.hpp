@@ -30,9 +30,10 @@ class tableau;
 class linear_expression
 {
 public:
-    typedef double t;
-    typedef variable_to_number_map::value_type value_type;
-    typedef variable_to_number_map::value_type term;
+    typedef std::unordered_map<variable, double>    terms_map;
+
+    typedef terms_map::value_type   value_type;
+    typedef terms_map::value_type   term;
 
 public:
     linear_expression(double num = 0);
@@ -70,7 +71,7 @@ public:
     // contains a term involving v, Add c to the existing coefficient.
     // If the new coefficient is approximately 0, delete v.  Notify the
     // solver if v appears or disappears from this expression.
-    linear_expression& add(const variable& v, t c,
+    linear_expression& add(const variable& v, double c,
                            const variable& subject, tableau& solver);
 
     void erase(const variable& v)
@@ -124,24 +125,24 @@ public:
     //
     // Note that the term involving subject has been dropped.
     // Returns the reciprocal, so ChangeSubject can use it, too
-    t new_subject(const variable& new_subj);
+    double new_subject(const variable& new_subj);
 
-    t evaluate() const;
+    double evaluate() const;
 
-    t coefficient(variable v) const
+    double coefficient(const variable& v) const
     {
         auto i (terms_.find(v));
         return i == terms_.end() ? 0.0 : i->second;
     }
 
-    t constant() const
+    double constant() const
         { return constant_; }
 
-    void set_constant(t c) { constant_ = c; }
+    void set_constant(double c) { constant_ = c; }
 
-    void increment_constant(t c) { constant_ += c; }
+    void increment_constant(double c) { constant_ += c; }
 
-    const variable_to_number_map& terms() const
+    const terms_map& terms() const
         { return terms_; }
 
     bool is_constant() const
@@ -162,8 +163,8 @@ public:
     }
 
 private:
-    t constant_;
-    variable_to_number_map terms_;
+    double      constant_;
+    terms_map   terms_;
 };
 
 //--------------------------------------------------------------------------
@@ -219,6 +220,12 @@ operator* (const variable& v, double x)
 }
 
 inline linear_expression
+operator* (const variable& v, int x)
+{
+    return linear_expression(v, x);
+}
+
+inline linear_expression
 operator/ (const variable& v, double x)
 {
     return linear_expression(v, 1.0/x);
@@ -231,9 +238,33 @@ operator+ (const variable& v, double x)
 }
 
 inline linear_expression
+operator+ (const variable& v, int x)
+{
+    return linear_expression(v, 1, x);
+}
+
+inline linear_expression
 operator- (const variable& v, double x)
 {
     return linear_expression(v, 1, -x);
+}
+
+inline linear_expression
+operator- (const variable& v, int x)
+{
+    return linear_expression(v, 1, -x);
+}
+
+inline linear_expression
+operator- (double x, const variable& v)
+{
+    return linear_expression(v, -1, x);
+}
+
+inline linear_expression
+operator- (int x, const variable& v)
+{
+    return linear_expression(v, -1, x);
 }
 
 inline linear_expression

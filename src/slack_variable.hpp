@@ -23,6 +23,16 @@
 
 namespace rhea {
 
+/** Slack variables are used to turn inequalities into equations.
+ * For example, this inequality:
+ * \f$
+ * 3x + 5y \leq 10
+ * \f$
+ * becomes the equation:
+ * \f$
+ * 3x + 5y + s = 10
+ * \f$ by introducing the slack variable \f$s\f$.
+ */
 class slack_variable : public abstract_variable
 {
 public:

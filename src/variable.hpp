@@ -32,98 +32,188 @@
 
 namespace rhea {
 
+/** A variable as used in an expression.
+ * Variables don't use the normal C++ copy semantics: objects are actually
+ * counted references to an abstract_variable.  The following example
+ * illustrates this:
+ * \code
+
+variable x (1), y;
+
+y = x;
+// y is now 1
+
+x.set_value(2);
+// both x and y are now 2
+
+ * \endcode
+ * Also note that a variable is nullable.  A variable that has been
+ * constructed without a type cannot be used in expressions. */
 class variable
 {
 public:
     variable() { }
 
+    /** An explicit nil variable.
+     *  This function only serves to make code more readable. */
     static variable nil() { return variable(); }
 
+    /** Wrap an abstract variable on the heap.
+     *  This object will now take care of the variable's lifetime, so
+     *  don't delete it later on. Example:
+     * \code
+     variable my_var (new objectve("az"));
+     * \endcode
+     * \param p  Pointer to a variable on the heap.
+     */
     variable(abstract_variable* p)
         : p_(p)
     {
         assert(p != nullptr);
     }
 
+    /** Wrap an abstract variable on the heap.
+     * \param p  Shared pointer to a variable.
+     */
     variable(std::shared_ptr<abstract_variable> p)
         : p_(std::move(p))
     { }
 
+    /** "Copy" a variable.
+     *  The resulting variable won't be a true copy, but rather another
+     *  counted reference to the same variable. */
     variable(const variable& copy)
         : p_(copy.p_)
     { }
 
+    /** Create a new floating pointe variable.
+     * \param value  The variable's initial value
+     */
     variable(int value)
         : p_(std::make_shared<float_variable>(value))
     { }
 
+    /** Create a new floating point variable.
+     * \param value  The variable's initial value
+     */
     variable(unsigned int value)
         : p_(std::make_shared<float_variable>(value))
     { }
 
+    /** Create a new floating point variable.
+     * \param value  The variable's initial value
+     */
     variable(float value)
         : p_(std::make_shared<float_variable>(value))
     { }
 
+    /** Create a new floating pointe variable.
+     * \param value  The variable's initial value
+     */
     variable(double value)
         : p_(std::make_shared<float_variable>(value))
     { }
 
+    /** Create a new, named floating pointe variable.
+     * \param name   The variable's name
+     * \param value  The variable's initial value
+     */
     variable(std::string name, double value = 0.0)
         : p_(std::make_shared<float_variable>(std::move(name), value))
     { }
 
-  //  operator double() const
-  //      { return value(); }
+    // Haven't decided yet whether this is a good idea or not;
+    //operator double() const
+    //    { return value(); }
 
+    /** Check if this variable is of the type float_variable. */
     bool is_float() const
         { return p_->is_float(); }
 
+    /** Check if this variable is used in the finite domain subsolver. */
     bool is_fd() const
         { return p_->is_fd(); }
 
+    /** Check if this variable is a dummy variable. */
     bool is_dummy() const
         { return p_->is_dummy(); }
 
+    /** Check if this variable is used outside the solver. */
     bool is_external() const
         { return p_->is_external(); }
 
+    /** Check if this variable can be used as a pivot element in a tableau. */
     bool is_pivotable() const
         { return p_->is_pivotable(); }
 
+    /** Check if this variable is restricted, or in other words, if it is
+     ** a dummy or a slack variable. */
     bool is_restricted() const
         { return p_->is_restricted(); }
 
+    /** Get the value of this variable. */
     double value() const
         { return p_->value(); }
 
+    /** Get the value of this variable, converted to an integer. */
     int int_value() const
         { return p_->int_value(); }
 
+    /** Set this variable to a new value. */
     void set_value(double x)
         { p_->set_value(x); }
 
+    /** Change this variable's value. */
     void change_value(double x)
         { p_->change_value(x); }
 
+    /** Get the name of this variable.
+     *  A nil variable will return "NIL". */
     std::string name() const
         { return is_nil() ? "NIL" : p_->name(); }
 
+    /** Check if this is a nil variable. */
     bool is_nil() const
         { return p_ == nullptr; }
 
+    /** Calculate a hash value.
+     *  This function is only used for placing variables in hash tables. */
     size_t hash() const
         { return std::hash<std::shared_ptr<abstract_variable>>()(p_); }
 
+    /** Get a string representation of the value. */
     std::string to_string() const
         { return is_nil() ? "NIL" : p_->to_string(); }
 
+    /** Get a string showing this variable's name and value. */
     std::string description() const
         { return name() + ":" + to_string(); }
 
+    /** Check if two variables refer to the same abstract_variable.
+     *  This will not return 'true' for two distinct variables that happen
+     *  to have the same value.  Example:
+     * \code
+     variable x (3), y (3), z;
+     x == y; // False!
+     z = x;  // z now refers to x
+     z.set_value(5);
+     x == z; // True! (x.value() == 5 as well)
+     * \endcode
+     */
     bool operator== (const variable& other) const
         { return p_ == other.p_; }
 
+    /** Check if two variables do not refer to the same abstract_variable.
+     *  This will not return 'false' for two distinct variables that happen
+     *  to have the same value.  Example:
+     * \code
+     variable x (3), y (3), z;
+     x != y; // True!
+     z = x;  // z now refers to x
+     z.set_value(5);
+     x != z; // False! (x.value() == 5 as well)
+     * \endcode
+     */
     bool operator!= (const variable& other) const
         { return p_ != other.p_; }
 
@@ -141,23 +231,17 @@ private:
         { return (!(p_ < other.p_)) && p_ != other.p_; }
 
 private:
+    /** Refernce counted pointer to the "real" variable. */
     std::shared_ptr<abstract_variable> p_;
 };
 
-struct variable_less_by_value
-    : public std::binary_function<bool, variable, variable>
-{
-    bool operator() (const variable& a, const variable& b) const
-    {
-        return a.value() < b.value();
-    }
-};
 
-typedef std::unordered_map<variable, double>        variable_to_number_map;
-typedef std::unordered_map<std::string, variable>   string_to_var_map;
-typedef std::unordered_set<variable>                variable_set;
+/** Convenience typedef for sets of variables. */
+typedef std::unordered_set<variable>            variable_set;
 
 } // namespace rhea
+
+//-------------------------------------------------------------------------
 
 namespace std {
 

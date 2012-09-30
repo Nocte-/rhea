@@ -23,6 +23,8 @@
 
 namespace rhea {
 
+/** Dummy variables are inserted by the simplex solver as part of the
+ ** two-phase method. */
 class dummy_variable : public abstract_variable
 {
 public:

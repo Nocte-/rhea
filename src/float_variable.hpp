@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-/// \file   floatvariable.hpp
+/// \file   float_variable.hpp
 /// \brief  A floating point variable that can be used in an expression
 //
 // This file is part of Rhea.  Rhea is free software: you can redistribute

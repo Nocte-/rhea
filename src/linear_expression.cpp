@@ -30,10 +30,11 @@ linear_expression::linear_expression(double constant)
     : constant_(constant)
 { }
 
-linear_expression::linear_expression(const variable& v, t value, t constant)
+linear_expression::linear_expression(const variable& v, double mul,
+                                     double constant)
     : constant_(constant)
 {
-    terms_[v] = value;
+    terms_[v] = mul;
 }
 
 linear_expression& linear_expression::operator*= (double x)
@@ -135,7 +136,7 @@ linear_expression::add(const linear_expression& x, const variable& subject,
 }
 
 linear_expression&
-linear_expression::add(const variable& v, t c, const variable& subject,
+linear_expression::add(const variable& v, double c, const variable& subject,
                        tableau& solver)
 {
     auto i (terms_.find(v));
@@ -173,23 +174,6 @@ double linear_expression::evaluate() const
     return result;
 }
 
-// This linear expression currently represents the equation self=0.  Destructively modify it so
-// that subject=self represents an equivalent equation.
-//
-// Precondition: subject must be one of the variables in this expression.
-// NOTES
-//   Suppose this expression is
-//     c + a*subject + a1*v1 + ... + an*vn
-//   representing
-//     c + a*subject + a1*v1 + ... + an*vn = 0
-// The modified expression will be
-//    subject = -c/a - (a1/a)*v1 - ... - (an/a)*vn
-//   representing
-//    subject = -c/a - (a1/a)*v1 - ... - (an/a)*vn = 0
-//
-// Note that the term involving subject has been dropped.
-//
-// Returns the reciprocal, so that NewSubject can be used by ChangeSubject
 double linear_expression::new_subject(const variable& subj)
 {
     auto i (terms_.find(subj));
@@ -201,25 +185,6 @@ double linear_expression::new_subject(const variable& subj)
     return reciprocal;
 }
 
-// This linear expression currently represents the equation
-// oldSubject=self.  Destructively modify it so that it represents
-// the equation NewSubject=self.
-//
-// Precondition: NewSubject currently has a nonzero coefficient in
-// this expression.
-//
-// NOTES
-//   Suppose this expression is c + a*NewSubject + a1*v1 + ... + an*vn.
-//
-//   Then the current equation is
-//       oldSubject = c + a*NewSubject + a1*v1 + ... + an*vn.
-//   The new equation will be
-//        NewSubject = -c/a + oldSubject/a - (a1/a)*v1 - ... - (an/a)*vn.
-//   Note that the term involving NewSubject has been dropped.
-//
-// Basically, we consider the expression to be an equation with oldSubject
-// equal to the expression, then Resolve the equation for NewSubject,
-// and destructively make the expression what NewSubject is then equal to
 void
 linear_expression::change_subject(const variable& old_subj,
                                   const variable& new_subj)
@@ -232,12 +197,6 @@ linear_expression::change_subject(const variable& old_subj,
     terms_[old_subj] = new_subject(new_subj);
 }
 
-// Replace var with a symbolic expression expr that is equal to it.
-// If a variable has been added to this expression that wasn't there
-// before, or if a variable has been dropped from this expression
-// because it now has a coefficient of 0, inform the solver.
-// PRECONDITIONS:
-//   var occurs with a non-Zero coefficient in this expression.
 void
 linear_expression::substitute_out(const variable& var,
                                   const linear_expression& expr,

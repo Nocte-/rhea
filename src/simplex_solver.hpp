@@ -35,6 +35,7 @@
 
 namespace rhea {
 
+/** Solver that implements the Cassowary simplex algorithm. */
 class simplex_solver : public solver, public tableau
 {
     typedef tableau super;
@@ -97,11 +98,11 @@ public:
                .add_constraint(new edit_constraint(p.y, s, weight));
     }
 
-    simplex_solver& remove_edit_var(const variable& v);
-
     simplex_solver& begin_edit();
 
     simplex_solver& end_edit();
+
+    simplex_solver& remove_edit_var(const variable& v);
 
     simplex_solver& remove_edit_vars_to(size_t n);
 
@@ -110,7 +111,6 @@ public:
         remove_edit_vars_to(0);
         return *this;
     }
-
 
     simplex_solver& add_point_stays(const std::vector<point>& points,
                                     const strength& s = strength::weak(),
@@ -130,21 +130,25 @@ public:
 
     void resolve();
 
-    // Suggest a new value for an edit variable
-    // the variable needs to be added as an edit variable
-    // and BeginEdit() needs to be called before this is called.
-    // The tableau will not be solved completely until
-    // after Resolve() has been called.
+    /** Suggest a new value for an edit variable.
+     *  The variable needs to be added as an edit variable,
+     *  and begin_edit() needs to be called first.
+     *  The tableau will not be solved completely until
+     *  after resolve() or end_edit() has been called. */
     simplex_solver& suggest_value(const variable& v, double x);
 
+    /** Suggest a new value for a point variable.
+     *  The variable needs to be added as an edit variable,
+     *  and begin_edit() needs to be called first.
+     *  The tableau will not be solved completely until
+     *  after resolve() or end_edit() has been called. */
     simplex_solver& suggest_value(const point& p, double x, double y)
     {
         return suggest_value(p.x, x).suggest_value(p.y, y);
     }
 
-    // If autosolving has been turned off, client code needs
-    // to explicitly call solve() before accessing variables
-    // values.
+    /** If autosolving has been turned off, client code needs to explicitly
+     ** call solve() before accessing variables values. */
     simplex_solver& solve()
     {
         if (needs_solving_)
@@ -193,10 +197,9 @@ public:
     bool is_constraint_satisfied(const constraint& c) const;
 
 
-    // re-set all the external variables to their current values
-    // most importantly, this re-calls all the ChangeClv callbacks
-    // (which might be used to copy the ClVariable's value to another
-    // variable)
+    /** Reset all external variables to their current values.
+     * Note: this triggers all callbacks, which might be used to copy the
+     * variable's value to another variable. */
     void update_external_variables()
         { set_external_variables(); }
 
@@ -204,19 +207,21 @@ public:
     void change_strength(constraint c, const strength& s);
     void change_weight(constraint c, double weight);
 
-    // Each of the non-required stays will be represented by an equation
-    // of the form
-    //     v = c + eplus - eminus
-    // where v is the variable with the stay, c is the previous value of
-    // v, and eplus and eminus are slack variables that hold the error
-    // in satisfying the stay constraint.  We are about to change
-    // something, and we want to fix the constants in the equations
-    // representing the stays.  If both eplus and eminus are nonbasic
-    // they have value 0 in the current solution, meaning the previous
-    // stay was exactly satisfied.  In this case nothing needs to be
-    // changed.  Otherwise one of them is basic, and the other must
-    // occur only in the Expression for that basic error variable.
-    // Reset the Constant in this Expression to 0.
+    /** Reset all stay constraint constants.
+     * Each of the non-required stays will be represented by the equation
+     * \f$v = v' + e_{plus} - e_{minus}\f$, where \f$v\f$ is the variable
+     * associated with the stay, \f$v'\f$ is the previous value of
+     * \f$v\f$, and \f$e_{plus}\f$ and \f$e_{minus}\f$ are slack variables
+     * that hold the error for satisfying the constraint.
+     *
+     * We are about to change something, and we want to fix the constants
+     * in the equations representing the stays.  If both \f$e_{plus}\f$
+     * and \f$e_{minus}\f$ are nonbasic, they are zero in the current
+     * solution, meaning the previous stay was exactly satisfied.  In this
+     * case nothing needs to be changed.  Otherwise one of them is basic,
+     * and the other must occur only in the expression for that basic error
+     * variable.  In that case, the constant in the expression is set to
+     * zero. */
     void reset_stay_constants();
 
     simplex_solver& set_auto_reset_stay_constants(bool f = true)
@@ -232,12 +237,9 @@ public:
         { return auto_reset_stay_constants_; }
 
 protected:
-    // ClEditInfo is a privately-used class
-    // that just wraps a constraint, its positive and negative
-    // error variables, and its prior edit Constant.
-    // It is used as values in _editInfoList, and replaces
-    // the parallel vectors of error variables and previous edit
-    // constants from the Smalltalk version of the code.
+    /** This is a privately-used struct that bundles a constraint, its
+     ** positive and negative error variables, and its prior edit constant.
+     */
     struct edit_info
     {
         edit_info(const variable& v_, constraint c_,
@@ -254,6 +256,9 @@ protected:
         double prev_constant;
     };
 
+    /** Bundles an expression, a plus and minus slack variable, and a
+     ** prior edit constant.
+     *  This struct is only used as a return variable of make_epression().*/
     struct expression_result
     {
         linear_expression expr;
@@ -268,95 +273,73 @@ protected:
         { }
     };
 
-    // Make a new linear Expression representing the constraint cn,
-    // replacing any basic variables with their defining expressions.
-    // Normalize if necessary so that the Constant is non-negative.  If
-    // the constraint is non-required give its error variables an
-    // appropriate weight in the objective function.
+    /** Make a new linear expression representing the constraint c,
+     ** replacing any basic variables with their defining expressions.
+     * Normalize if necessary so that the constant is non-negative.  If
+     * the constraint is non-required, give its error variables an
+     * appropriate weight in the objective function. */
     expression_result make_expression(const constraint& c);
 
-
-    // Add the constraint expr=0 to the inequality tableau using an
-    // artificial variable.  To do this, create an artificial variable
-    // av and Add av=expr to the inequality tableau, then make av be 0.
-    // (Raise an exception if we can't attain av=0.)
-    // (Raise an exception if we can't attain av=0.) If the Add fails,
-    // prepare an explanation in e that describes why it failed (note
-    // that an empty explanation is considered to mean the explanation
-    // encompasses all active constraints.
+    /** Add the constraint \f$expr = 0\f$ to the inequality tableau using
+     ** an artificial variable.
+     * To do this, create an artificial variable \f$a_0\f$, and add the
+     * expression \f$a_0 = expr\f$ to the inequality tableau.
+     * Then we try to solve for \f$a_0 = 0\f$, the return value indicates
+     * whether this has succeeded or not.
+     * @return True iff the expression could be added */
     bool add_with_artificial_variable(linear_expression& expr);
 
-
-    // We are trying to Add the constraint expr=0 to the appropriate
-    // tableau.  Try to Add expr directly to the tableax without
-    // creating an artificial variable.  Return true if successful and
-    // false if not.
+    /** Add the constraint \f$expr = 0\f$ to the inequality tableau.
+     * @return True iff the expression could be added */
     bool try_adding_directly(linear_expression& expr);
 
-    // We are trying to Add the constraint expr=0 to the tableaux.  Try
-    // to choose a subject (a variable to become basic) from among the
-    // current variables in expr.  If expr contains any unrestricted
-    // variables, then we must choose an unrestricted variable as the
-    // subject.  Also, if the subject is new to the solver we won't have
-    // to do any substitutions, so we prefer new variables to ones that
-    // are currently noted as parametric.  If expr contains only
-    // restricted variables, if there is a restricted variable with a
-    // negative coefficient that is new to the solver we can make that
-    // the subject.  Otherwise we can't find a subject, so return nil.
-    // (In this last case we have to Add an artificial variable and use
-    // that variable as the subject -- this is done outside this method
-    // though.)
-    //
-    // Note: in checking for variables that are new to the solver, we
-    // ignore whether a variable occurs in the objective function, since
-    // new slack variables are added to the objective function by
-    // 'NewExpression:', which is called before this method.
+    /** Try to choose a subject (that is, a variable to become basic) from
+     ** among the current variables in \a expr.
+     * If expr contains any unrestricted variables, then we must choose an
+     * unrestricted variable as the subject.  Also, if the subject is new to
+     * the solver, we won't have to do any substitutions, so we prefer new
+     * variables to ones that are currently noted as parametric.
+     *
+     * If expr contains only restricted variables, if there is a restricted
+     * variable with a negative coefficient that is new to the solver we can
+     * make that the subject.  Otherwise we return nil, and have to add an
+     * artificial variable and use that variable as the subject -- this is
+     * done outside this method though.
+     *
+     * Note: in checking for variables that are new to the solver, we
+     * ignore whether a variable occurs in the objective function, since
+     * new slack variables are added to the objective function by
+     * make_expression(), which is called before this method.
+     *
+     * \param expr  The expression that is being added to the solver
+     * \return An appropriate subject, or nil */
     variable choose_subject(linear_expression& expr);
 
-    // Each of the non-required edits will be represented by an equation
-    // of the form
-    //    v = c + eplus - eminus
-    // where v is the variable with the edit, c is the previous edit
-    // value, and eplus and eminus are slack variables that hold the
-    // error in satisfying the edit constraint.  We are about to change
-    // something, and we want to fix the constants in the equations
-    // representing the edit constraints.  If one of eplus and eminus is
-    // basic, the other must occur only in the Expression for that basic
-    // error variable.  (They can't both be basic.)  Fix the Constant in
-    // this Expression.  Otherwise they are both nonbasic.  Find all of
-    // the expressions in which they occur, and fix the constants in
-    // those.  See the UIST paper for details.
-    // (This comment was for resetEditConstants(), but that is now
-    // gone since it was part of the screwey vector-based interface
-    // to resolveing. --02/15/99 gjb)
     void delta_edit_constant(double delta, const variable& v1, const variable& v2);
 
-    // We have set new values for the constants in the edit constraints.
-    // Re-Optimize using the dual simplex algorithm.
+    /** Optimize using the dual algorithm. */
     void dual_optimize();
 
-    // Minimize the value of the objective.  (The tableau should already
-    // be feasible.)
+    /** Minimize the value of an objective.
+     * \pre The tableau is feasible.
+     * \param z The objective to optimize for */
     void optimize(const variable& z);
 
-    // Do a Pivot.  Move entryVar into the basis (i.e. make it a basic variable),
-    // and move exitVar out of the basis (i.e., make it a parametric variable)
+    /** Perform a pivot operation.
+     *  Move entry into the basis (i.e. make it a basic variable), and move
+     *  exit out of the basis (i.e., make it a parametric variable).
+     */
     void pivot(const variable& entry, const variable& exit);
 
-    // Set the external variables known to this solver to their appropriate values.
-    // Set each external basic variable to its value, and set each
-    // external parametric variable to 0.  (It isn't clear that we will
-    // ever have external parametric variables -- every external
-    // variable should either have a stay on it, or have an equation
-    // that defines it in terms of other external variables that do have
-    // stays.  For the moment I'll put this in though.)  Variables that
-    // are internal to the solver don't actually store values -- their
-    // values are just implicit in the tableu -- so we don't need to set
-    // them.
+    /** Set the external variables known to this solver to their appropriate
+     ** values.
+     * Set each external basic variable to its value, and set each
+     * external parametric variable to zero.  Variables that are internal
+     * to the solver don't actually store values &mdash; their
+     * values are just implicit in the tableu &mdash; so we don't need to
+     * set them. */
     void set_external_variables();
 
-    // this gets called by RemoveConstraint and by AddConstraint when the
-    // contraint we're trying to Add is inconsistent
     simplex_solver& remove_constraint_internal(const constraint& c);
 
     void change(variable& v, double n)
@@ -390,9 +373,23 @@ private:
 };
 
 /** Scoped edit action.
- *  This class calls begin_edit() on a simplex_solver upon construction,
- *  and end_edit() as it goes out of scope.  This can be used as an
- *  alternative to calling these two functions manually. */
+ * This class calls begin_edit() on a simplex_solver upon construction,
+ * and end_edit() as it goes out of scope.  This can be used as an
+ * alternative to calling these two functions manually.
+ *
+ * \code
+
+variable x(4), y(6);
+simplex_solver solv;
+
+solv.add_edit_variable(x).add_edit_variable(y);
+{
+scoped_edit user_input(solv);
+solv.suggest_value(x, 2)
+    .suggest_value(y, 7);
+}
+// 'user_input' goes out of scope here and calls solv.end_edit()
+ * \endcode */
 class scoped_edit
 {
 public:
