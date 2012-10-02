@@ -31,7 +31,6 @@
 #include "stay_constraint.hpp"
 #include "tableau.hpp"
 #include "objective_variable.hpp"
-#include "point.hpp"
 
 namespace rhea {
 
@@ -73,15 +72,6 @@ public:
         return *this;
     }
 
-    simplex_solver& add_edit_var(const point& p,
-                                 const strength& s = strength::strong(),
-                                 double weight = 1.0)
-    {
-        add_constraint(new edit_constraint(p.x, s, weight));
-        add_constraint(new edit_constraint(p.y, s, weight));
-        return *this;
-    }
-
     simplex_solver& begin_edit();
 
     simplex_solver& end_edit();
@@ -96,14 +86,6 @@ public:
         return *this;
     }
 
-    simplex_solver& add_point_stays(const std::vector<point>& points,
-                                    const strength& s = strength::weak(),
-                                    double weight = 1.0);
-
-    simplex_solver& add_point_stay(const point& v,
-                                   const strength& s = strength::weak(),
-                                   double weight = 1.0);
-
     void resolve();
 
     /** Suggest a new value for an edit variable.
@@ -112,16 +94,6 @@ public:
      *  The tableau will not be solved completely until
      *  after resolve() or end_edit() has been called. */
     simplex_solver& suggest_value(const variable& v, double x);
-
-    /** Suggest a new value for a point variable.
-     *  The variable needs to be added as an edit variable,
-     *  and begin_edit() needs to be called first.
-     *  The tableau will not be solved completely until
-     *  after resolve() or end_edit() has been called. */
-    simplex_solver& suggest_value(const point& p, double x, double y)
-    {
-        return suggest_value(p.x, x).suggest_value(p.y, y);
-    }
 
     /** If autosolving has been turned off, client code needs to explicitly
      ** call solve() before accessing variables values. */

@@ -203,27 +203,6 @@ simplex_solver::add_constraint_(const constraint& c)
     return *this;
 }
 
-simplex_solver&
-simplex_solver::add_point_stays(const std::vector<point>& points,
-                                const strength& s, double weight)
-{
-    auto i (points.begin());
-    for (const auto& pt : points)
-    {
-        add_point_stay(pt, s, weight);
-        weight *= 2.0;
-    }
-    return *this;
-}
-
-simplex_solver&
-simplex_solver::add_point_stay(const point& pt, const strength& s, double weight)
-{
-    add_stay(pt.x, s, weight);
-    add_stay(pt.y, s, weight);
-    return *this;
-}
-
 solver&
 simplex_solver::remove_constraint_(const constraint& c)
 {

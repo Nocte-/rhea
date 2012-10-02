@@ -8,9 +8,18 @@
 
 #include "../src/simplex_solver.hpp"
 #include "../src/linear_equation.hpp"
-#include "../src/iostream.hpp"
 
 using namespace rhea;
+
+struct point
+{
+    variable x, y;
+
+    point(double a = 0, double b = 0) : x("x",a), y("y",b) { }
+
+    bool operator ==(const std::pair<int,int>& p) const
+        { return x.value() == p.first && y.value() == p.second; }
+};
 
 namespace std
 {
@@ -18,6 +27,18 @@ namespace std
     std::ostream& operator<< (std::ostream& s, const std::pair<a,b>& p)
     {
         return s << p.first << "," << p.second;
+    }
+
+    inline
+    std::ostream& operator<< (std::ostream& s, const variable& p)
+    {
+        return s << p.description();
+    }
+
+    inline
+    std::ostream& operator<< (std::ostream& s, const point& p)
+    {
+        return s << p.x << " " << p.y;
     }
 }
 
@@ -458,7 +479,13 @@ BOOST_AUTO_TEST_CASE (quad_test)
     std::vector<point> m (4);
     simplex_solver solver;
 
-    solver.add_point_stays(c);
+    double factor (1);
+    for (point& corner : c)
+    {
+        solver.add_stay(corner.x, strength::weak(), factor);
+        solver.add_stay(corner.y, strength::weak(), factor);
+        factor *= 2;
+    }
 
     // Midpoint constraints
     for (int i (0); i < 4; ++i)
@@ -477,19 +504,19 @@ BOOST_AUTO_TEST_CASE (quad_test)
         solver.add_constraint(c[a.first].y + 1 <= c[a.second].y);
 
     // Limits
-    for (int i (0); i < 4; ++i)
+    for (auto& corner : c)
     {
-        solver.add_bounds(c[i].x, 0, 300);
-        solver.add_bounds(c[i].y, 0, 300);
+        solver.add_bounds(corner.x, 0, 300);
+        solver.add_bounds(corner.y, 0, 300);
     }
 
     // Now for the actual tests
-    BOOST_CHECK_EQUAL(c[0].value(), point(50, 50).value());
-    BOOST_CHECK_EQUAL(m[0].value(), point(50, 150).value());
-    BOOST_CHECK_EQUAL(c[1].value(), point(50, 250).value());
-    BOOST_CHECK_EQUAL(m[1].value(), point(150, 250).value());
-    BOOST_CHECK_EQUAL(c[2].value(), point(250, 250).value());
-    BOOST_CHECK_EQUAL(m[2].value(), point(250, 150).value());
+    BOOST_CHECK_EQUAL(c[0], std::make_pair(50, 50));
+    BOOST_CHECK_EQUAL(m[0], std::make_pair(50, 150));
+    BOOST_CHECK_EQUAL(c[1], std::make_pair(50, 250));
+    BOOST_CHECK_EQUAL(m[1], std::make_pair(150, 250));
+    BOOST_CHECK_EQUAL(c[2], std::make_pair(250, 250));
+    BOOST_CHECK_EQUAL(m[2], std::make_pair(250, 150));
 
     // Move one of the corners
     solver.add_edit_var(c[0].x);
@@ -497,21 +524,23 @@ BOOST_AUTO_TEST_CASE (quad_test)
     solver.suggest_value(c[0].x, 100);
     solver.end_edit();
 
-    BOOST_CHECK_EQUAL(c[0].value(), point(100, 50).value());
-    BOOST_CHECK_EQUAL(m[0].value(), point(75, 150).value());
-    BOOST_CHECK_EQUAL(c[1].value(), point(50, 250).value());
-    BOOST_CHECK_EQUAL(m[1].value(), point(150, 250).value());
-    BOOST_CHECK_EQUAL(c[3].value(), point(250, 50).value());
-    BOOST_CHECK_EQUAL(m[3].value(), point(175, 50).value());
+    BOOST_CHECK_EQUAL(c[0], std::make_pair(100, 50));
+    BOOST_CHECK_EQUAL(m[0], std::make_pair(75, 150));
+    BOOST_CHECK_EQUAL(c[1], std::make_pair(50, 250));
+    BOOST_CHECK_EQUAL(m[1], std::make_pair(150, 250));
+    BOOST_CHECK_EQUAL(c[3], std::make_pair(250, 50));
+    BOOST_CHECK_EQUAL(m[3], std::make_pair(175, 50));
 
     // Move one of the midpoints
-    solver.add_edit_var(m[0]);
+    solver.add_edit_var(m[0].x).add_edit_var(m[0].y);
     solver.begin_edit();
-    solver.suggest_value(m[0], 50, 150);
+    solver.suggest_value(m[0].x, 50);
+    solver.suggest_value(m[0].y, 150);
     solver.end_edit();
 
-    BOOST_CHECK_EQUAL(c[0].value(), point(50, 50).value());
-    BOOST_CHECK_EQUAL(m[0].value(), point(50, 150).value());
-    BOOST_CHECK_EQUAL(m[3].value(), point(150, 50).value());
+    BOOST_CHECK_EQUAL(m[0], std::make_pair(50, 150));
+    BOOST_CHECK_EQUAL(c[0], std::make_pair(50, 50));
+    BOOST_CHECK_EQUAL(m[0], std::make_pair(50, 150));
+    BOOST_CHECK_EQUAL(m[3], std::make_pair(150, 50));
 }
 
