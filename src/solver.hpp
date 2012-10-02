@@ -21,6 +21,7 @@
 
 #include <memory>
 #include "constraint.hpp"
+#include "linear_inequality.hpp"
 #include "variable.hpp"
 
 namespace rhea {
@@ -34,8 +35,6 @@ public:
 
     virtual ~solver() { }
 
-    virtual solver& add_constraint(const constraint& c) = 0;
-    virtual solver& remove_constraint(const constraint& c) = 0;
 
     virtual solver& solve() { return *this; }
 
@@ -50,7 +49,66 @@ public:
         return *this;
     }
 
+public:
+    solver& add_constraint(const constraint& c)
+    {
+        add_constraint_(c);
+        return *this;
+    }
+
+    solver& add_constraint(const linear_equation& c,
+                           const strength& s = strength::required(),
+                           double weight = 1.0)
+    {
+        return add_constraint(constraint(c, s, weight));
+    }
+
+    solver& add_constraint(const linear_inequality& c,
+                           const strength& s = strength::required(),
+                           double weight = 1.0)
+    {
+        return add_constraint(constraint(c, s, weight));
+    }
+
+    solver& add_constraints(const constraint_list& cs)
+    {
+        for (auto& c : cs) add_constraint(c);
+        return *this;
+    }
+
+    solver& add_lower_bound(const variable& v, double lower)
+    {
+        return add_constraint(new linear_inequality(v - lower));
+    }
+
+    solver& add_upper_bound(const variable& v, double upper)
+    {
+        return add_constraint(new linear_inequality(upper - v));
+    }
+
+    solver& add_bounds(const variable& v, double lower, double upper)
+    {
+        return add_lower_bound(v, lower).add_upper_bound(v, upper);
+    }
+
+
+
+    solver& remove_constraint(const constraint& c)
+    {
+        remove_constraint_(c);
+        return *this;
+    }
+
+    solver& remove_constraints(const constraint_list& cs)
+    {
+        for (auto& c : cs) remove_constraint(c);
+        return *this;
+    }
+
 protected:
+    virtual solver& add_constraint_(const constraint& c) = 0;
+    virtual solver& remove_constraint_(const constraint& c) = 0;
+
     bool auto_solve_;
 };
 

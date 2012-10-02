@@ -55,8 +55,9 @@ public:
     simplex_solver()
         : solver()
         , objective_(new objective_variable("z"))
-        , needs_solving_ (true)
-        , explain_failure_ (false)
+        , auto_reset_stay_constants_(true)
+        , needs_solving_(true)
+        , explain_failure_(false)
     {
         rows_[objective_]; // Create an empty row for the objective
         cedcns_.push(0);
@@ -64,60 +65,21 @@ public:
 
     virtual ~simplex_solver() { }
 
-    simplex_solver& add_lower_bound(const variable& v, double lower)
-    {
-        return add_constraint(new linear_inequality(v - lower));
-    }
-
-    simplex_solver& add_upper_bound(const variable& v, double upper)
-    {
-        return add_constraint(new linear_inequality(upper - v));
-    }
-
-    simplex_solver& add_bounds(const variable& v, double lower, double upper)
-    {
-        return add_lower_bound(v, lower).add_upper_bound(v, upper);
-    }
-
-    simplex_solver& add_constraint(const constraint& c);
-
-    simplex_solver& add_constraints(const constraint_list& cs)
-    {
-        for (auto& c : cs) add_constraint(c);
-        return *this;
-    }
-
-    simplex_solver& add_constraint(const linear_equation& c,
-                                   const strength& s = strength::required(),
-                                   double weight = 1.0)
-    {
-        return add_constraint(constraint(c, s, weight));
-    }
-
-    simplex_solver& add_constraint(const linear_inequality& c,
-                                   const strength& s = strength::required(),
-                                   double weight = 1.0)
-    {
-        return add_constraint(constraint(c, s, weight));
-    }
-
-
-
-    simplex_solver& remove_constraint(const constraint& c);
-
     simplex_solver& add_edit_var(const variable& v,
                                  const strength& s = strength::strong(),
                                  double weight = 1.0)
     {
-        return add_constraint(new edit_constraint(v, s, weight));
+        add_constraint(new edit_constraint(v, s, weight));
+        return *this;
     }
 
     simplex_solver& add_edit_var(const point& p,
                                  const strength& s = strength::strong(),
                                  double weight = 1.0)
     {
-        return  add_constraint(new edit_constraint(p.x, s, weight))
-               .add_constraint(new edit_constraint(p.y, s, weight));
+        add_constraint(new edit_constraint(p.x, s, weight));
+        add_constraint(new edit_constraint(p.y, s, weight));
+        return *this;
     }
 
     simplex_solver& begin_edit();
@@ -147,17 +109,19 @@ public:
                              const strength& s = strength::weak(),
                              double weight = 1.0)
     {
-        return add_constraint(new stay_constraint(v, s, weight));
+        add_constraint(new stay_constraint(v, s, weight));
+        return *this;
     }
 
     simplex_solver& add_stay(const variable& v, const variable& w, const variable& x, const variable& y,
                              const strength& s = strength::weak(),
                              double weight = 1.0)
     {
-        return add_constraint(new stay_constraint(v, s, weight))
-              .add_constraint(new stay_constraint(w, s, weight))
-              .add_constraint(new stay_constraint(x, s, weight))
-              .add_constraint(new stay_constraint(y, s, weight));
+        add_constraint(new stay_constraint(v, s, weight));
+        add_constraint(new stay_constraint(w, s, weight));
+        add_constraint(new stay_constraint(x, s, weight));
+        add_constraint(new stay_constraint(y, s, weight));
+        return *this;
     }
 
     void resolve();
@@ -228,7 +192,6 @@ public:
 
     bool is_constraint_satisfied(const constraint& c) const;
 
-
     /** Reset all external variables to their current values.
      * Note: this triggers all callbacks, which might be used to copy the
      * variable's value to another variable. */
@@ -269,6 +232,10 @@ public:
         { return auto_reset_stay_constants_; }
 
 protected:
+    solver& add_constraint_(const constraint& c);
+    solver& remove_constraint_(const constraint& c);
+
+
     /** This is a privately-used struct that bundles a constraint, its
      ** positive and negative error variables, and its prior edit constant.
      */
@@ -372,8 +339,6 @@ protected:
      * values are just implicit in the tableu &mdash; so we don't need to
      * set them. */
     void set_external_variables();
-
-    simplex_solver& remove_constraint_internal(const constraint& c);
 
     void change(variable& v, double n)
     {

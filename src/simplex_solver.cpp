@@ -137,8 +137,8 @@ simplex_solver::make_expression(const constraint& c)
     return result;
 }
 
-simplex_solver&
-simplex_solver::add_constraint(const constraint& c)
+solver&
+simplex_solver::add_constraint_(const constraint& c)
 {
     if (c.is_strict_inequality())
         throw strict_inequality_not_allowed();
@@ -173,7 +173,7 @@ simplex_solver::add_constraint(const constraint& c)
     }
     catch(required_failure&)
     {
-        remove_constraint_internal(c);
+        remove_constraint_(c);
         throw;
     }
 
@@ -181,7 +181,7 @@ simplex_solver::add_constraint(const constraint& c)
     {
         if (!add_with_artificial_variable(r.expr))
         {
-            remove_constraint_internal(c);
+            remove_constraint_(c);
             throw required_failure();
         }
     }
@@ -224,8 +224,8 @@ simplex_solver::add_point_stay(const point& pt, const strength& s, double weight
     return *this;
 }
 
-simplex_solver&
-simplex_solver::remove_constraint_internal(const constraint& c)
+solver&
+simplex_solver::remove_constraint_(const constraint& c)
 {
     needs_solving_ = true;
     reset_stay_constants();
@@ -903,14 +903,6 @@ simplex_solver::is_constraint_satisfied(const constraint& c) const
         }
     }
     return true;
-}
-
-simplex_solver&
-simplex_solver::remove_constraint(const constraint& c)
-{
-    remove_constraint_internal(c);
-    //c.removed_from(*this);
-    return *this;
 }
 
 void
