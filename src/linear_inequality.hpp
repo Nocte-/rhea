@@ -158,6 +158,85 @@ operator >= (const variable& lhs, const linear_expression& rhs)
     return linear_inequality(lhs, relation::geq, rhs);
 }
 
+//-------------------------------------------------------------------------
+
+inline linear_inequality
+operator < (const variable& lhs, const variable& rhs)
+{
+    return linear_inequality(lhs, relation::lt, rhs);
+}
+
+inline linear_inequality
+operator <= (const variable& lhs, const variable& rhs)
+{
+    return linear_inequality(lhs, relation::leq, rhs);
+}
+
+inline linear_inequality
+operator > (const variable& lhs, const variable& rhs)
+{
+    return linear_inequality(lhs, relation::gt, rhs);
+}
+
+inline linear_inequality
+operator >= (const variable& lhs, const variable& rhs)
+{
+    return linear_inequality(lhs, relation::geq, rhs);
+}
+
+//-------------------------------------------------------------------------
+
+inline linear_inequality
+operator < (const variable& lhs, double rhs)
+{
+    return linear_inequality(lhs, relation::lt, rhs);
+}
+
+inline linear_inequality
+operator <= (const variable& lhs, double rhs)
+{
+    return linear_inequality(lhs, relation::leq, rhs);
+}
+
+inline linear_inequality
+operator > (const variable& lhs, double rhs)
+{
+    return linear_inequality(lhs, relation::gt, rhs);
+}
+
+inline linear_inequality
+operator >= (const variable& lhs, double rhs)
+{
+    return linear_inequality(lhs, relation::geq, rhs);
+}
+
+//-------------------------------------------------------------------------
+
+inline linear_inequality
+operator < (const variable& lhs, int rhs)
+{
+    return linear_inequality(lhs, relation::lt, rhs);
+}
+
+inline linear_inequality
+operator <= (const variable& lhs, int rhs)
+{
+    return linear_inequality(lhs, relation::leq, rhs);
+}
+
+inline linear_inequality
+operator > (const variable& lhs, int rhs)
+{
+    return linear_inequality(lhs, relation::gt, rhs);
+}
+
+inline linear_inequality
+operator >= (const variable& lhs, int rhs)
+{
+    return linear_inequality(lhs, relation::geq, rhs);
+}
+
+
 } // namespace rhea
 
 

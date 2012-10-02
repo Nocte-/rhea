@@ -8,13 +8,38 @@ Rhea is an incremental constraint solver based on
 originally developed by Greg J. Badros and Alan Borning.  The main
 differences are:
 
- * Written in modern C++11
- * Fixes some memory leaks
+ * Allows the programmer to write constraints in a natural way
+ * Rewritten in C++11, fixes some bugs and memory leaks
  * CMake instead of GNU Autoconfig
  * Unit tests use the Boost Test Framework
  * Uses Doxygen for documentation
  * Expression parser based on Boost Spirit
  * Does not have a finite domain subsolver 
+
+
+Quick example
+-------------
+
+```c++
+#include <rhea/simplex_solver.hpp>
+#include <rhea/iostream.hpp>
+
+main()
+{
+    rhea::variable x (0), y (0);
+    rhea::simplex_solver solver;
+
+    solver.add_constraints(
+    {
+        x <= y,
+        y == x + 3,
+        x == 10
+    });
+
+    std::cout << x << " " << y << std::endl;
+    // Prints "10 13"
+}
+```
 
 
 Status

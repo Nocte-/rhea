@@ -19,6 +19,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
+#include <list>
 #include <memory>
 #include "abstract_constraint.hpp"
 #include "linear_equation.hpp"
@@ -150,6 +151,10 @@ public:
 private:
     std::shared_ptr<abstract_constraint> p_;
 };
+
+
+/** Convenience typedef for bundling constraints. */
+typedef std::list<constraint> constraint_list;
 
 } // namespace rhea
 

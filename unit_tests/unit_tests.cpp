@@ -8,6 +8,7 @@
 
 #include "../src/simplex_solver.hpp"
 #include "../src/linear_equation.hpp"
+#include "../src/iostream.hpp"
 
 using namespace rhea;
 
@@ -285,6 +286,19 @@ BOOST_AUTO_TEST_CASE (casso1_test)
 
     BOOST_CHECK(   (x.value() == 10 && y.value() == 13)
                 || (x.value() == 7  && y.value() == 10));
+}
+
+BOOST_AUTO_TEST_CASE (casso2_test)
+{
+    variable x (0), y (0);
+    simplex_solver solver;
+
+    solver.add_constraints(
+    {
+        x <= y, y == x + 3, x == 10
+    });
+    BOOST_CHECK_EQUAL(x.value(), 10);
+    BOOST_CHECK_EQUAL(y.value(), 13);
 }
 
 BOOST_AUTO_TEST_CASE (inconsistent1_test)

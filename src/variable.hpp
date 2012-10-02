@@ -253,4 +253,11 @@ struct equal_to<rhea::variable>
         { return a.is(b); }
 };
 
+/**  */
+inline
+std::string to_string(const rhea::variable& v)
+{
+    return v.to_string();
+}
+
 } // namespace std

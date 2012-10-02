@@ -81,6 +81,12 @@ public:
 
     simplex_solver& add_constraint(const constraint& c);
 
+    simplex_solver& add_constraints(const constraint_list& cs)
+    {
+        for (auto& c : cs) add_constraint(c);
+        return *this;
+    }
+
     simplex_solver& add_constraint(const linear_equation& c,
                                    const strength& s = strength::required(),
                                    double weight = 1.0)
@@ -142,6 +148,16 @@ public:
                              double weight = 1.0)
     {
         return add_constraint(new stay_constraint(v, s, weight));
+    }
+
+    simplex_solver& add_stay(const variable& v, const variable& w, const variable& x, const variable& y,
+                             const strength& s = strength::weak(),
+                             double weight = 1.0)
+    {
+        return add_constraint(new stay_constraint(v, s, weight))
+              .add_constraint(new stay_constraint(w, s, weight))
+              .add_constraint(new stay_constraint(x, s, weight))
+              .add_constraint(new stay_constraint(y, s, weight));
     }
 
     void resolve();
