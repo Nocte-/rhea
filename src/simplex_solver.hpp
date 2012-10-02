@@ -104,26 +104,6 @@ public:
                                    const strength& s = strength::weak(),
                                    double weight = 1.0);
 
-
-    simplex_solver& add_stay(const variable& v,
-                             const strength& s = strength::weak(),
-                             double weight = 1.0)
-    {
-        add_constraint(new stay_constraint(v, s, weight));
-        return *this;
-    }
-
-    simplex_solver& add_stay(const variable& v, const variable& w, const variable& x, const variable& y,
-                             const strength& s = strength::weak(),
-                             double weight = 1.0)
-    {
-        add_constraint(new stay_constraint(v, s, weight));
-        add_constraint(new stay_constraint(w, s, weight));
-        add_constraint(new stay_constraint(x, s, weight));
-        add_constraint(new stay_constraint(y, s, weight));
-        return *this;
-    }
-
     void resolve();
 
     /** Suggest a new value for an edit variable.

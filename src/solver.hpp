@@ -21,6 +21,7 @@
 
 #include <memory>
 #include "constraint.hpp"
+#include "stay_constraint.hpp"
 #include "linear_inequality.hpp"
 #include "variable.hpp"
 
@@ -91,7 +92,21 @@ public:
         return add_lower_bound(v, lower).add_upper_bound(v, upper);
     }
 
+    solver& add_stay(const variable& v,
+                     const strength& s = strength::weak(),
+                     double weight = 1.0)
+    {
+        add_constraint(new stay_constraint(v, s, weight));
+        return *this;
+    }
 
+    solver& add_stays(const variable_set& vs,
+                      const strength& s = strength::weak(),
+                      double weight = 1.0)
+    {
+        for (auto& v : vs) add_constraint(new stay_constraint(v, s, weight));
+        return *this;
+    }
 
     solver& remove_constraint(const constraint& c)
     {

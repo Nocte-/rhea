@@ -410,10 +410,6 @@ simplex_solver::suggest_value(const variable& v, double x)
     return *this;
 }
 
-// Add the constraint expr=0 to the inequality tableau using an
-// artificial variable.  To do this, create an artificial variable
-// av and Add av=expr to the inequality tableau, then make av be 0.
-// (Raise an exception if we can't attain av=0 -- and prepare explanation)
 bool
 simplex_solver::add_with_artificial_variable(linear_expression& expr)
 {
@@ -636,8 +632,7 @@ simplex_solver::choose_subject(linear_expression& expr)
     return subj;
 }
 
-// Minimize the value of the objective.  (The tableau should already
-// be feasible.)
+
 void simplex_solver::optimize(const variable& v)
 {
     auto& row (row_expression(v));
@@ -703,22 +698,6 @@ void simplex_solver::optimize(const variable& v)
     }
 }
 
-// Each of the non-required edits will be represented by an equation
-// of the form
-//    v = c + eplus - eminus
-// where v is the variable with the edit, c is the previous edit
-// value, and eplus and eminus are slack variables that hold the
-// error in satisfying the edit constraint.  We are about to change
-// something, and we want to fix the constants in the equations
-// representing the edit constraints.  If one of eplus and eminus is
-// basic, the other must occur only in the Expression for that basic
-// error variable.  (They can't both be basic.)  Fix the Constant in
-// this Expression.  Otherwise they are both nonbasic.  Find all of
-// the expressions in which they occur, and fix the constants in
-// those.  See the UIST paper for details.
-// (This comment was for resetEditConstants(), but that is now
-// gone since it was part of the screwey vector-based interface
-// to resolveing. --02/15/99 gjb)
 void
 simplex_solver::delta_edit_constant(double delta, const variable& plus,
                                     const variable& minus)
@@ -829,19 +808,6 @@ simplex_solver::pivot(const variable& entry, const variable& exit)
     add_row(entry, expr);
 }
 
-// Each of the non-required stays will be represented by an equation
-// of the form
-//     v = c + eplus - eminus
-// where v is the variable with the stay, c is the previous value of
-// v, and eplus and eminus are slack variables that hold the error
-// in satisfying the stay constraint.  We are about to change
-// something, and we want to fix the constants in the equations
-// representing the stays.  If both eplus and eminus are nonbasic
-// they have value 0 in the current solution, meaning the previous
-// stay was exactly satisfied.  In this case nothing needs to be
-// changed.  Otherwise one of them is basic, and the other must
-// occur only in the Expression for that basic error variable.
-// Reset the Constant in this Expression to 0.
 void
 simplex_solver::reset_stay_constants()
 {
@@ -857,16 +823,6 @@ simplex_solver::reset_stay_constants()
     }
 }
 
-// Set the external variables known to this solver to their appropriate values.
-// Set each external basic variable to its value, and set each
-// external parametric variable to 0.  (It isn't clear that we will
-// ever have external parametric variables -- every external
-// variable should either have a stay on it, or have an equation
-// that defines it in terms of other external variables that do have
-// stays.  For the moment I'll put this in though.)  Variables that
-// are internal to the solver don't actually store values -- their
-// values are just implicit in the tableu -- so we don't need to set
-// them."
 void
 simplex_solver::set_external_variables()
 {
