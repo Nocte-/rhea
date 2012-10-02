@@ -24,6 +24,8 @@
 
 namespace rhea {
 
+/** Abstract constraint that can be related to a variable, used only as
+ ** a base class for edit_constraint and stay_constraint. */
 class edit_or_stay_constraint : public abstract_constraint
 {
 public:
@@ -35,7 +37,7 @@ public:
 
     virtual ~edit_or_stay_constraint() { }
 
-    variable var() const
+    const variable& var() const
         { return var_; }
 
     linear_expression expression() const

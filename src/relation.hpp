@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /// \file   relation.hpp
-/// \brief  Relation between two sides in an inequality
+/// \brief  Relation between two sides in an equation or inequality
 //
 // This file is part of Rhea.  Rhea is free software: you can redistribute
 // it and/or modify it under the terms of the GNU Lesser General Public
@@ -21,13 +21,26 @@
 
 namespace rhea {
 
+/** An (in)equality relation. */
 class relation
 {
 public:
-    // enum setup so additive inverse flips the direction of the inequality
+    /** This enumeration is set up in such a way that additive inverse flips
+     ** the direction of the inequality. */
     typedef enum
     {
-        eq = 0, neq = 100, leq = 2, geq = -2, lt = 3, gt = -3
+        /** Equal to. */
+        eq = 0,
+        /** Not equal to. */
+        neq = 100,
+        /** Less than or equal to. */
+        leq = 2,
+        /** Greater than or equal to. */
+        geq = -2,
+        /** Less than. */
+        lt = 3,
+        /** Greater than. */
+        gt = -3
     }
     comp_t;
 

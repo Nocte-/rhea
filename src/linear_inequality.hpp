@@ -25,6 +25,7 @@
 
 namespace rhea {
 
+/** A constraint of the form \f$expr \geq 0\f$. */
 class linear_inequality : public linear_constraint
 {
 public:

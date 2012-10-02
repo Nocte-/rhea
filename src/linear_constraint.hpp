@@ -24,11 +24,13 @@
 
 namespace rhea {
 
+/** A constraint based on a linear expression.
+ *  Used as a base class for linear_equation and linear_inequality. */
 class linear_constraint : public abstract_constraint
 {
 public:
     linear_constraint(const linear_expression& expr,
-                      strength s = strength::required(),
+                      const strength& s = strength::required(),
                       double weight = 1.0)
         : abstract_constraint(s, weight)
         , expr_(expr)

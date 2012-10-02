@@ -23,6 +23,8 @@
 
 namespace rhea {
 
+/** Edit constraints are added to a tableau on a variable, so that a
+ ** new value can be suggested for that variable later on. */
 class edit_constraint : public edit_or_stay_constraint
 {
 public:

@@ -64,6 +64,7 @@ public:
 
     virtual ~simplex_solver() { }
 
+
     simplex_solver& add_edit_var(const variable& v,
                                  const strength& s = strength::strong(),
                                  double weight = 1.0)
@@ -72,8 +73,10 @@ public:
         return *this;
     }
 
+    /** Begin suggesting new values for edit variables. */
     simplex_solver& begin_edit();
 
+    /** We're done with the edit variables, resolve the constraints. */
     simplex_solver& end_edit();
 
     simplex_solver& remove_edit_var(const variable& v);
@@ -107,6 +110,7 @@ public:
         return *this;
     }
 
+
     simplex_solver& set_edited_value(variable& v, double n)
     {
         if (contains_variable(v))
@@ -123,6 +127,9 @@ public:
         return *this;
     }
 
+    /** Check if the solver knows of a given variable.
+     * \param v The variable to check for
+     * \return True iff v is a column in the tableau or a basic variable */
     bool contains_variable(const variable& v)
     {
         return columns_has_key(v) || is_basic_var(v);
