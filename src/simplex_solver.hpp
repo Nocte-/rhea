@@ -37,30 +37,25 @@ namespace rhea {
 /** Solver that implements the Cassowary simplex algorithm. */
 class simplex_solver : public solver, public tableau
 {
-    typedef tableau super;
-
 public:
     typedef std::function<void(simplex_solver&)>            event_cb;
     typedef std::function<void(const variable&, simplex_solver&)> variable_cb;
 
+    /** Gets called whenever the tableau is resolved. */
     event_cb    on_resolve;
+    /** Gets called whenever a variable has changed. */
     variable_cb on_variable_change;
 
-    typedef std::unordered_map<constraint, variable_set> constraint_to_varset_map;
-    typedef std::unordered_map<constraint, variable>   constraint_to_var_map;
-    typedef std::unordered_map<variable, constraint>   var_to_constraint_map;
+public:
+    /** This struct is used as a parameter for the suggest() function. */
+    struct suggestion
+    {
+        const variable& v;
+        double          suggested_value;
+    };
 
 public:
-    simplex_solver()
-        : solver()
-        , objective_(new objective_variable("z"))
-        , auto_reset_stay_constants_(true)
-        , needs_solving_(true)
-        , explain_failure_(false)
-    {
-        rows_[objective_]; // Create an empty row for the objective
-        cedcns_.push(0);
-    }
+    simplex_solver();
 
     virtual ~simplex_solver() { }
 
@@ -84,10 +79,7 @@ public:
     simplex_solver& remove_edit_vars_to(size_t n);
 
     simplex_solver& remove_all_edit_vars()
-    {
-        remove_edit_vars_to(0);
-        return *this;
-    }
+        { return remove_edit_vars_to(0); }
 
     void resolve();
 
@@ -98,56 +90,29 @@ public:
      *  after resolve() or end_edit() has been called. */
     simplex_solver& suggest_value(const variable& v, double x);
 
+    /** Suggest new values for a list of variables.
+     * \code
+     solver.suggest({{ width, 200 }, { height, 150 }});
+     * \endcode */
+    void suggest(const std::list<suggestion>& suggestions);
+
     /** If autosolving has been turned off, client code needs to explicitly
      ** call solve() before accessing variables values. */
-    simplex_solver& solve()
-    {
-        if (needs_solving_)
-        {
-            optimize(objective_);
-            set_external_variables();
-        }
-        return *this;
-    }
-
-
-    simplex_solver& set_edited_value(variable& v, double n)
-    {
-        if (contains_variable(v))
-        {
-            change(v, n);
-        }
-        else if (!approx(n, v.value()))
-        {
-            add_edit_var(v);
-            begin_edit();
-            suggest_value(v, n);
-            end_edit();
-        }
-        return *this;
-    }
+    simplex_solver& solve();
 
     /** Check if the solver knows of a given variable.
      * \param v The variable to check for
      * \return True iff v is a column in the tableau or a basic variable */
     bool contains_variable(const variable& v)
-    {
-        return columns_has_key(v) || is_basic_var(v);
-    }
+        { return columns_has_key(v) || is_basic_var(v); }
 
-    simplex_solver& add_var(const variable& v)
-    {
-        if (!contains_variable(v))
-            add_stay(v);
-
-        return *this;
-    }
-
+/*
     const constraint_to_var_map& constraint_map() const
         { return marker_vars_; }
 
     const var_to_constraint_map& marker_map() const
         { return constraints_marked_; }
+*/
 
     bool is_constraint_satisfied(const constraint& c) const;
 
@@ -307,10 +272,15 @@ protected:
     }
 
 private:
-    // the arrays of positive and negative error vars for the stay constraints
-    // (need both positive and negative since they have only non-negative values)
-    std::vector<variable> stay_minus_error_vars_;
-    std::vector<variable> stay_plus_error_vars_;
+    typedef std::unordered_map<constraint, variable_set> constraint_to_varset_map;
+    typedef std::unordered_map<constraint, variable>   constraint_to_var_map;
+    typedef std::unordered_map<variable, constraint>   var_to_constraint_map;
+
+    // The arrays of positive and negative error vars for the stay
+    // constraints.  (We need to keep positive and negative separate,
+    // since the error vars are always non-negative.)
+    std::vector<variable>       stay_minus_error_vars_;
+    std::vector<variable>       stay_plus_error_vars_;
 
     constraint_to_varset_map    error_vars_;
     constraint_to_var_map       marker_vars_;
@@ -318,13 +288,12 @@ private:
 
     variable    objective_;
 
-    // Map edit variables to their constraints, errors, and prior
-    // values
-    std::list<edit_info>  edit_info_list_;
+    // Map edit variables to their constraints, errors, and prior value.
+    std::list<edit_info>    edit_info_list_;
 
-    bool        auto_reset_stay_constants_;
-    bool        needs_solving_;
-    bool        explain_failure_;
+    bool    auto_reset_stay_constants_;
+    bool    needs_solving_;
+    bool    explain_failure_;
 
     std::stack<size_t> cedcns_;
 };

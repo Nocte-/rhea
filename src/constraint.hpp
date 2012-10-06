@@ -32,10 +32,6 @@ class constraint
 public:
     constraint() { }
 
-    constraint(std::shared_ptr<abstract_constraint> p)
-        : p_(std::move(p))
-    { }
-
     constraint(abstract_constraint* p)
         : p_(p)
     { }
@@ -132,10 +128,18 @@ public:
     template <typename t>
     const t* try_cast() const { return dynamic_cast<const t*>(p_.get()); }
 
+    bool is_nil() const { return p_.get() == nullptr; }
+
 public:
     constraint& operator= (abstract_constraint* ptr)
         {
             p_.reset(ptr);
+            return *this;
+        }
+
+    constraint& operator= (const constraint& assign)
+        {
+            p_ = assign.p_;
             return *this;
         }
 

@@ -79,12 +79,12 @@ public:
 
     solver& add_lower_bound(const variable& v, double lower)
     {
-        return add_constraint(new linear_inequality(v - lower));
+        return add_constraint(v >= lower);
     }
 
     solver& add_upper_bound(const variable& v, double upper)
     {
-        return add_constraint(new linear_inequality(upper - v));
+        return add_constraint(v <= upper);
     }
 
     solver& add_bounds(const variable& v, double lower, double upper)
@@ -104,7 +104,9 @@ public:
                       const strength& s = strength::weak(),
                       double weight = 1.0)
     {
-        for (auto& v : vs) add_constraint(new stay_constraint(v, s, weight));
+        for (auto& v : vs)
+            add_constraint(new stay_constraint(v, s, weight));
+
         return *this;
     }
 
@@ -112,7 +114,9 @@ public:
                       const strength& s = strength::weak(),
                       double weight = 1.0)
     {
-        for (auto& v : vs) add_constraint(new stay_constraint(v, s, weight));
+        for (auto& v : vs)
+            add_constraint(new stay_constraint(v, s, weight));
+
         return *this;
     }
 

@@ -105,6 +105,11 @@ public:
         : p_(copy.p_)
     { }
 
+    /** Move constructor. */
+    variable(variable&& copy)
+        : p_(std::move(copy.p_))
+    { }
+
     /** Create a new floating pointe variable.
      * \param value  The variable's initial value
      */
@@ -140,6 +145,13 @@ public:
     variable(std::string name, double value = 0.0)
         : p_(std::make_shared<float_variable>(std::move(name), value))
     { }
+
+
+    variable& operator= (const variable& assign)
+        { p_ = assign.p_; return *this; }
+
+    variable& operator= (variable&& move)
+        { p_ = std::move(move.p_); return *this; }
 
 
 

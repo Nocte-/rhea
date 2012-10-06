@@ -27,6 +27,17 @@
 
 namespace rhea {
 
+simplex_solver::simplex_solver()
+    : solver()
+    , objective_(new objective_variable("z"))
+    , auto_reset_stay_constants_(true)
+    , needs_solving_(true)
+    , explain_failure_(false)
+{
+    rows_[objective_]; // Create an empty row for the objective
+    cedcns_.push(0);
+}
+
 template <class container, typename func>
 void remove_from_container_if(container& c, func pred)
 {
@@ -117,13 +128,13 @@ simplex_solver::make_expression(const constraint& c)
 
             if (c.is_stay_constraint())
             {
-                stay_plus_error_vars_.push_back(eplus);
-                stay_minus_error_vars_.push_back(eminus);
+                stay_plus_error_vars_.emplace_back(std::move(eplus));
+                stay_minus_error_vars_.emplace_back(std::move(eminus));
             }
             else if (c.is_edit_constraint())
             {
-                result.plus  = eplus;
-                result.minus = eminus;
+                result.plus  = std::move(eplus);
+                result.minus = std::move(eminus);
                 result.previous_constant = c.expression().constant();
             }
         }
@@ -349,7 +360,8 @@ simplex_solver::remove_constraint_(const constraint& c)
         auto& ec (*c.try_cast<edit_constraint>());
         auto ei (std::find(edit_info_list_.begin(), edit_info_list_.end(), ec.var()));
         assert(ei != edit_info_list_.end());
-        remove_column(ei->minus); // plus is a marker var and gets removed later
+        remove_column(ei->minus);
+        // ei->plus is a marker and will be removed later
         edit_info_list_.erase(ei);
     }
 
@@ -386,6 +398,30 @@ simplex_solver::suggest_value(const variable& v, double x)
     ei->prev_constant = x;
     delta_edit_constant(delta, ei->plus, ei->minus);
 
+    return *this;
+}
+
+void
+simplex_solver::suggest(const std::list<suggestion>& suggestions)
+{
+    for (auto& sugg : suggestions)
+        add_edit_var(sugg.v);
+
+    begin_edit();
+    for (auto& sugg : suggestions)
+        suggest_value(sugg.v, sugg.suggested_value);
+
+    end_edit();
+}
+
+simplex_solver&
+simplex_solver::solve()
+{
+    if (needs_solving_)
+    {
+        optimize(objective_);
+        set_external_variables();
+    }
     return *this;
 }
 
@@ -467,31 +503,31 @@ simplex_solver::remove_edit_vars_to(size_t n)
          it != edit_info_list_.end() && edit_info_list_.size() != n;
          ++it, ++i)
     {
-        if (i >= n)
+        if (i >= n && !it->c.is_nil())
             qv.push(it->v);
         else
             still_editing.insert(it->v);
-
-        while (!qv.empty())
-        {
-            // only remove the variable if it's not in the set of variable
-            // from a previous nested outer edit
-            // e.g., if I do:
-            // Edit x,y
-            // Edit w,h,x,y
-            // EndEdit
-            // The end edit needs to only get rid of the edits on w,h
-            // not the ones on x,y
-            auto& f (qv.front());
-            if (still_editing.count(f) == 0)
-                remove_edit_var(f);
-
-            qv.pop();
-        }
-
-        while (edit_info_list_.size() > n)
-            edit_info_list_.pop_back();
     }
+
+    while (!qv.empty())
+    {
+        // only remove the variable if it's not in the set of variable
+        // from a previous nested outer edit
+        // e.g., if I do:
+        // Edit x,y
+        // Edit w,h,x,y
+        // EndEdit
+        // The end edit needs to only get rid of the edits on w,h
+        // not the ones on x,y
+        auto& f (qv.front());
+        if (still_editing.count(f) == 0)
+            remove_edit_var(f);
+
+        qv.pop();
+    }
+
+    while (edit_info_list_.size() > n)
+        edit_info_list_.pop_back();
 
     return *this;
 }
@@ -612,7 +648,8 @@ simplex_solver::choose_subject(linear_expression& expr)
 }
 
 
-void simplex_solver::optimize(const variable& v)
+void
+simplex_solver::optimize(const variable& v)
 {
     auto& row (row_expression(v));
 
@@ -761,8 +798,6 @@ simplex_solver::dual_optimize()
     }
 }
 
-// Do a Pivot.  Move entryVar into the basis (i.e. make it a basic variable),
-// and move exitVar out of the basis (i.e., make it a parametric variable)
 void
 simplex_solver::pivot(const variable& entry, const variable& exit)
 {

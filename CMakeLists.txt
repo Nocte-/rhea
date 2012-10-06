@@ -24,7 +24,7 @@ if(MSVC)
     set(CMAKE_LIB_LINKER_FLAGS  "${CMAKE_LB_LINKER_FLAGS} /DEBUG /OPT:REF /SUBSYSTEM:WINDOWS")
     
 else() # Most likely gcc or clang
-    set(CMAKE_CXX_FLAGS "-std=c++0x -pedantic -Wall -Wno-strict-aliasing")
+    set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -pedantic -Wall -Wno-strict-aliasing")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG   "-g")
     set(CMAKE_LIB_LINKER_FLAGS "-s")    
