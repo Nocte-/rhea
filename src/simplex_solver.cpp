@@ -29,7 +29,7 @@ namespace rhea {
 
 simplex_solver::simplex_solver()
     : solver()
-    , objective_(new objective_variable("z"))
+    , objective_(new objective_variable)
     , auto_reset_stay_constants_(true)
     , needs_solving_(true)
     , explain_failure_(false)
@@ -78,7 +78,7 @@ simplex_solver::make_expression(const constraint& c)
 
         if (!c.is_required())
         {
-            variable eminus (std::make_shared<slack_variable>("em"));
+            variable eminus (std::make_shared<slack_variable>());
             expr.set(eminus, 1);
             linear_expression&  row (row_expression(objective_));
             double              sw  (c.adjusted_symbolic_weight());
@@ -106,8 +106,8 @@ simplex_solver::make_expression(const constraint& c)
             // error variable, making the resulting constraint
             //       expr = eplus - eminus,
             // in other words:  expr-eplus+eminus=0
-            variable eplus  (std::make_shared<slack_variable>("ep"));
-            variable eminus (std::make_shared<slack_variable>("em"));
+            variable eplus  (std::make_shared<slack_variable>());
+            variable eminus (std::make_shared<slack_variable>());
 
             expr.set(eplus, -1);
             expr.set(eminus, 1);
@@ -164,7 +164,7 @@ simplex_solver::add_constraint_(const constraint& c)
         const edit_constraint& ec (*ptr);
         const auto& v (ec.var());
         if (!v.is_external() || (!is_basic_var(v) && !columns_has_key(v)))
-            throw edit_misuse("edit constraints on variable not in tableau");
+            throw edit_misuse(v);
 
         auto i (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
         if (i != edit_info_list_.end())
@@ -392,7 +392,7 @@ simplex_solver::suggest_value(const variable& v, double x)
 {
     auto ei (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
     if (ei == edit_info_list_.end())
-        throw edit_misuse(v.name());
+        throw edit_misuse(v);
 
     double delta (x - ei->prev_constant);
     ei->prev_constant = x;
@@ -430,8 +430,8 @@ simplex_solver::add_with_artificial_variable(linear_expression& expr)
 {
     // The artificial objective is av, which we know is equal to expr
     // (which contains only parametric variables).
-    variable av (std::make_shared<slack_variable>("av"));
-    variable az (std::make_shared<objective_variable>("az"));
+    variable av (std::make_shared<slack_variable>());
+    variable az (std::make_shared<objective_variable>());
     linear_expression row (expr);
 
     // Objective is treated as a row in the tableau,
@@ -552,7 +552,7 @@ simplex_solver::remove_edit_var(const variable& v)
 {
     auto i (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
     if (i == edit_info_list_.end())
-        throw edit_misuse();
+        throw edit_misuse(v);
 
     remove_constraint(i->c);
 
@@ -932,7 +932,7 @@ simplex_solver&
 simplex_solver::begin_edit()
 {
     if (edit_info_list_.empty())
-        throw edit_misuse("begin_edit called with no edit variables");
+        throw edit_misuse();
 
     infeasible_rows_.clear();
     reset_stay_constants();
@@ -945,7 +945,7 @@ simplex_solver&
 simplex_solver::end_edit()
 {
     if (edit_info_list_.empty())
-        throw edit_misuse("end_edit called with no edit variables");
+        throw edit_misuse();
 
     resolve();
     cedcns_.pop();

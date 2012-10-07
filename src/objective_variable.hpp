@@ -24,14 +24,12 @@
 
 namespace rhea {
 
+/** A special variable that is used internally by the solver as the
+ ** objective to solve for. */
 class objective_variable : public abstract_variable
 {
 public:
     objective_variable() { }
-
-    objective_variable(std::string name)
-        : abstract_variable(name)
-    { }
 
     virtual ~objective_variable() { }
 

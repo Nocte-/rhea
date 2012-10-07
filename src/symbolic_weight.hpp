@@ -50,27 +50,7 @@ public:
 
     double as_double() const
     {
-        double sum(0), factor(1), multiplier(1000000);
-        for (auto i (values_.rbegin()); i != values_.rend(); ++i)
-        {
-            sum += *i * factor;
-            factor *= multiplier;
-        }
-        return sum;
-    }
-
-    bool approx(double n)
-    {
-        auto i (values_.begin());
-        if (!rhea::approx(*i, n))
-            return false;
-
-        for (++i; i != values_.end(); ++i)
-        {
-            if (!rhea::approx(*i, 0))
-                return false;
-        }
-        return true;
+        return values_[2] + values_[1] * 10000. + values_[0] * 10000000.;
     }
 
     size_t levels() const

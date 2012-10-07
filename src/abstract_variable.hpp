@@ -25,53 +25,52 @@
 
 namespace rhea {
 
+/** Base class for variables. */
 class abstract_variable
 {
 public:
     abstract_variable()
     { }
 
-    abstract_variable(std::string name)
-        : name_(name)
-    { }
-
     virtual ~abstract_variable() { }
 
-    std::string name() const { return name_; }
-
-    virtual void set_name(const std::string& new_name)
-        { name_ = new_name; }
-
+    /** Return true if this is a floating point variable.
+     * \sa float_variable */
     virtual bool is_float() const
         { return false; }
 
+    /** Return true if this is a variable in a finite domain. */
     virtual bool is_fd() const
         { return false; }
 
-    // Return true if this a dummy variable (used as a marker variable
-    // for required equality constraints).  Such variables aren't
-    // allowed to enter the basis when pivoting.
+    /** Return true if this a dummy variable.
+     * Dummies are used as a marker variable for required equality
+     * constraints.  Such variables aren't allowed to enter the basis
+     *  when pivoting. \sa dummy_variable */
     virtual bool is_dummy() const
         { return false; }
 
-    // Return true if this a variable known outside the solver.
-    // (We need to give such variables a Value after solving is complete.)
+    /** Return true if this a variable known outside the solver. */
     virtual bool is_external() const
         { return false; }
 
-    // Return true if we can Pivot on this variable.
+    /** Return true if we can pivot on this variable.
+     * \sa simplex_solver::pivot() */
     virtual bool is_pivotable() const
         { throw too_difficult("variable not usable inside simplex_solver"); }
 
-    // Return true if this is a restricted (or slack) variable.  Such
-    // variables are constrained to be non-negative and occur only
-    // internally to the simplex solver.
+    /** Return true if this is a restricted (or slack) variable.
+     * Such variables are constrained to be non-negative and occur only
+     * internally to the simplex solver.
+     * \sa slack_variable */
     virtual bool is_restricted() const
         { throw too_difficult("variable not usable inside simplex_solver"); }
 
+    /** Get the value of this variable. */
     virtual double value() const
         { return 0.0; }
 
+    /** Get the value of this variable as an integer */
     virtual int int_value() const
         { return 0; }
 
@@ -81,10 +80,8 @@ public:
     virtual void change_value(double)
         { assert(false); }
 
+    /** Get the value as a string. */
     virtual std::string to_string() const = 0;
-
-private:
-    std::string name_;
 };
 
 } // namespace rhea

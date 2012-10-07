@@ -55,8 +55,6 @@ int main (int argc, char** argv)
             constraints[j] = new linear_inequality(std::move(expr));
         else
             constraints[j] = new linear_equation(std::move(expr));
-
-        std::cout << "Created constraint " << j << std::endl;
     }
 
     auto timer (clock.now());
@@ -75,7 +73,6 @@ int main (int argc, char** argv)
                 ++exceptions;
             }
         }
-        std::cout << "Done adding " << added << " constraints" << std::endl;
     }
     auto time_add (clock.now() - timer);
 
@@ -116,8 +113,8 @@ int main (int argc, char** argv)
     // ------
 
     double f (0.001);
-    std::cout << "add: " << time_add.count()*f << "ms edit: " << time_edit.count()*f
-              << "ms resolve: " << time_resolve.count()*f << "ms endedit: "
+    std::cout << "add: " << time_add.count()*f << "ms  edit: " << time_edit.count()*f
+              << "ms  resolve: " << time_resolve.count()*f << "ms  endedit: "
               << time_endedit.count()*f << "ms" << std::endl;
 
     return 0;

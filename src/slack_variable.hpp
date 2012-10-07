@@ -37,7 +37,6 @@ class slack_variable : public abstract_variable
 {
 public:
     slack_variable() : abstract_variable() { }
-    slack_variable(std::string name) : abstract_variable(std::move(name)) { }
     ~slack_variable() { }
 
     virtual bool is_external() const    { return false; }

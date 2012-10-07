@@ -34,7 +34,7 @@
 
 namespace rhea {
 
-/** Solver that implements the Cassowary simplex algorithm. */
+/** Solver that implements the Cassowary incremental simplex algorithm. */
 class simplex_solver : public solver, public tableau
 {
 public:
@@ -59,7 +59,9 @@ public:
 
     virtual ~simplex_solver() { }
 
-
+    /** Add an edit constraint for a given variable.
+     * The application should call this for every variable it is planning
+     * to suggest a new value for, before calling begin_edit(). */
     simplex_solver& add_edit_var(const variable& v,
                                  const strength& s = strength::strong(),
                                  double weight = 1.0)
@@ -68,7 +70,10 @@ public:
         return *this;
     }
 
-    /** Begin suggesting new values for edit variables. */
+    /** Begin suggesting new values for edit variables.
+     * The application should call add_edit_var() first for every variable
+     * it is planning to call suggest_value() for. In most cases, it is
+     * more convenient to use suggest() instead. */
     simplex_solver& begin_edit();
 
     /** We're done with the edit variables, resolve the constraints. */
@@ -92,12 +97,12 @@ public:
 
     /** Suggest new values for a list of variables.
      * \code
-     solver.suggest({{ width, 200 }, { height, 150 }});
+     solver.suggest({ { width, 200 }, { height, 150 } });
      * \endcode */
     void suggest(const std::list<suggestion>& suggestions);
 
     /** If autosolving has been turned off, client code needs to explicitly
-     ** call solve() before accessing variables values. */
+     ** call this function before accessing variables values. */
     simplex_solver& solve();
 
     /** Check if the solver knows of a given variable.
@@ -106,14 +111,7 @@ public:
     bool contains_variable(const variable& v)
         { return columns_has_key(v) || is_basic_var(v); }
 
-/*
-    const constraint_to_var_map& constraint_map() const
-        { return marker_vars_; }
-
-    const var_to_constraint_map& marker_map() const
-        { return constraints_marked_; }
-*/
-
+    /** Check if this constraint was satisfied. */
     bool is_constraint_satisfied(const constraint& c) const;
 
     /** Reset all external variables to their current values.

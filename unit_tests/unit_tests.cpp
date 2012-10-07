@@ -8,6 +8,7 @@
 
 #include "../src/simplex_solver.hpp"
 #include "../src/linear_equation.hpp"
+#include "../src/iostream.hpp"
 
 using namespace rhea;
 
@@ -15,7 +16,7 @@ struct point
 {
     variable x, y;
 
-    point(double a = 0, double b = 0) : x("x",a), y("y",b) { }
+    point(double a = 0, double b = 0) : x(a), y(b) { }
 
     bool operator ==(const std::pair<int,int>& p) const
         { return x.value() == p.first && y.value() == p.second; }
@@ -27,12 +28,6 @@ namespace std
     std::ostream& operator<< (std::ostream& s, const std::pair<a,b>& p)
     {
         return s << p.first << "," << p.second;
-    }
-
-    inline
-    std::ostream& operator<< (std::ostream& s, const variable& p)
-    {
-        return s << p.description();
     }
 
     inline
@@ -191,8 +186,8 @@ BOOST_AUTO_TEST_CASE (linear_inequality2_test)
 
 BOOST_AUTO_TEST_CASE (simple1_test)
 {
-    variable x ("x", 167);
-    variable y ("y", 2);
+    variable x (167);
+    variable y (2);
 
     simplex_solver solver;
 
@@ -207,7 +202,7 @@ BOOST_AUTO_TEST_CASE (simple1_test)
 
 BOOST_AUTO_TEST_CASE (simple2_test)
 {
-    variable x ("x", 167);
+    variable x (167);
 
     simplex_solver solver;
 
@@ -288,7 +283,7 @@ BOOST_AUTO_TEST_CASE (editleak2_test)
 
 BOOST_AUTO_TEST_CASE (delete1_test)
 {
-    variable x ("x");
+    variable x (0);
     simplex_solver solver;
 
     constraint init (x == 100, strength::weak());
@@ -319,7 +314,7 @@ BOOST_AUTO_TEST_CASE (delete1_test)
 
 BOOST_AUTO_TEST_CASE (delete2_test)
 {
-    variable x ("x"), y ("y");
+    variable x (0), y (0);
     simplex_solver solver;
 
     solver.add_constraint(x == 100, strength::weak())
@@ -373,7 +368,7 @@ BOOST_AUTO_TEST_CASE (delete3_test)
 
 BOOST_AUTO_TEST_CASE (casso1_test)
 {
-    variable x ("x"), y ("y");
+    variable x (0), y (0);
     simplex_solver solver;
 
     solver.add_constraint(x <= y)
@@ -400,7 +395,7 @@ BOOST_AUTO_TEST_CASE (casso2_test)
 
 BOOST_AUTO_TEST_CASE (inconsistent1_test)
 {
-    variable x ("x");
+    variable x (0);
     simplex_solver solver;
 
     solver.add_constraint(x == 10);
@@ -412,7 +407,7 @@ BOOST_AUTO_TEST_CASE (inconsistent1_test)
 
 BOOST_AUTO_TEST_CASE (inconsistent2_test)
 {
-    variable x ("x");
+    variable x (0);
     simplex_solver solver;
 
     BOOST_CHECK_THROW(solver.add_constraint(x >= 10)
@@ -423,7 +418,7 @@ BOOST_AUTO_TEST_CASE (inconsistent2_test)
 
 BOOST_AUTO_TEST_CASE (inconsistent3_test)
 {
-    variable v ("v"), w ("w"), x ("x"), y ("y");
+    variable v (0), w (0), x (0), y (0);
     simplex_solver solver;
 
     solver.add_constraint(v >= 10)
@@ -527,7 +522,7 @@ BOOST_AUTO_TEST_CASE (bounds_test)
 
 BOOST_AUTO_TEST_CASE (bug0_test)
 {
-    variable x ("x",7), y ("y",8), z("z",9);
+    variable x (7), y (8), z(9);
     simplex_solver solver;
 
     solver.add_stay(x).add_stay(y).add_stay(z);

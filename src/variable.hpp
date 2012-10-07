@@ -29,6 +29,7 @@
 #include "approx.hpp"
 #include "abstract_variable.hpp"
 #include "float_variable.hpp"
+#include "errors.hpp"
 
 namespace rhea {
 
@@ -138,13 +139,6 @@ public:
         : p_(std::make_shared<float_variable>(value))
     { }
 
-    /** Create a new, named floating pointe variable.
-     * \param name   The variable's name
-     * \param value  The variable's initial value
-     */
-    variable(std::string name, double value = 0.0)
-        : p_(std::make_shared<float_variable>(std::move(name), value))
-    { }
 
 
     variable& operator= (const variable& assign)
@@ -196,11 +190,6 @@ public:
     void change_value(double x)
         { p_->change_value(x); }
 
-    /** Get the name of this variable.
-     *  A nil variable will return "NIL". */
-    std::string name() const
-        { return is_nil() ? "NIL" : p_->name(); }
-
     /** Check if this is a nil variable. */
     bool is_nil() const
         { return p_ == nullptr; }
@@ -213,10 +202,6 @@ public:
     /** Get a string representation of the value. */
     std::string to_string() const
         { return is_nil() ? "NIL" : p_->to_string(); }
-
-    /** Get a string showing this variable's name and value. */
-    std::string description() const
-        { return name() + ":" + to_string(); }
 
     /** Check if two variables refer to the same abstract_variable.
      *  This will not return 'true' for two distinct variables that happen
@@ -233,7 +218,7 @@ public:
         { return p_ == x.p_; }
 
 private:
-    /** Refernce counted pointer to the "real" variable. */
+    /** Reference counted pointer to the actual variable. */
     std::shared_ptr<abstract_variable> p_;
 };
 

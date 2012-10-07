@@ -23,32 +23,24 @@
 
 namespace rhea {
 
+/** A plain-old-datatype variable. */
 template <typename t>
 class pod_variable : public abstract_variable
 {
     typedef abstract_variable super;
 
 public:
-    pod_variable()
-        : abstract_variable()
-    { }
-
     pod_variable(t value)
         : abstract_variable()
         , value_(value)
     { }
 
-    pod_variable(std::string name, t value)
-        : abstract_variable(name)
-        , value_(value)
-    { }
-
     virtual ~pod_variable() { }
 
-    virtual bool is_dummy() const { return false; }
-    virtual bool is_external() const { return true; }
-    virtual bool is_pivotable() const { return false; }
-    virtual bool is_restricted() const { return false; }
+    virtual bool is_dummy() const       { return false; }
+    virtual bool is_external() const    { return true; }
+    virtual bool is_pivotable() const   { return false; }
+    virtual bool is_restricted() const  { return false; }
 
     virtual void set_value(t new_value)
         { value_ = new_value; }
@@ -58,27 +50,26 @@ public:
 
     virtual std::string to_string() const { return std::to_string(value_); }
 
-private:
-    // Shouldn't be passed by value
-    pod_variable(const pod_variable<t>& copy) {}
-
 protected:
     t value_;
 };
 
+/** A floating-point variable. */
 class float_variable : public pod_variable<double>
 {
 public:
-    float_variable() : pod_variable(0.0)
+    float_variable()
+        : pod_variable(0.0)
     { }
 
-    float_variable(double value) : pod_variable(value)
+    float_variable(double value)
+        : pod_variable(value)
     { }
 
-    float_variable(std::string name, double value) : pod_variable(name, value)
-    { }
+    virtual ~float_variable() { }
 
-    virtual bool is_float() const { return true; }
+    virtual bool is_float() const
+        { return true; }
 
     virtual double value() const
         { return value_; }

@@ -24,6 +24,9 @@
 
 namespace rhea {
 
+class variable;
+
+/** Base class for all Rhea exceptions. */
 class error : public std::exception
 {
 public:
@@ -35,6 +38,7 @@ public:
     }
 };
 
+/** Signals an internal inconsistency in the solver. */
 class internal_error : public error
 {
     std::string msg;
@@ -47,30 +51,31 @@ public:
         { return msg.c_str(); }
 };
 
-class bad_resolve : public error
-{
-public:
-    virtual ~bad_resolve() throw() { }
-
-    virtual const char* what() const throw()
-        { return "number of resolve values did not match number of edit vars"; }
-};
-
+/** Thrown whenever the usual ordering of setting up edit constraints is
+ ** not observed.
+ * The usual order is:
+ * - simplex_solver::add_edit_var()
+ * - simplex_solver::begin_edit()
+ * - simplex_solver::suggest_value()
+ * - simplex_solver::end_edit()
+ *
+ * This is done automatically by simplex_solver::suggest(). */
 class edit_misuse : public error
 {
-    std::string varname_;
+    const variable* var_;
 
 public:
-    edit_misuse() { }
-    edit_misuse(std::string name) : varname_(name) { }
+    edit_misuse() : var_(nullptr) { }
+    edit_misuse(const rhea::variable& v) : var_(&v) { }
     virtual ~edit_misuse() throw() { }
 
     virtual const char* what() const throw()
         { return "edit protocol usage violation"; }
 
-    const std::string& variable_name() const { return varname_; }
+    const variable& var() const { return *var_; }
 };
 
+/** The constraints are too difficult to solve. */
 class too_difficult : public error
 {
     std::string msg;
@@ -84,6 +89,8 @@ public:
         { return msg.empty() ? "the constraints are too difficult to solve" : msg.c_str(); }
 };
 
+/** Read-only constraints are not allowed by this particular solver
+ ** implementation. */
 class readonly_not_allowed : public too_difficult
 {
 public:
@@ -93,6 +100,7 @@ public:
         { return "the read-only annotation is not permitted by the solver"; }
 };
 
+/** Cyclic dependencies between constraints are not allowed. */
 class cycle_not_allowed : public too_difficult
 {
 public:
@@ -102,6 +110,10 @@ public:
         { return "a cyclic constraint graph is not permitted by the solver"; }
 };
 
+/** This solver cannot handle strict inequalities.
+ * Strict inequalities are \f$<\f$ and \f$>\f$.  They can be solved in the
+ * finite domain, but the simplex solver can only deal with \f$\leq\f$ and
+ * \f$\geq\f$. */
 class strict_inequality_not_allowed : public too_difficult
 {
 public:
@@ -111,6 +123,7 @@ public:
         { return "the strict inequality is not permitted by the solver"; }
 };
 
+/** One of the required constraints cannot be satisfied. */
 class required_failure : public error
 {
 public:
@@ -120,6 +133,8 @@ public:
         { return "a required constraint cannot be satisfied"; }
 };
 
+/** Not enough stay constraints were specified to give specific values
+ ** to every variable. */
 class not_enough_stays : public error
 {
 public:
@@ -129,6 +144,9 @@ public:
         { return "there are not enough stays to give specific values to every variable"; }
 };
 
+/** The resulting expression would be nonlinear.
+ * This usually happens when multiplying two expressions that have the
+ * same variable in them, resulting in a quadratic expression. */
 class nonlinear_expression : public error
 {
 public:
@@ -138,6 +156,8 @@ public:
         { return "the resulting expression would be nonlinear"; }
 };
 
+/** The application tried to remove a constraint that doesn't exist in
+ ** the solver. */
 class constraint_not_found : public error
 {
 public:
@@ -147,6 +167,7 @@ public:
         { return "tried to remove a constraint that was never added"; }
 };
 
+/** The application tried to remove a row that doesn't exist. */
 class row_not_found : public error
 {
 public:
