@@ -21,7 +21,7 @@ if(MSVC)
 	set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} /MP /EHsc /wd4244 /wd4996 ")
     set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} /MTd")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /DNDEBUG /MT /MP /GS- /Ox /Ob2 /Oi /Oy /arch:SSE /fp:fast /Zi")
-    set(CMAKE_LIB_LINKER_FLAGS  "${CMAKE_LB_LINKER_FLAGS} /DEBUG /OPT:REF /SUBSYSTEM:WINDOWS")
+    set(CMAKE_LIB_LINKER_FLAGS  "${CMAKE_LIB_LINKER_FLAGS} /OPT:REF /SUBSYSTEM:WINDOWS")
     
 else() # Most likely gcc or clang
     set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -pedantic -Wall -Wno-strict-aliasing")
@@ -56,7 +56,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An implementation of the Cassowary solver
 set(CPACK_PACKAGE_VENDOR "Nocte")
 set(CPACK_PACKAGE_CONTACT "Nocte <nocte@hippie.nu>")
 set(CPACK_SOURCE_IGNORE_FILES "CMakefiles;Makefile;CMakeCache.txt;_CPack_Packages;/.git/;.gitignore;")
-    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}_${VERSION}")
+set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}_${VERSION}")
     
 if(UNIX)
     set(CPACK_GENERATOR "TGZ;DEB;RPM")
@@ -66,6 +66,9 @@ if(UNIX)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.0), libstdc++6 (>= 4.0)")
     add_custom_target(deb dpkg-buildpackage)
     add_dependencies(deb dist)
+
+elseif(WIN32)
+    set(CPACK_GENERATOR "ZIP")
 endif()
 
 include(CPack)

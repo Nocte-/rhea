@@ -8,8 +8,6 @@ file(GLOB HEADER_FILES "*.hpp")
 
 add_library(${LIBNAME} ${SOURCE_FILES} ${HEADER_FILES})
 
-if(UNIX)
-    install(TARGETS rhea DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/")
-    install(FILES ${HEADER_FILES} DESTINATION "${CMAKE_INSTALL_PREFIX}/include/rhea/")
-endif()
+install(TARGETS rhea DESTINATION lib)
+install(FILES ${HEADER_FILES} DESTINATION include/rhea)
 
