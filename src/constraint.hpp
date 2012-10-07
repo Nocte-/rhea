@@ -27,6 +27,17 @@
 
 namespace rhea {
 
+/** An equation or inequality involving one or more variables.
+ * Constraints can be defined as "normal" C++ expressions:
+ * \code
+
+ variable x (1), y (2);
+
+ constraint a (x + 4 <= y * 2);
+ constraint b (x * 2 == y * 3);
+
+ * \endcode
+ */
 class constraint
 {
 public:

@@ -177,21 +177,6 @@ public:
     bool is_constant() const
         { return terms_.empty(); }
 
-    /** Make a human-readable representation of this expression. */
-    std::string to_string() const
-    {
-        std::string result;
-        for (auto i (terms_.begin()); i != terms_.end(); ++i)
-        {
-            result += i->first.name();
-            result += " * ";
-            result += std::to_string(i->second);
-            result += " + ";
-        }
-        result += std::to_string(constant_);
-        return result;
-    }
-
 private:
     /** The expression's constant term. */
     double      constant_;

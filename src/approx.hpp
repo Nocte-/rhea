@@ -23,6 +23,7 @@
 
 namespace rhea {
 
+/** Return true iff a and b are approximately the same. */
 inline bool approx(double a, double b)
 {
     const double epsilon = 1.0e-8;
@@ -33,6 +34,7 @@ inline bool approx(double a, double b)
     }
 }
 
+/** Return true iff a is almost zero. */
 inline bool near_zero(double a)
 {
     return approx(a, 0.0);

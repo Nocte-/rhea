@@ -27,6 +27,7 @@
 
 namespace rhea {
 
+/** Base class for solvers. \sa simplex_solver */
 class solver
 {
 public:

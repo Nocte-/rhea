@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------
 /// \file   iostream.hpp
-/// \brief  iostream support for variables
+/// \brief  Standard Library iostream support for variables
 //
 // This file is part of Rhea.  Rhea is free software: you can redistribute
 // it and/or modify it under the terms of the GNU Lesser General Public
