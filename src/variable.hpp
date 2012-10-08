@@ -40,7 +40,7 @@ namespace rhea {
  *
  * \code
 
-variable x (1), y;
+variable x(1), y(0);
 
 y = x;
 // y is now 1
@@ -59,7 +59,7 @@ x.set_value(2);
  *
  * \code
 
-variable x (2), y (x), z (2);
+variable x(2), y(x), z(2);
 
 x.is(y); // True: y was constructed from x
 x.is(z); // False: x and z both have the value 2, but they are different variables
@@ -207,7 +207,7 @@ public:
      *  This will not return 'true' for two distinct variables that happen
      *  to have the same value.  Example:
      * \code
-     variable x (3), y (3), z;
+     variable x(3), y(3), z;
      x.is(y); // False!
      z = x;  // z now refers to x
      z.set_value(5);

@@ -21,10 +21,20 @@
 
 #include <cstddef>
 #include <array>
-#include "approx.hpp"
 
 namespace rhea {
 
+/** A 3-tuple weight for constraint strengths.
+ * In the original implementation this was an n-tuple, but it has been fixed
+ * at 3 in Rhea.  The three elements correspond to the strong, medium and
+ * weak constraints.  Every constraint can also have a weight (1 by
+ * default).  Symbolic weights are then ordered lexicographically: strong
+ * weights always outclass medium weights, no matter what the values.
+ *
+ * The end effect is that strong constraints are satisfied before the
+ * medium ones, and the weak constraints are satisfied last.  Within each
+ * of the three classes of constraints, you can make further adjustments
+ * by changing the weight. */
 class symbolic_weight
 {
 public:

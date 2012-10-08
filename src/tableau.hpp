@@ -27,6 +27,35 @@
 
 namespace rhea {
 
+/** A tableau, or augmented matrix, represents the coefficients and
+ ** solution of a set of equations.
+ * For example, given the following set of equations:
+ * \f[\begin{align}
+ * a + 2b + 3c &= 0 \\
+ * 3a + 4b + 7c &= 2 \\
+ * 6a + 5b + 9c &= 11
+ * \end{align}\f]
+ * The tableau would be:
+ * \f[\left[\begin{array}{ccc|c}
+ * 1 & 2 & 3 & 0 \\
+ * 3 & 4 & 7 & 2 \\
+ * 6 & 5 & 9 & 11
+ * \end{array}\right]\f]
+ * So every column corresponds to a variable, and every row to a
+ * linear equation.  If the first row is the objective, and the first
+ * column the objective variable, we get a tableau of the form:
+ * \f[\left[\begin{array}{cc|c}
+ * 1 & -c^T & 0 \\
+ * 0 & A & b
+ * \end{array}\right]\f]
+ * If \f$A\f$ contains an identity matrix, the tableau is in canonical
+ * form.  The variables corresponding to the identity matrix are the
+ * basic variables, the others are the free variables.  (Since it is an
+ * identity matrix, every row is also associated with exactly one basic
+ * variable.)
+ * If the free variables are assumed to be zero, the solution can be read
+ * from the first row.
+ */
 class tableau
 {
 public:
@@ -34,14 +63,15 @@ public:
     typedef std::unordered_map<variable, linear_expression> rows_map;
 
 public:
-    // Variable v has been removed from an Expression.  If the
-    // Expression is in a tableau the corresponding basic variable is
-    // subject (or if subject is nil then it's in the objective function).
-    // Update the column cross-indices.
+    /** This function should be invoked when v has been removed from an
+     ** expression, so the column indices can be updated. */
     void note_removed_variable(const variable& v, const variable& subj);
 
+    /** This function should be invoked when v has been added to an
+     ** expression, so the column indices can be updated. */
     void note_added_variable(const variable& v, const variable& subj);
 
+    /** Check the internal consistency this data structure. */
     bool is_valid() const;
 
 public:
@@ -49,10 +79,16 @@ public:
 
     virtual ~tableau() { }
 
+    /** Add a new row to the tableau. */
     void add_row(const variable& v, const linear_expression& e);
 
+    /** Remove a variable from the tableau.
+     * \return True iff the variable was known */
     bool remove_column(const variable& v);
 
+    /** Remove a row from the tableau.
+     * \param v  The basic variable that is used to index the row
+     * \return The expression represented by the removed row */
     linear_expression remove_row(const variable& v);
 
     /** Replace all occurrences of \a old_var with \a expr, and update
@@ -71,6 +107,7 @@ public:
     bool columns_has_key(const variable& subj) const
         { return columns_.count(subj) > 0; }
 
+    /** Get the linear expression that the given row represents. */
     const linear_expression& row_expression(const variable& v) const
     {
         auto i (rows_.find(v));
@@ -80,6 +117,7 @@ public:
         return i->second;
     }
 
+    /** Get the linear expression that the given row represents. */
     linear_expression& row_expression(const variable& v)
     {
         auto i (rows_.find(v));
@@ -89,32 +127,31 @@ public:
         return i->second;
     }
 
+    /** Check if v is one of the basic variables. */
     bool is_basic_var(const variable& v) const
         { return rows_.count(v) > 0; }
 
+    /** Check if f is one of the parametric (aka. free) variables. */
     bool is_parametric_var(const variable& v) const
         { return rows_.count(v) == 0; }
 
 protected:
-    // _columns is a mapping from variables which occur in expressions to the
-    // set of basic variables whose expressions contain them
-    // i.e., it's a mapping from variables in expressions (a column) to the
-    // set of rows that contain them
+    /** A mapping from variables which occur in expressions to the
+     ** rows whose expressions contain them. */
     columns_map     columns_;
 
-    // _rows maps basic variables to the expressions for that row in the tableau
+    /** A mapping from the basic variables to the expressions for that
+     ** row in the tableau. */
     rows_map        rows_;
 
-    // the collection of basic variables that have infeasible rows
-    // (used when reoptimizing)
+    /** The collection of basic variables that have infeasible rows.
+     *  This is used internally when optimizing. */
     variable_set    infeasible_rows_;
 
-    // the set of rows where the basic variable is external
-    // this was added to the C++ version to reduce time in SetExternalVariables()
+    /** A map to quickly find rows with external basic variables. */
     variable_set    external_rows_;
 
-    // the set of external variables which are parametric
-    // this was added to the C++ version to reduce time in SetExternalVariables()
+    /** A map to quickly find rows with external parametric variables. */
     variable_set    external_parametric_vars_;
 
 };
