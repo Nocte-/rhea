@@ -6,9 +6,9 @@
 #include <random>
 #include <boost/range/algorithm.hpp>
 
-#include "../src/simplex_solver.hpp"
-#include "../src/linear_equation.hpp"
-#include "../src/iostream.hpp"
+#include "../rhea/simplex_solver.hpp"
+#include "../rhea/linear_equation.hpp"
+#include "../rhea/iostream.hpp"
 
 using namespace rhea;
 

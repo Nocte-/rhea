@@ -24,13 +24,13 @@ if(MSVC)
     set(CMAKE_LIB_LINKER_FLAGS  "${CMAKE_LIB_LINKER_FLAGS} /OPT:REF /SUBSYSTEM:WINDOWS")
     
 else() # Most likely gcc or clang
-    set(CMAKE_CXX_FLAGS "-std=c++0x -fPIC -pedantic -Wall -Wno-strict-aliasing")
+    set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -pedantic -Wall -Wno-strict-aliasing")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG   "-g")
     set(CMAKE_LIB_LINKER_FLAGS "-s")    
 endif()
 
-add_subdirectory(src)
+add_subdirectory(rhea)
 
 if(BUILD_UNITTESTS)
   add_subdirectory(unit_tests)

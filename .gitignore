@@ -30,5 +30,5 @@ CMakeCache.txt
 tags
 
 # Generated headers
-src/version.hpp
+rhea/version.hpp
 

@@ -4,8 +4,8 @@
 #include <iostream>
 #include <vector>
 
-#include "../src/simplex_solver.hpp"
-#include "../src/linear_equation.hpp"
+#include "../rhea/simplex_solver.hpp"
+#include "../rhea/linear_equation.hpp"
 
 inline
 double uniform_rand()
