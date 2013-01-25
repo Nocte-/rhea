@@ -1,0 +1,7 @@
+language: cpp
+compiler:
+  - gcc
+  - clang
+
+script: mkdir build && cd build && cmake -DBUILD_UNITTESTS .. && make && cd unit_tests && ./unit_tests
+
