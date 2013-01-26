@@ -24,7 +24,15 @@ if(MSVC)
     set(CMAKE_LIB_LINKER_FLAGS  "${CMAKE_LIB_LINKER_FLAGS} /OPT:REF /SUBSYSTEM:WINDOWS")
     
 else() # Most likely gcc or clang
-    set(CMAKE_CXX_FLAGS "-std=c++11 -fPIC -pedantic -Wall -Wno-strict-aliasing")
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        set(CMAKE_CXX_FLAGS "-std=c++11")
+    elseif ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS "4.7")
+        set(CMAKE_CXX_FLAGS "-std=c++0x")
+    else()
+        set(CMAKE_CXX_FLAGS "-std=c++11")
+    endif()
+
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -pedantic -Wall -Wno-strict-aliasing")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG   "-g")
     set(CMAKE_LIB_LINKER_FLAGS "-s")    
