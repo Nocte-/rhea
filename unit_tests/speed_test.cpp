@@ -20,19 +20,19 @@ double grained_rand()
 
 int main (int argc, char** argv)
 {
-    using namespace rhea;
+    using std::chrono::system_clock;
 
     size_t cns (500), resolves (500), solvers (10);
 
     const double ineq_prob (0.12);
     const unsigned int max_vars (3), nr_vars (cns);
 
-    std::chrono::high_resolution_clock clock;
+    system_clock clock;
 
-    std::vector<simplex_solver> slv (solvers);
+    std::vector<rhea::simplex_solver> slv (solvers);
     for (auto& s : slv) s.set_autosolve(false);
 
-    std::vector<variable>       vars;
+    std::vector<rhea::variable>       vars;
     for (size_t i (0); i < nr_vars; ++i)
     {
         vars.emplace_back((int)i);
@@ -40,21 +40,21 @@ int main (int argc, char** argv)
     }
 
     size_t cns_made (cns * 2);
-    std::vector<constraint> constraints (cns_made);
+    std::vector<rhea::constraint> constraints (cns_made);
 
     for (size_t j (0); j < cns_made; ++j)
     {
         size_t nvs ((uniform_rand() * max_vars) + 1);
-        linear_expression expr (grained_rand() * 20.0 - 10.0);
+        rhea::linear_expression expr (grained_rand() * 20.0 - 10.0);
         for (size_t k (0); k < nvs; ++k)
         {
             double coeff (grained_rand() * 10.0 - 5.0);
-            expr += linear_expression(vars[uniform_rand()*nr_vars]) * coeff;
+            expr += rhea::linear_expression(vars[uniform_rand()*nr_vars]) * coeff;
         }
         if (uniform_rand() < ineq_prob)
-            constraints[j] = new linear_inequality(std::move(expr));
+            constraints[j] = new rhea::linear_inequality(std::move(expr));
         else
-            constraints[j] = new linear_equation(std::move(expr));
+            constraints[j] = new rhea::linear_equation(std::move(expr));
     }
 
     auto timer (clock.now());
@@ -74,12 +74,13 @@ int main (int argc, char** argv)
             }
         }
     }
-    auto time_add (clock.now() - timer);
+    auto end (clock.now());
+    auto time_add (end - timer);
 
     // ------
 
-    variable e1 (vars[uniform_rand() * nr_vars]);
-    variable e2 (vars[uniform_rand() * nr_vars]);
+    rhea::variable e1 (vars[uniform_rand() * nr_vars]);
+    rhea::variable e2 (vars[uniform_rand() * nr_vars]);
 
     timer = clock.now();
     for (auto& s : slv)
