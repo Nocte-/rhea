@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012, 2013, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -76,7 +76,7 @@ public:
 
     /** An explicit nil variable.
      *  This function only serves to make code more readable. */
-    static variable nil() { return variable(); }
+    static variable nil_var() { return variable(); }
 
     /** Wrap an abstract variable on the heap.
      *  This object will now take care of the variable's lifetime, so

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012, 2013, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #include "simplex_solver.hpp"
 
@@ -169,8 +169,8 @@ simplex_solver::add_constraint_(const constraint& c)
         auto i (std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
         if (i != edit_info_list_.end())
         {
-            edit_info_list_.emplace_back(v, constraint(), variable::nil(),
-                                         variable::nil(), 0);
+            edit_info_list_.emplace_back(v, constraint(), variable::nil_var(),
+                                         variable::nil_var(), 0);
             return *this;
         }
     }
@@ -254,7 +254,7 @@ simplex_solver::remove_constraint_(const constraint& c)
         auto& col (columns_[marker]);
         bool exit_var_set (false);
         double min_ratio (0.0);
-        variable exit_var (variable::nil());
+        variable exit_var (variable::nil_var());
 
         for (auto& v : col)
         {
@@ -562,7 +562,7 @@ simplex_solver::remove_edit_var(const variable& v)
 variable
 simplex_solver::choose_subject(linear_expression& expr)
 {
-    variable subj (variable::nil());
+    variable subj (variable::nil_var());
     bool found_unrestricted (false), found_new_restricted (false);
 
     for (auto& term : expr.terms())
@@ -623,7 +623,7 @@ simplex_solver::choose_subject(linear_expression& expr)
     {
         const variable& v (term.first);
         if (!v.is_dummy())
-            return variable::nil(); // Nope, no luck.
+            return variable::nil_var(); // Nope, no luck.
 
         if (!columns_has_key(v))
         {
@@ -653,7 +653,7 @@ simplex_solver::optimize(const variable& v)
 {
     auto& row (row_expression(v));
 
-    variable entry (variable::nil()), exit (variable::nil());
+    variable entry (variable::nil_var()), exit (variable::nil_var());
 
     while (true)
     {
@@ -762,7 +762,7 @@ simplex_solver::dual_optimize()
         auto ii (infeasible_rows_.begin());
         variable exit_var (*ii);
         infeasible_rows_.erase(ii);
-        variable entry_var (variable::nil());
+        variable entry_var (variable::nil_var());
 
         // exit_var might have become basic after some other pivoting
         // so allow for the case of its not being there any longer.

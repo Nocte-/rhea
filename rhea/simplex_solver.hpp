@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012, 2013, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -189,8 +189,8 @@ protected:
         double   previous_constant;
 
         expression_result()
-            : minus(variable::nil())
-            , plus(variable::nil())
+            : minus(variable::nil_var())
+            , plus(variable::nil_var())
             , previous_constant(0.0)
         { }
     };

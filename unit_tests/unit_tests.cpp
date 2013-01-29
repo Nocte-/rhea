@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE (variable_test)
     variable y (x);
     variable z (3.0);
 
-    BOOST_CHECK(variable::nil().is_nil());
+    BOOST_CHECK(variable::nil_var().is_nil());
     BOOST_CHECK(!x.is_nil());
     BOOST_CHECK(!y.is_nil());
     BOOST_CHECK(x.is_float());

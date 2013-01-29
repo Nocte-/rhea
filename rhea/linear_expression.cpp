@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012, 2013, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #include "linear_expression.hpp"
 
@@ -162,7 +162,7 @@ variable linear_expression::find_pivotable_variable() const
     auto found (std::find_if(terms_.begin(), terms_.end(),
                 [&](const value_type& x){ return x.first.is_pivotable(); }));
 
-    return found == terms_.end() ? variable::nil() : found->first;
+    return found == terms_.end() ? variable::nil_var() : found->first;
 }
 
 double linear_expression::evaluate() const
