@@ -29,7 +29,6 @@
 #include "approx.hpp"
 #include "abstract_variable.hpp"
 #include "float_variable.hpp"
-#include "errors.hpp"
 
 namespace rhea {
 

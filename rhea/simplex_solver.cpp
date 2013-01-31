@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <queue>
 
-#include "errors.hpp"
+#include "errors_expl.hpp"
 #include "slack_variable.hpp"
 #include "dummy_variable.hpp"
 
@@ -190,10 +190,11 @@ simplex_solver::add_constraint_(const constraint& c)
 
     if (!added_ok_directly)
     {
-        if (!add_with_artificial_variable(r.expr))
+        auto result (add_with_artificial_variable(r.expr));
+        if (!result.first)
         {
             remove_constraint_(c);
-            throw required_failure();
+            throw required_failure_with_explanation(std::move(result.second));
         }
     }
 
@@ -425,7 +426,7 @@ simplex_solver::solve()
     return *this;
 }
 
-bool
+std::pair<bool, constraint_list>
 simplex_solver::add_with_artificial_variable(linear_expression& expr)
 {
     // The artificial objective is av, which we know is equal to expr
@@ -460,8 +461,11 @@ simplex_solver::add_with_artificial_variable(linear_expression& expr)
     // If not, the original constraint was not satisfiable
     if (!near_zero(tableau_row.constant()))
     {
-        ///\todo build explanation
-        return false;
+        constraint_list result;
+        if (explain_failure_)
+            result = build_explanation(az, tableau_row);
+
+        return std::make_pair(false, result);
     }
 
     if (is_basic_var(av))
@@ -475,13 +479,16 @@ simplex_solver::add_with_artificial_variable(linear_expression& expr)
         {
             assert(near_zero(e.constant()));
             remove_row(av);
-            return true;
+            return std::make_pair(true, constraint_list());
         }
         variable entry (e.find_pivotable_variable());
         if (entry.is_nil())
         {
-            ///\todo build explanation
-            return false;
+            constraint_list result;
+            if (explain_failure_)
+                result = build_explanation(av, e);
+
+            return std::make_pair(false, result);
         }
         pivot(entry, av);
     }
@@ -490,7 +497,7 @@ simplex_solver::add_with_artificial_variable(linear_expression& expr)
     remove_column(av);
     remove_row(az);
 
-    return true;
+    return std::make_pair(true, constraint_list());
 }
 
 simplex_solver&
@@ -952,6 +959,26 @@ simplex_solver::end_edit()
     remove_edit_vars_to(cedcns_.top());
 
     return *this;
+}
+
+constraint_list
+simplex_solver::build_explanation(const variable& v,
+                                  const linear_expression& expr) const
+{
+    constraint_list result;
+
+    auto found (constraints_marked_.find(v));
+    if (found != constraints_marked_.end())
+        result.push_back(found->second);
+
+    for (auto& term : expr.terms())
+    {
+        auto found (constraints_marked_.find(term.first));
+        if (found != constraints_marked_.end())
+            result.push_back(found->second);
+    }
+
+    return result;
 }
 
 } // namespace rhea

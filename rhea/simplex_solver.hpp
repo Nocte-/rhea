@@ -153,6 +153,12 @@ public:
     bool is_auto_reset_stay_constants() const
         { return auto_reset_stay_constants_; }
 
+    void set_explaining(bool flag)
+        { explain_failure_ = flag; }
+
+    bool is_explaining() const
+        { return explain_failure_; }
+
 protected:
     solver& add_constraint_(const constraint& c);
     solver& remove_constraint_(const constraint& c);
@@ -208,8 +214,10 @@ protected:
      * expression \f$a_0 = expr\f$ to the inequality tableau.
      * Then we try to solve for \f$a_0 = 0\f$, the return value indicates
      * whether this has succeeded or not.
-     * @return True iff the expression could be added */
-    bool add_with_artificial_variable(linear_expression& expr);
+     * @return True iff the expression could be added.
+     *         False and a list of the constraints involved if not */
+    std::pair<bool, constraint_list>
+    add_with_artificial_variable(linear_expression& expr);
 
     /** Add the constraint \f$expr = 0\f$ to the inequality tableau.
      * @return True iff the expression could be added */
@@ -268,6 +276,9 @@ protected:
         if (on_variable_change)
             on_variable_change(v, *this);
     }
+
+    constraint_list
+    build_explanation(const variable& v, const linear_expression& expr) const;
 
 private:
     typedef std::unordered_map<constraint, variable_set> constraint_to_varset_map;

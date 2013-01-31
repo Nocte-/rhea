@@ -9,6 +9,7 @@
 #include "../rhea/simplex_solver.hpp"
 #include "../rhea/linear_equation.hpp"
 #include "../rhea/iostream.hpp"
+#include "../rhea/errors_expl.hpp"
 
 using namespace rhea;
 
@@ -410,8 +411,7 @@ BOOST_AUTO_TEST_CASE (inconsistent2_test)
     variable x (0);
     simplex_solver solver;
 
-    BOOST_CHECK_THROW(solver.add_constraint(x >= 10)
-                            .add_constraint(x <= 5),
+    BOOST_CHECK_THROW(solver.add_constraints({ x >= 10, x <= 5 }),
                       required_failure);
 
 }
@@ -421,12 +421,30 @@ BOOST_AUTO_TEST_CASE (inconsistent3_test)
     variable v (0), w (0), x (0), y (0);
     simplex_solver solver;
 
-    solver.add_constraint(v >= 10)
-          .add_constraint(w >= v)
-          .add_constraint(x >= w)
-          .add_constraint(y >= x);
-
+    solver.add_constraints({ v >= 10, w >= v, x >= w, y >= x});
     BOOST_CHECK_THROW(solver.add_constraint(y <= 5), required_failure);
+}
+
+BOOST_AUTO_TEST_CASE (inconsistent4_test)
+{
+    variable v (0), w (0), x (0), y (0);
+    simplex_solver solver;
+
+    solver.set_explaining(true);
+    solver.add_constraints({ v >= 10, w >= v, x >= w, y >= x});
+
+    try
+    {
+        solver.add_constraint(y <= 5);
+    }
+    catch (required_failure_with_explanation& e)
+    {
+        BOOST_CHECK_EQUAL(e.explanation().size(), 5);
+    }
+    catch (...)
+    {
+        BOOST_CHECK(false);
+    }
 }
 
 BOOST_AUTO_TEST_CASE (multiedit1_test)
