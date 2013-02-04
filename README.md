@@ -52,3 +52,10 @@ License
 Rhea is free software: you can redistribute it and/or modify it under the
 terms of the GNU Lesser General Public License version 3.
 
+Build status
+------------
+[![Build status](https://travis-ci.org/Nocte-/rhea.png?branch=master)](https://travis-ci.org/Nocte-/rhea)
+
+This project uses [Travis CI](http://travis-ci.org/) to build and run the unit
+tests on different compilers automatically.
+
