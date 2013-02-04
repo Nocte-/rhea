@@ -31,9 +31,11 @@ namespace rhea {
 class required_failure_with_explanation : public required_failure
 {
 public:
-    required_failure_with_explanation(constraint_list cl) throw()
+    required_failure_with_explanation(constraint_list cl)
         : expl_(std::move(cl))
     { }
+
+    virtual ~required_failure_with_explanation() throw() { }
 
     const constraint_list& explanation() const { return expl_; }
 
