@@ -60,17 +60,19 @@ if(BUILD_DOCUMENTATION)
   endif()
 endif()
 
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "An implementation of the Cassowary solver")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Incremental constraint solver C++ library")
+set(CPACK_PACKAGE_DESCRIPTION "Rhea is a constraint solver that is especially useful for creating user interfaces.  It is based on Cassowary.")
 set(CPACK_PACKAGE_VENDOR "Nocte")
 set(CPACK_PACKAGE_CONTACT "Nocte <nocte@hippie.nu>")
 set(CPACK_SOURCE_IGNORE_FILES "CMakefiles;Makefile;CMakeCache.txt;_CPack_Packages;/.git/;.gitignore;")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}_${VERSION}")
-    
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+ 
 if(UNIX)
-    set(CPACK_GENERATOR "TGZ;DEB;RPM")
+    set(CPACK_GENERATOR "DEB")
     add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
     
-    set(CPACK_DEBIAN_PACKAGE_SECTION "Development")
+    set(CPACK_DEBIAN_PACKAGE_SECTION "devel")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.0), libstdc++6 (>= 4.0)")
     add_custom_target(deb dpkg-buildpackage)
     add_dependencies(deb dist)
