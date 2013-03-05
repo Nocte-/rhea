@@ -157,11 +157,9 @@ simplex_solver::add_constraint_(const constraint& c)
     if (!c.read_only_variables().empty())
         throw readonly_not_allowed();
 
-    auto ptr (c.try_cast<edit_constraint>());
-    if (ptr != nullptr)
+    if (c.is_edit_constraint())
     {
-        assert(c.is_edit_constraint());
-        const edit_constraint& ec (*ptr);
+        auto& ec (c.as<edit_constraint>());
         const auto& v (ec.var());
         if (!v.is_external() || (!is_basic_var(v) && !columns_has_key(v)))
             throw edit_misuse(v);
@@ -200,9 +198,9 @@ simplex_solver::add_constraint_(const constraint& c)
 
     needs_solving_ = true;
 
-    if (ptr != nullptr)
+    if (c.is_edit_constraint())
     {
-        const edit_constraint& ec (*ptr);
+        auto& ec (c.as<edit_constraint>());
         edit_info_list_.emplace_back(ec.var(), c, r.plus, r.minus, r.previous_constant);
     }
 
@@ -358,8 +356,8 @@ simplex_solver::remove_constraint_(const constraint& c)
     }
     else if (c.is_edit_constraint())
     {
-        auto& ec (*c.try_cast<edit_constraint>());
-        auto ei (std::find(edit_info_list_.begin(), edit_info_list_.end(), ec.var()));
+        auto& ec (c.as<edit_constraint>());
+        auto  ei (std::find(edit_info_list_.begin(), edit_info_list_.end(), ec.var()));
         assert(ei != edit_info_list_.end());
         remove_column(ei->minus);
         // ei->plus is a marker and will be removed later

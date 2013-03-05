@@ -97,7 +97,7 @@ public:
                      const strength& s = strength::weak(),
                      double weight = 1.0)
     {
-        add_constraint(new stay_constraint(v, s, weight));
+        add_constraint(std::make_shared<stay_constraint>(v, s, weight));
         return *this;
     }
 
@@ -106,7 +106,7 @@ public:
                       double weight = 1.0)
     {
         for (auto& v : vs)
-            add_constraint(new stay_constraint(v, s, weight));
+            add_constraint(std::make_shared<stay_constraint>(v, s, weight));
 
         return *this;
     }
@@ -116,7 +116,7 @@ public:
                       double weight = 1.0)
     {
         for (auto& v : vs)
-            add_constraint(new stay_constraint(v, s, weight));
+            add_constraint(std::make_shared<stay_constraint>(v, s, weight));
 
         return *this;
     }

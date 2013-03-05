@@ -43,8 +43,9 @@ class constraint
 public:
     constraint() { }
 
-    constraint(abstract_constraint* p)
-        : p_(p)
+    template <typename t>
+    constraint(std::shared_ptr<t>&& p)
+        : p_(std::move(p))
     { }
 
     constraint(const linear_equation& eq)
@@ -134,20 +135,14 @@ public:
         { p_->remove_from(s); }
 
     template <typename t>
-    t* try_cast() { return dynamic_cast<t*>(p_.get()); }
+    t& as() { return *dynamic_cast<t*>(p_.get()); }
 
     template <typename t>
-    const t* try_cast() const { return dynamic_cast<const t*>(p_.get()); }
+    const t& as() const { return *dynamic_cast<const t*>(p_.get()); }
 
-    bool is_nil() const { return p_.get() == nullptr; }
+    bool is_nil() const { return !p_; }
 
 public:
-    constraint& operator= (abstract_constraint* ptr)
-        {
-            p_.reset(ptr);
-            return *this;
-        }
-
     constraint& operator= (const constraint& assign)
         {
             p_ = assign.p_;

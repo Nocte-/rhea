@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE (simple1_test)
 
     simplex_solver solver;
 
-    constraint c (new linear_equation(x, linear_expression(y)));
+    constraint c (std::make_shared<linear_equation>(x, linear_expression(y)));
     solver.add_stay(x);
     solver.add_stay(y);
     solver.add_constraint(c);
@@ -218,7 +218,7 @@ BOOST_AUTO_TEST_CASE (constraint1_test)
 {
     variable x (0);
     simplex_solver solver;
-    solver.add_constraint(new linear_equation(x, 10, strength::weak()));
+    solver.add_constraint(std::make_shared<linear_equation>(x, 10, strength::weak()));
     BOOST_CHECK_EQUAL(x.value(), 10.0);
 }
 

@@ -66,7 +66,7 @@ public:
                                  const strength& s = strength::strong(),
                                  double weight = 1.0)
     {
-        add_constraint(new edit_constraint(v, s, weight));
+        add_constraint(std::make_shared<edit_constraint>(v, s, weight));
         return *this;
     }
 
