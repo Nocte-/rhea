@@ -70,6 +70,12 @@ public:
     linear_expression& operator-= (const variable& x)
         { return operator+=(term(x, -1)); }
 
+    linear_expression& operator+= (double x)
+        { constant_ += x; return *this; }
+
+    linear_expression& operator-= (double x)
+        { constant_ -= x; return *this; }
+
     linear_expression& set(const variable& v, double x)
         {
             if (!near_zero(x)) terms_[v] = x;

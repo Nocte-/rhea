@@ -29,7 +29,7 @@ namespace rhea {
 class linear_constraint : public abstract_constraint
 {
 public:
-    linear_constraint(const linear_expression& expr,
+    linear_constraint(const linear_expression& expr = linear_expression(),
                       const strength& s = strength::required(),
                       double weight = 1.0)
         : abstract_constraint(s, weight)

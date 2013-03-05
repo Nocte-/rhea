@@ -32,7 +32,7 @@ public:
      * \param e     The expression
      * \param s     The constraint's strength
      * \param weight The constraint's weight */
-    linear_equation(linear_expression e,
+    linear_equation(linear_expression e = linear_expression(0.0),
                     const strength& s = strength::required(),
                     double weight = 1.0)
         : linear_constraint(std::move(e), s, weight)

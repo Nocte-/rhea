@@ -29,6 +29,11 @@ namespace rhea {
 class linear_inequality : public linear_constraint
 {
 public:
+    linear_inequality ()
+        : linear_constraint(0.0, strength::required(), 1.0)
+        , strict_inequality_(false)
+    { }
+
     linear_inequality (linear_expression expr,
                        strength s = strength::required(),
                        double weight = 1.0)

@@ -39,7 +39,7 @@ public:
 
     const constraint_list& explanation() const { return expl_; }
 
-    void add (constraint c) { expl_.emplace_back(std::move(c)); }
+    void add (constraint c) { expl_.emplace_back(c); }
 
 protected:
     constraint_list expl_;
