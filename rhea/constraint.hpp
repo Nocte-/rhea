@@ -135,10 +135,10 @@ public:
         { p_->remove_from(s); }
 
     template <typename t>
-    t& as() { return *dynamic_cast<t*>(p_.get()); }
+    t& as() { return dynamic_cast<t&>(*p_); }
 
     template <typename t>
-    const t& as() const { return *dynamic_cast<const t*>(p_.get()); }
+    const t& as() const { return dynamic_cast<const t&>(*p_); }
 
     bool is_nil() const { return !p_; }
 
