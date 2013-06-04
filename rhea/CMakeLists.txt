@@ -8,6 +8,6 @@ file(GLOB HEADER_FILES "*.hpp")
 
 add_library(${LIBNAME} ${SOURCE_FILES} ${HEADER_FILES})
 
-install(TARGETS rhea DESTINATION lib)
+install(TARGETS ${LIBNAME} DESTINATION lib)
 install(FILES ${HEADER_FILES} DESTINATION include/rhea)
 

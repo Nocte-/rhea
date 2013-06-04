@@ -1,15 +1,16 @@
-project (tests)
+project (unit-tests)
 cmake_minimum_required (VERSION 2.8.3)
+set(EXE unit_tests)
 
-add_executable(unit_tests unit_tests.cpp)
+add_executable(${EXE} unit_tests.cpp)
 # add_executable(speed_test speed_test.cpp)
 
-include_directories(../rhea ../build/rhea)
+include_directories(..)
 
 find_package(Boost 1.46 REQUIRED COMPONENTS unit_test_framework)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-target_link_libraries(unit_tests rhea ${Boost_LIBRARIES})
+target_link_libraries(${EXE} rhea ${Boost_LIBRARIES})
 # target_link_libraries(speed_test rhea)
 
