@@ -67,6 +67,7 @@ set(CPACK_PACKAGE_CONTACT "Nocte <nocte@hippie.nu>")
 set(CPACK_SOURCE_IGNORE_FILES "CMakefiles;Makefile;CMakeCache.txt;_CPack_Packages;/.git/;.gitignore;")
 set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}_${VERSION}")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/COPYING")
+set(CPACK_SOURCE_GENERATOR "TGZ")
  
 if(UNIX)
     set(CPACK_GENERATOR "DEB")
