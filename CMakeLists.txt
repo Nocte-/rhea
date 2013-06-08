@@ -2,6 +2,7 @@ project(rhea)
 cmake_minimum_required(VERSION 2.8.3)
 set(CPACK_PACKAGE_NAME "rhea")
 
+set(SOVERSION     "1")
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
 set(VERSION_PATCH "1")
