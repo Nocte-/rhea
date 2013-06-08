@@ -6,14 +6,14 @@ Build-Depends: debhelper (>= 8.0.0), cmake (>= 2.8), cdbs, libboost-dev (>= 1.47
 Standards-Version: 3.9.4
 Homepage: http://github.com/Nocte-/rhea
 
-Package: librhea-dev
+Package: librhea1-dev
 Section: libdevel
 Architecture: any
-Depends: librhea (= ${binary:Version}), ${misc:Depends}
+Depends: librhea1 (= ${binary:Version}), ${misc:Depends}
 Description: Linear constraint solver library
  Simplex linear constraint solver in C++11, based on the Cassowary library.
 
-Package: librhea
+Package: librhea1
 Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}

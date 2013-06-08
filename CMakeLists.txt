@@ -1,12 +1,13 @@
 project(rhea)
 cmake_minimum_required(VERSION 2.8.3)
-set(CPACK_PACKAGE_NAME "rhea")
 
 set(SOVERSION     "1")
 set(VERSION_MAJOR "0")
 set(VERSION_MINOR "1")
 set(VERSION_PATCH "1")
 set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+
+set(CPACK_PACKAGE_NAME "librhea${SOVERSION}")
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build (Debug or Release)" FORCE)
