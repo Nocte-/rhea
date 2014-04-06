@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -32,10 +32,12 @@ class error : public std::exception
 public:
     virtual ~error() throw() { }
 
+    // LCOV_EXCL_START
     virtual const char* what() const throw()
     {
         return "unspecified error";
     }
+    // LCOV_EXCL_STOP
 };
 
 /** Signals an internal inconsistency in the solver. */

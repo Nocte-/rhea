@@ -52,9 +52,13 @@ BOOST_AUTO_TEST_CASE (variable_test)
     BOOST_CHECK(variable::nil_var().is_nil());
     BOOST_CHECK(!x.is_nil());
     BOOST_CHECK(!y.is_nil());
+    BOOST_CHECK(!x.is_fd());
+    BOOST_CHECK(!x.is_dummy());
     BOOST_CHECK(x.is_float());
+    BOOST_CHECK(x.is_external());
 
     BOOST_CHECK_EQUAL(x.value(), 3);
+    BOOST_CHECK_EQUAL(x.int_value(), 3);
     BOOST_CHECK_EQUAL(y.value(), 3);
 
     std::hash<variable> h;
@@ -63,8 +67,12 @@ BOOST_AUTO_TEST_CASE (variable_test)
     BOOST_CHECK(h(x) != h(z));
     BOOST_CHECK(!x.is(z));
 
-    y.set_value(4);
-    BOOST_CHECK_EQUAL(x.value(), 4);
+    y.set_value(3.7);
+    BOOST_CHECK_EQUAL(x.value(), 3.7);
+    BOOST_CHECK_EQUAL(x.int_value(), 4);
+
+    y.set_value(-3.7);
+    BOOST_CHECK_EQUAL(x.int_value(), -4);
 
     variable_set s;
     s.insert(x);
@@ -73,6 +81,21 @@ BOOST_AUTO_TEST_CASE (variable_test)
 
     s.erase(y);
     BOOST_CHECK(s.empty());
+
+    BOOST_CHECK(!objective_variable().is_float());
+    BOOST_CHECK(!objective_variable().is_fd());
+    BOOST_CHECK(!objective_variable().is_external());
+    BOOST_CHECK_EQUAL(objective_variable().value(), 0.0);
+    BOOST_CHECK_EQUAL(objective_variable().int_value(), 0);
+    BOOST_CHECK_EQUAL(objective_variable().to_string(), "objective");
+}
+
+BOOST_AUTO_TEST_CASE (variable_stream_test)
+{
+    variable x (3.0);
+    std::stringstream s;
+    s << x;
+    BOOST_CHECK_EQUAL(s.str().substr(0,3), "3.0");
 }
 
 BOOST_AUTO_TEST_CASE (linearexpr1_test)
@@ -198,7 +221,12 @@ BOOST_AUTO_TEST_CASE (simple1_test)
     solver.add_constraint(c);
 
     BOOST_CHECK(solver.is_valid());
+    BOOST_CHECK(c.is_okay_for_simplex_solver());
+    BOOST_CHECK(!c.is_read_only(x));
     BOOST_CHECK_EQUAL(x.value(), y.value());
+
+    BOOST_CHECK(!edit_constraint(x).is_satisfied());
+    BOOST_CHECK(!stay_constraint(x).is_satisfied());
 }
 
 BOOST_AUTO_TEST_CASE (simple2_test)
@@ -212,6 +240,9 @@ BOOST_AUTO_TEST_CASE (simple2_test)
                         solver.suggest_value(x, 100),
                         solver.end_edit()),
                         edit_misuse);
+
+    BOOST_CHECK_EQUAL(std::string(edit_misuse().what()),
+                      "edit protocol usage violation");
 }
 
 BOOST_AUTO_TEST_CASE (constraint1_test)
@@ -622,4 +653,5 @@ BOOST_AUTO_TEST_CASE (quad_test)
     BOOST_CHECK_EQUAL(m[0], std::make_pair(50, 150));
     BOOST_CHECK_EQUAL(m[3], std::make_pair(150, 50));
 }
+
 

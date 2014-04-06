@@ -37,7 +37,7 @@ public:
     abstract_constraint(strength s = strength::required(), double weight = 1.0)
         : strength_(std::move(s))
         , weight_(weight)
-        , times_added_(0)
+    //    , times_added_(0)
     { }
 
     virtual ~abstract_constraint() { }
@@ -82,8 +82,8 @@ public:
     virtual bool is_satisfied() const = 0;
 
     /** Check if this constraint was added to a solver. */
-    virtual bool is_in_solver() const
-        { return times_added_ != 0; }
+    //virtual bool is_in_solver() const
+    //    { return times_added_ != 0; }
 
     /** Check if this constraint can be used in a simplex_solver. */
     virtual bool is_okay_for_simplex_solver() const
@@ -99,10 +99,10 @@ public:
      *  that is already part of a solver. */
     void change_strength(const strength& new_strength)
     {
-        if (times_added_ == 0)
+        //if (!is_in_solver())
             strength_ = new_strength;
-        else
-            throw too_difficult();
+        //else
+        //    throw too_difficult();
     }
 
     /** Change the weight.
@@ -110,10 +110,10 @@ public:
      *  that is already part of a solver. */
     void change_weight(double new_weight)
     {
-        if (times_added_ == 0)
+        //if (!is_in_solver())
             weight_ = new_weight;
-        else
-            throw too_difficult();
+        //else
+        //    throw too_difficult();
     }
 
     /** Mark a variables as read-only. */
@@ -149,17 +149,17 @@ public:
         { weight_ = n; }
 
     /** Notify this constraint that it has been added to a solver. */
-    void add_to(solver&)
-        { ++times_added_; }
+    //void add_to(solver&)
+    //    { ++times_added_; }
 
     /** Notify this constraint that it has been removed from a solver. */
-    void remove_from(solver&)
-        { --times_added_; }
+    //void remove_from(solver&)
+    //    { --times_added_; }
 
 protected:
     strength        strength_;
     double          weight_;
-    int             times_added_;
+    //int             times_added_;
     variable_set    readonly_vars_;
 };
 

@@ -33,7 +33,6 @@ public:
 
     virtual ~objective_variable() { }
 
-    virtual bool is_external() const    { return false; }
     virtual bool is_pivotable() const   { return false; }
     virtual bool is_restricted() const  { return false; }
 

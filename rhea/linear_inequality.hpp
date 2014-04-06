@@ -61,7 +61,7 @@ public:
                 break;
 
             default:
-                throw edit_misuse();
+                throw edit_misuse(); // LCOV_EXCL_LINE
         };
         if (op == relation::lt || op == relation::gt)
             strict_inequality_ = true;
@@ -88,7 +88,7 @@ public:
                 break;
 
             default:
-                throw edit_misuse();
+                throw edit_misuse(); // LCOV_EXCL_LINE
         };
         if (op == relation::lt || op == relation::gt)
             strict_inequality_ = true;

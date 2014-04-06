@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -95,8 +95,8 @@ public:
     bool is_satisfied() const
         { return p_->is_satisfied(); }
 
-    bool is_in_solver() const
-        { return p_->is_in_solver(); }
+    //bool is_in_solver() const
+    //    { return p_->is_in_solver(); }
 
     bool is_okay_for_simplex_solver() const
         { return p_->is_okay_for_simplex_solver(); }
@@ -128,11 +128,11 @@ public:
     void set_weight(double n)
         { p_->set_weight(n); }
 
-    void add_to(solver& s)
-        { p_->add_to(s); }
+    //void add_to(solver& s)
+    //    { p_->add_to(s); }
 
-    void remove_from(solver& s)
-        { p_->remove_from(s); }
+    //void remove_from(solver& s)
+    //    { p_->remove_from(s); }
 
     template <typename t>
     t& as() { return dynamic_cast<t&>(*p_); }

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -74,11 +74,13 @@ public:
     virtual int int_value() const
         { return 0; }
 
+    // LCOV_EXCL_START
     virtual void set_value(double)
         { assert(false); }
 
     virtual void change_value(double)
         { assert(false); }
+    // LCOV_EXCL_STOP
 
     /** Get the value as a string. */
     virtual std::string to_string() const = 0;

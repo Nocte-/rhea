@@ -38,7 +38,7 @@ public:
     virtual ~solver() { }
 
 
-    virtual solver& solve() { return *this; }
+    virtual solver& solve() = 0;
 
     virtual void resolve() = 0;
 
