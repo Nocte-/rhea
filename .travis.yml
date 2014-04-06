@@ -3,7 +3,8 @@ compiler:
   - gcc
   - clang
 before_install: 
-  - sudo apt-get install libboost-test-dev lcov libgemplugin-ruby
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq libboost-test-dev lcov libgemplugin-ruby
   - sudo gem install coveralls-lcov
 script:
   - mkdir build 
