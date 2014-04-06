@@ -12,5 +12,9 @@ find_package(Boost 1.46 REQUIRED COMPONENTS unit_test_framework)
 include_directories(${Boost_INCLUDE_DIRS})
 
 target_link_libraries(${EXE} rhea ${Boost_LIBRARIES})
+if(BUILD_COVERAGE)
+  target_link_libraries(${EXE} -fprofile-arcs -ftest-coverage)
+endif()
+
 # target_link_libraries(speed_test rhea)
 
