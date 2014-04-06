@@ -1,5 +1,6 @@
 Rhea
 ====
+[![Build status](https://travis-ci.org/Nocte-/rhea.png?branch=master)](https://travis-ci.org/Nocte-/rhea) [![Coverage Status](https://coveralls.io/repos/Nocte-/rhea/badge.png)](https://coveralls.io/r/Nocte-/rhea)
 
 About
 -----
@@ -50,12 +51,5 @@ in an actual application yet.  Use at your own peril.
 License
 -------
 Rhea is free software: you can redistribute it and/or modify it under the
-terms of the GNU Lesser General Public License version 3.
-
-Build status
-------------
-[![Build status](https://travis-ci.org/Nocte-/rhea.png?branch=master)](https://travis-ci.org/Nocte-/rhea)
-
-This project uses [Travis CI](http://travis-ci.org/) to build and run the unit
-tests on different compilers automatically.
+terms of the [GNU Lesser General Public License version 3](https://www.gnu.org/licenses/lgpl.html).
 
