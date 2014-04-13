@@ -71,30 +71,19 @@ x.value() == z.value(); // Also true
 class variable
 {
 public:
-    variable() { }
+    variable() 
+        : p_(std::make_shared<float_variable>(0.0f))
+    { }
 
     /** An explicit nil variable.
      *  This function only serves to make code more readable. */
     static variable nil_var() { return variable(); }
 
     /** Wrap an abstract variable on the heap.
-     *  This object will now take care of the variable's lifetime, so
-     *  don't delete it later on. Example:
-     * \code
-     variable my_var (new objectve("az"));
-     * \endcode
-     * \param p  Pointer to a variable on the heap.
-     */
-    variable(abstract_variable* p)
-        : p_(p)
-    {
-        assert(p != nullptr);
-    }
-
-    /** Wrap an abstract variable on the heap.
      * \param p  Shared pointer to a variable.
      */
-    variable(std::shared_ptr<abstract_variable> p)
+    template <typename t>
+    variable(std::shared_ptr<t>&& p)
         : p_(std::move(p))
     { }
 

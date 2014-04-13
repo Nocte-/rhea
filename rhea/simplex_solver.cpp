@@ -29,7 +29,7 @@ namespace rhea {
 
 simplex_solver::simplex_solver()
     : solver()
-    , objective_(new objective_variable)
+    , objective_(std::make_shared<objective_variable>())
     , auto_reset_stay_constants_(true)
     , needs_solving_(true)
     , explain_failure_(false)
