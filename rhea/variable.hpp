@@ -77,7 +77,7 @@ public:
 
     /** An explicit nil variable.
      *  This function only serves to make code more readable. */
-    static variable nil_var() { return variable(); }
+    static variable nil_var() { return variable(nil_()); }
 
     /** Wrap an abstract variable on the heap.
      * \param p  Shared pointer to a variable.
@@ -204,6 +204,10 @@ public:
      */
     bool is(const variable& x) const
         { return p_ == x.p_; }
+
+private:
+    struct nil_ { };
+    variable(const nil_&) { }
 
 private:
     /** Reference counted pointer to the actual variable. */
