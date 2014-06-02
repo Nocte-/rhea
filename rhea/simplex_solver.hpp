@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, 2013, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -32,17 +32,18 @@
 #include "tableau.hpp"
 #include "objective_variable.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** Solver that implements the Cassowary incremental simplex algorithm. */
 class simplex_solver : public solver, public tableau
 {
 public:
-    typedef std::function<void(simplex_solver&)>            event_cb;
+    typedef std::function<void(simplex_solver&)> event_cb;
     typedef std::function<void(const variable&, simplex_solver&)> variable_cb;
 
     /** Gets called whenever the tableau is resolved. */
-    event_cb    on_resolve;
+    event_cb on_resolve;
     /** Gets called whenever a variable has changed. */
     variable_cb on_variable_change;
 
@@ -51,13 +52,13 @@ public:
     struct suggestion
     {
         const variable& v;
-        double          suggested_value;
+        double suggested_value;
     };
 
 public:
     simplex_solver();
 
-    virtual ~simplex_solver() { }
+    virtual ~simplex_solver() {}
 
     /** Add an edit constraint for a given variable.
      * The application should call this for every variable it is planning
@@ -83,8 +84,7 @@ public:
 
     simplex_solver& remove_edit_vars_to(size_t n);
 
-    simplex_solver& remove_all_edit_vars()
-        { return remove_edit_vars_to(0); }
+    simplex_solver& remove_all_edit_vars() { return remove_edit_vars_to(0); }
 
     void resolve();
 
@@ -109,7 +109,9 @@ public:
      * \param v The variable to check for
      * \return True iff v is a column in the tableau or a basic variable */
     bool contains_variable(const variable& v)
-        { return columns_has_key(v) || is_basic_var(v); }
+    {
+        return columns_has_key(v) || is_basic_var(v);
+    }
 
     /** Check if this constraint was satisfied. */
     bool is_constraint_satisfied(const constraint& c) const;
@@ -117,10 +119,10 @@ public:
     /** Reset all external variables to their current values.
      * Note: this triggers all callbacks, which might be used to copy the
      * variable's value to another variable. */
-    void update_external_variables()
-        { set_external_variables(); }
+    void update_external_variables() { set_external_variables(); }
 
-    void change_strength_and_weight(constraint c, const strength& s, double weight);
+    void change_strength_and_weight(constraint c, const strength& s,
+                                    double weight);
     void change_strength(constraint c, const strength& s);
     void change_weight(constraint c, double weight);
 
@@ -151,31 +153,34 @@ public:
     }
 
     bool is_auto_reset_stay_constants() const
-        { return auto_reset_stay_constants_; }
+    {
+        return auto_reset_stay_constants_;
+    }
 
-    void set_explaining(bool flag)
-        { explain_failure_ = flag; }
+    void set_explaining(bool flag) { explain_failure_ = flag; }
 
-    bool is_explaining() const
-        { return explain_failure_; }
+    bool is_explaining() const { return explain_failure_; }
 
 protected:
     solver& add_constraint_(const constraint& c);
     solver& remove_constraint_(const constraint& c);
-
 
     /** This is a privately-used struct that bundles a constraint, its
      ** positive and negative error variables, and its prior edit constant.
      */
     struct edit_info
     {
-        edit_info(const variable& v_, constraint c_,
-                  variable plus_, variable minus_, double prev_constant_)
-            : v(v_), c(c_), plus(plus_), minus(minus_), prev_constant(prev_constant_)
-        { }
+        edit_info(const variable& v_, constraint c_, variable plus_,
+                  variable minus_, double prev_constant_)
+            : v{v_}
+            , c{c_}
+            , plus{plus_}
+            , minus{minus_}
+            , prev_constant{prev_constant_}
+        {
+        }
 
-        bool operator== (const variable& comp) const
-            { return v.is(comp); }
+        bool operator==(const variable& comp) const { return v.is(comp); }
 
         variable v;
         constraint c;
@@ -192,13 +197,14 @@ protected:
         linear_expression expr;
         variable minus;
         variable plus;
-        double   previous_constant;
+        double previous_constant;
 
         expression_result()
-            : minus(variable::nil_var())
-            , plus(variable::nil_var())
-            , previous_constant(0.0)
-        { }
+            : minus{variable::nil_var()}
+            , plus{variable::nil_var()}
+            , previous_constant{0.0}
+        {
+        }
     };
 
     /** Make a new linear expression representing the constraint c,
@@ -245,7 +251,8 @@ protected:
      * \return An appropriate subject, or nil */
     variable choose_subject(linear_expression& expr);
 
-    void delta_edit_constant(double delta, const variable& v1, const variable& v2);
+    void delta_edit_constant(double delta, const variable& v1,
+                             const variable& v2);
 
     /** Optimize using the dual algorithm. */
     void dual_optimize();
@@ -277,32 +284,33 @@ protected:
             on_variable_change(v, *this);
     }
 
-    constraint_list
-    build_explanation(const variable& v, const linear_expression& expr) const;
+    constraint_list build_explanation(const variable& v,
+                                      const linear_expression& expr) const;
 
 private:
-    typedef std::unordered_map<constraint, variable_set> constraint_to_varset_map;
-    typedef std::unordered_map<constraint, variable>   constraint_to_var_map;
-    typedef std::unordered_map<variable, constraint>   var_to_constraint_map;
+    typedef std::unordered_map<constraint, variable_set>
+    constraint_to_varset_map;
+    typedef std::unordered_map<constraint, variable> constraint_to_var_map;
+    typedef std::unordered_map<variable, constraint> var_to_constraint_map;
 
     // The arrays of positive and negative error vars for the stay
     // constraints.  (We need to keep positive and negative separate,
     // since the error vars are always non-negative.)
-    std::vector<variable>       stay_minus_error_vars_;
-    std::vector<variable>       stay_plus_error_vars_;
+    std::vector<variable> stay_minus_error_vars_;
+    std::vector<variable> stay_plus_error_vars_;
 
-    constraint_to_varset_map    error_vars_;
-    constraint_to_var_map       marker_vars_;
-    var_to_constraint_map       constraints_marked_;
+    constraint_to_varset_map error_vars_;
+    constraint_to_var_map marker_vars_;
+    var_to_constraint_map constraints_marked_;
 
-    variable    objective_;
+    variable objective_;
 
     // Map edit variables to their constraints, errors, and prior value.
-    std::list<edit_info>    edit_info_list_;
+    std::list<edit_info> edit_info_list_;
 
-    bool    auto_reset_stay_constants_;
-    bool    needs_solving_;
-    bool    explain_failure_;
+    bool auto_reset_stay_constants_;
+    bool needs_solving_;
+    bool explain_failure_;
 
     std::stack<size_t> cedcns_;
 };
@@ -328,12 +336,14 @@ solv.suggest_value(x, 2)
 class scoped_edit
 {
 public:
-    scoped_edit(simplex_solver& s) : s_(s.begin_edit()) { }
+    scoped_edit(simplex_solver& s)
+        : s_(s.begin_edit())
+    {
+    }
     ~scoped_edit() { s_.end_edit(); }
 
 private:
     simplex_solver& s_;
 };
-
 
 } // namespace rhea

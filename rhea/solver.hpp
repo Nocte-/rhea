@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -25,18 +25,19 @@
 #include "linear_inequality.hpp"
 #include "variable.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** Base class for solvers. \sa simplex_solver */
 class solver
 {
 public:
     solver()
-        : auto_solve_(true)
-    { }
+        : auto_solve_{true}
+    {
+    }
 
-    virtual ~solver() { }
-
+    virtual ~solver() {}
 
     virtual solver& solve() = 0;
 
@@ -74,7 +75,8 @@ public:
 
     solver& add_constraints(const constraint_list& cs)
     {
-        for (auto& c : cs) add_constraint(c);
+        for (auto& c : cs)
+            add_constraint(c);
         return *this;
     }
 
@@ -93,8 +95,7 @@ public:
         return add_lower_bound(v, lower).add_upper_bound(v, upper);
     }
 
-    solver& add_stay(const variable& v,
-                     const strength& s = strength::weak(),
+    solver& add_stay(const variable& v, const strength& s = strength::weak(),
                      double weight = 1.0)
     {
         add_constraint(std::make_shared<stay_constraint>(v, s, weight));
@@ -129,7 +130,8 @@ public:
 
     solver& remove_constraints(const constraint_list& cs)
     {
-        for (auto& c : cs) remove_constraint(c);
+        for (auto& c : cs)
+            remove_constraint(c);
         return *this;
     }
 

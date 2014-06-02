@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include <cmath>
 
-namespace rhea {
+namespace rhea
+{
 
 /** Return true iff a and b are approximately the same. */
 inline bool approx(double a, double b)

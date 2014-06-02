@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -23,88 +23,84 @@
 #include "linear_constraint.hpp"
 #include "relation.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** A constraint of the form \f$expr \geq 0\f$. */
 class linear_inequality : public linear_constraint
 {
 public:
-    linear_inequality ()
-        : linear_constraint(0.0, strength::required(), 1.0)
-        , strict_inequality_(false)
-    { }
+    linear_inequality()
+        : linear_constraint{0.0, strength::required(), 1.0}
+        , strict_inequality_{false}
+    {
+    }
 
-    linear_inequality (linear_expression expr,
-                       strength s = strength::required(),
-                       double weight = 1.0)
-        : linear_constraint(std::move(expr), s, weight)
-        , strict_inequality_(false)
-    { }
+    linear_inequality(linear_expression expr,
+                      strength s = strength::required(), double weight = 1.0)
+        : linear_constraint{std::move(expr), s, weight}
+        , strict_inequality_{false}
+    {
+    }
 
     linear_inequality(const variable& v, relation op, linear_expression expr,
-                      strength s = strength::required(),
-                      double weight = 1.0)
-        : linear_constraint(std::move(expr), s, weight)
-        , strict_inequality_(false)
+                      strength s = strength::required(), double weight = 1.0)
+        : linear_constraint{std::move(expr), s, weight}
+        , strict_inequality_{false}
     {
-        switch (op.type())
-        {
-            case relation::geq:
-            case relation::gt:
-                expr_ *= -1;
-                expr_ += v;
-                break;
+        switch (op.type()) {
+        case relation::geq:
+        case relation::gt:
+            expr_ *= -1;
+            expr_ += v;
+            break;
 
-            case relation::leq:
-            case relation::lt:
-                expr_ -= v;
-                break;
+        case relation::leq:
+        case relation::lt:
+            expr_ -= v;
+            break;
 
-            default:
-                throw edit_misuse(); // LCOV_EXCL_LINE
+        default:
+            throw edit_misuse(); // LCOV_EXCL_LINE
         };
         if (op == relation::lt || op == relation::gt)
             strict_inequality_ = true;
     }
 
     linear_inequality(linear_expression lhs, relation op,
-                      linear_expression rhs,
-                      strength s = strength::required(),
+                      linear_expression rhs, strength s = strength::required(),
                       double weight = 1.0)
-        : linear_constraint(std::move(rhs), s, weight)
-        , strict_inequality_(false)
+        : linear_constraint{std::move(rhs), s, weight}
+        , strict_inequality_{false}
     {
-        switch (op.type())
-        {
-            case relation::geq:
-            case relation::gt:
-                expr_ *= -1.0;
-                expr_ += lhs;
-                break;
+        switch (op.type()) {
+        case relation::geq:
+        case relation::gt:
+            expr_ *= -1.0;
+            expr_ += lhs;
+            break;
 
-            case relation::leq:
-            case relation::lt:
-                expr_ -= lhs;
-                break;
+        case relation::leq:
+        case relation::lt:
+            expr_ -= lhs;
+            break;
 
-            default:
-                throw edit_misuse(); // LCOV_EXCL_LINE
+        default:
+            throw edit_misuse(); // LCOV_EXCL_LINE
         };
         if (op == relation::lt || op == relation::gt)
             strict_inequality_ = true;
     }
 
-    virtual ~linear_inequality() { }
+    virtual ~linear_inequality() {}
 
-    virtual bool is_inequality() const
-        { return true; }
+    virtual bool is_inequality() const { return true; }
 
-    virtual bool is_strict_inequality() const
-        { return strict_inequality_; }
+    virtual bool is_strict_inequality() const { return strict_inequality_; }
 
     virtual bool is_satisfied() const
     {
-        double v (expr_.evaluate());
+        double v = expr_.evaluate();
         return strict_inequality_ ? (v > 0) : (v >= 0);
     }
 
@@ -114,135 +110,120 @@ private:
 
 //-------------------------------------------------------------------------
 
-inline linear_inequality
-operator < (const linear_expression& lhs, const linear_expression& rhs)
+inline linear_inequality operator<(const linear_expression& lhs,
+                                   const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::lt, rhs);
 }
 
-inline linear_inequality
-operator <= (const linear_expression& lhs, const linear_expression& rhs)
+inline linear_inequality operator<=(const linear_expression& lhs,
+                                    const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::leq, rhs);
 }
 
-inline linear_inequality
-operator > (const linear_expression& lhs, const linear_expression& rhs)
+inline linear_inequality operator>(const linear_expression& lhs,
+                                   const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::gt, rhs);
 }
 
-inline linear_inequality
-operator >= (const linear_expression& lhs, const linear_expression& rhs)
+inline linear_inequality operator>=(const linear_expression& lhs,
+                                    const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::geq, rhs);
 }
 
 //-------------------------------------------------------------------------
 
-inline linear_inequality
-operator < (const variable& lhs, const linear_expression& rhs)
+inline linear_inequality operator<(const variable& lhs,
+                                   const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::lt, rhs);
 }
 
-inline linear_inequality
-operator <= (const variable& lhs, const linear_expression& rhs)
+inline linear_inequality operator<=(const variable& lhs,
+                                    const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::leq, rhs);
 }
 
-inline linear_inequality
-operator > (const variable& lhs, const linear_expression& rhs)
+inline linear_inequality operator>(const variable& lhs,
+                                   const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::gt, rhs);
 }
 
-inline linear_inequality
-operator >= (const variable& lhs, const linear_expression& rhs)
+inline linear_inequality operator>=(const variable& lhs,
+                                    const linear_expression& rhs)
 {
     return linear_inequality(lhs, relation::geq, rhs);
 }
 
 //-------------------------------------------------------------------------
 
-inline linear_inequality
-operator < (const variable& lhs, const variable& rhs)
+inline linear_inequality operator<(const variable& lhs, const variable& rhs)
 {
     return linear_inequality(lhs, relation::lt, rhs);
 }
 
-inline linear_inequality
-operator <= (const variable& lhs, const variable& rhs)
+inline linear_inequality operator<=(const variable& lhs, const variable& rhs)
 {
     return linear_inequality(lhs, relation::leq, rhs);
 }
 
-inline linear_inequality
-operator > (const variable& lhs, const variable& rhs)
+inline linear_inequality operator>(const variable& lhs, const variable& rhs)
 {
     return linear_inequality(lhs, relation::gt, rhs);
 }
 
-inline linear_inequality
-operator >= (const variable& lhs, const variable& rhs)
+inline linear_inequality operator>=(const variable& lhs, const variable& rhs)
 {
     return linear_inequality(lhs, relation::geq, rhs);
 }
 
 //-------------------------------------------------------------------------
 
-inline linear_inequality
-operator < (const variable& lhs, double rhs)
+inline linear_inequality operator<(const variable& lhs, double rhs)
 {
     return linear_inequality(lhs, relation::lt, rhs);
 }
 
-inline linear_inequality
-operator <= (const variable& lhs, double rhs)
+inline linear_inequality operator<=(const variable& lhs, double rhs)
 {
     return linear_inequality(lhs, relation::leq, rhs);
 }
 
-inline linear_inequality
-operator > (const variable& lhs, double rhs)
+inline linear_inequality operator>(const variable& lhs, double rhs)
 {
     return linear_inequality(lhs, relation::gt, rhs);
 }
 
-inline linear_inequality
-operator >= (const variable& lhs, double rhs)
+inline linear_inequality operator>=(const variable& lhs, double rhs)
 {
     return linear_inequality(lhs, relation::geq, rhs);
 }
 
 //-------------------------------------------------------------------------
 
-inline linear_inequality
-operator < (const variable& lhs, int rhs)
+inline linear_inequality operator<(const variable& lhs, int rhs)
 {
     return linear_inequality(lhs, relation::lt, rhs);
 }
 
-inline linear_inequality
-operator <= (const variable& lhs, int rhs)
+inline linear_inequality operator<=(const variable& lhs, int rhs)
 {
     return linear_inequality(lhs, relation::leq, rhs);
 }
 
-inline linear_inequality
-operator > (const variable& lhs, int rhs)
+inline linear_inequality operator>(const variable& lhs, int rhs)
 {
     return linear_inequality(lhs, relation::gt, rhs);
 }
 
-inline linear_inequality
-operator >= (const variable& lhs, int rhs)
+inline linear_inequality operator>=(const variable& lhs, int rhs)
 {
     return linear_inequality(lhs, relation::geq, rhs);
 }
-
 
 } // namespace rhea
-
-

@@ -15,11 +15,12 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
-namespace rhea {
+namespace rhea
+{
 
 /** An (in)equality relation. */
 class relation
@@ -27,8 +28,7 @@ class relation
 public:
     /** This enumeration is set up in such a way that additive inverse flips
      ** the direction of the inequality. */
-    typedef enum
-    {
+    typedef enum {
         /** Equal to. */
         eq = 0,
         /** Not equal to. */
@@ -41,34 +41,43 @@ public:
         lt = 3,
         /** Greater than. */
         gt = -3
-    }
-    comp_t;
+    } comp_t;
 
 public:
-    relation(comp_t type = eq) : type_(type) { }
+    relation(comp_t type = eq)
+        : type_(type)
+    {
+    }
 
-    comp_t type() const
-        { return type_; }
+    comp_t type() const { return type_; }
 
     relation reverse_inequality() const
-        { return type_ == neq ? type_ : comp_t(-(int)type_); }
+    {
+        return type_ == neq ? type_ : comp_t(-(int)type_);
+    }
 
     std::string to_string() const
     {
-        switch (type_)
-        {
-            case eq:    return "==";
-            case neq:   return "!=";
-            case leq:   return "<=";
-            case geq:   return ">=";
-            case lt:    return "<";
-            case gt:    return ">";
-            default: assert(false); return "?";
+        switch (type_) {
+        case eq:
+            return "==";
+        case neq:
+            return "!=";
+        case leq:
+            return "<=";
+        case geq:
+            return ">=";
+        case lt:
+            return "<";
+        case gt:
+            return ">";
+        default:
+            assert(false);
+            return "?";
         }
     }
 
-    bool operator== (comp_t c) const
-         { return type_ == c; }
+    bool operator==(comp_t c) const { return type_ == c; }
 
 private:
     comp_t type_;

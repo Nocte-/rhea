@@ -15,13 +15,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include "edit_or_stay_constraint.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** Edit constraints are added to a tableau on a variable, so that a
  ** new value can be suggested for that variable later on. */
@@ -30,16 +31,15 @@ class edit_constraint : public edit_or_stay_constraint
 public:
     edit_constraint(const variable& v, const strength& s = strength::strong(),
                     double weight = 1.0)
-        : edit_or_stay_constraint(v, s, weight)
-    { }
+        : edit_or_stay_constraint{v, s, weight}
+    {
+    }
 
-    virtual ~edit_constraint() { }
+    virtual ~edit_constraint() {}
 
-    virtual bool is_edit_constraint() const
-        { return true; }
+    virtual bool is_edit_constraint() const { return true; }
 
-    virtual bool is_satisfied() const
-        { return false; }
+    virtual bool is_satisfied() const { return false; }
 };
 
 } // namespace rhea

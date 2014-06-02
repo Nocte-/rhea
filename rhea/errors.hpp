@@ -22,7 +22,8 @@
 #include <string>
 #include <stdexcept>
 
-namespace rhea {
+namespace rhea
+{
 
 class variable;
 
@@ -30,13 +31,10 @@ class variable;
 class error : public std::exception
 {
 public:
-    virtual ~error() throw() { }
+    virtual ~error() throw() {}
 
     // LCOV_EXCL_START
-    virtual const char* what() const throw()
-    {
-        return "unspecified error";
-    }
+    virtual const char* what() const throw() { return "unspecified error"; }
     // LCOV_EXCL_STOP
 };
 
@@ -46,11 +44,14 @@ class internal_error : public error
     std::string msg;
 
 public:
-    internal_error(std::string m) : msg(m) { }
-    virtual ~internal_error() throw() { }
+    internal_error(std::string m)
+        : msg(m)
+    {
+    }
 
-    virtual const char* what() const throw()
-        { return msg.c_str(); }
+    virtual ~internal_error() throw() {}
+
+    virtual const char* what() const throw() { return msg.c_str(); }
 };
 
 /** Thrown whenever the usual ordering of setting up edit constraints is
@@ -67,12 +68,20 @@ class edit_misuse : public error
     const variable* var_;
 
 public:
-    edit_misuse() : var_(nullptr) { }
-    edit_misuse(const rhea::variable& v) : var_(&v) { }
-    virtual ~edit_misuse() throw() { }
+    edit_misuse()
+        : var_{nullptr}
+    {
+    }
+    edit_misuse(const rhea::variable& v)
+        : var_{&v}
+    {
+    }
+    virtual ~edit_misuse() throw() {}
 
     virtual const char* what() const throw()
-        { return "edit protocol usage violation"; }
+    {
+        return "edit protocol usage violation";
+    }
 
     const variable& var() const { return *var_; }
 };
@@ -83,12 +92,20 @@ class too_difficult : public error
     std::string msg;
 
 public:
-    too_difficult() { }
-    too_difficult(std::string m) : msg(m) { }
-    virtual ~too_difficult() throw() { }
+    too_difficult() {}
+
+    too_difficult(std::string m)
+        : msg{m}
+    {
+    }
+
+    virtual ~too_difficult() throw() {}
 
     virtual const char* what() const throw()
-        { return msg.empty() ? "the constraints are too difficult to solve" : msg.c_str(); }
+    {
+        return msg.empty() ? "the constraints are too difficult to solve"
+                           : msg.c_str();
+    }
 };
 
 /** Read-only constraints are not allowed by this particular solver
@@ -96,20 +113,24 @@ public:
 class readonly_not_allowed : public too_difficult
 {
 public:
-    virtual ~readonly_not_allowed() throw() { }
+    virtual ~readonly_not_allowed() throw() {}
 
     virtual const char* what() const throw()
-        { return "the read-only annotation is not permitted by the solver"; }
+    {
+        return "the read-only annotation is not permitted by the solver";
+    }
 };
 
 /** Cyclic dependencies between constraints are not allowed. */
 class cycle_not_allowed : public too_difficult
 {
 public:
-    virtual ~cycle_not_allowed() throw() { }
+    virtual ~cycle_not_allowed() throw() {}
 
     virtual const char* what() const throw()
-        { return "a cyclic constraint graph is not permitted by the solver"; }
+    {
+        return "a cyclic constraint graph is not permitted by the solver";
+    }
 };
 
 /** This solver cannot handle strict inequalities.
@@ -119,20 +140,24 @@ public:
 class strict_inequality_not_allowed : public too_difficult
 {
 public:
-    virtual ~strict_inequality_not_allowed() throw() { }
+    virtual ~strict_inequality_not_allowed() throw() {}
 
     virtual const char* what() const throw()
-        { return "the strict inequality is not permitted by the solver"; }
+    {
+        return "the strict inequality is not permitted by the solver";
+    }
 };
 
 /** One of the required constraints cannot be satisfied. */
 class required_failure : public error
 {
 public:
-    virtual ~required_failure() throw() { }
+    virtual ~required_failure() throw() {}
 
     virtual const char* what() const throw()
-        { return "a required constraint cannot be satisfied"; }
+    {
+        return "a required constraint cannot be satisfied";
+    }
 };
 
 /** Not enough stay constraints were specified to give specific values
@@ -140,10 +165,13 @@ public:
 class not_enough_stays : public error
 {
 public:
-    virtual ~not_enough_stays() throw() { }
+    virtual ~not_enough_stays() throw() {}
 
     virtual const char* what() const throw()
-        { return "there are not enough stays to give specific values to every variable"; }
+    {
+        return "there are not enough stays to give specific values to every "
+               "variable";
+    }
 };
 
 /** The resulting expression would be nonlinear.
@@ -152,10 +180,12 @@ public:
 class nonlinear_expression : public error
 {
 public:
-    virtual ~nonlinear_expression() throw() { }
+    virtual ~nonlinear_expression() throw() {}
 
     virtual const char* what() const throw()
-        { return "the resulting expression would be nonlinear"; }
+    {
+        return "the resulting expression would be nonlinear";
+    }
 };
 
 /** The application tried to remove a constraint that doesn't exist in
@@ -163,22 +193,21 @@ public:
 class constraint_not_found : public error
 {
 public:
-    virtual ~constraint_not_found() throw() { }
+    virtual ~constraint_not_found() throw() {}
 
     virtual const char* what() const throw()
-        { return "tried to remove a constraint that was never added"; }
+    {
+        return "tried to remove a constraint that was never added";
+    }
 };
 
 /** The application tried to remove a row that doesn't exist. */
 class row_not_found : public error
 {
 public:
-    virtual ~row_not_found() throw() { }
+    virtual ~row_not_found() throw() {}
 
-    virtual const char* what() const throw()
-        { return "row does not exist"; }
+    virtual const char* what() const throw() { return "row does not exist"; }
 };
 
 } // namespace rhea
-
-

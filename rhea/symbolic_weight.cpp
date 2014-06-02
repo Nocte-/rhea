@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #include "symbolic_weight.hpp"
 #include <cassert>
 
-namespace rhea {
+namespace rhea
+{
 
 symbolic_weight::symbolic_weight()
 {
@@ -46,7 +47,7 @@ symbolic_weight& symbolic_weight::negate()
     return *this;
 }
 
-symbolic_weight& symbolic_weight::operator *=(double n)
+symbolic_weight& symbolic_weight::operator*=(double n)
 {
     for (double& v : values_)
         v *= n;
@@ -54,7 +55,7 @@ symbolic_weight& symbolic_weight::operator *=(double n)
     return *this;
 }
 
-symbolic_weight& symbolic_weight::operator /=(double n)
+symbolic_weight& symbolic_weight::operator/=(double n)
 {
     assert(n != 0);
     for (double& v : values_)
@@ -63,11 +64,11 @@ symbolic_weight& symbolic_weight::operator /=(double n)
     return *this;
 }
 
-symbolic_weight& symbolic_weight::operator +=(const symbolic_weight& n)
+symbolic_weight& symbolic_weight::operator+=(const symbolic_weight& n)
 {
     assert(levels() == n.levels());
-    auto i1 (values_.begin());
-    auto i2 (n.values_.begin());
+    auto i1 = values_.begin();
+    auto i2 = n.values_.begin();
 
     for (; i1 != values_.end(); ++i1, ++i2)
         *i1 += *i2;
@@ -75,11 +76,11 @@ symbolic_weight& symbolic_weight::operator +=(const symbolic_weight& n)
     return *this;
 }
 
-symbolic_weight& symbolic_weight::operator -=(const symbolic_weight& n)
+symbolic_weight& symbolic_weight::operator-=(const symbolic_weight& n)
 {
     assert(levels() == n.levels());
-    auto i1 (values_.begin());
-    auto i2 (n.values_.begin());
+    auto i1 = values_.begin();
+    auto i2 = n.values_.begin();
 
     for (; i1 != values_.end(); ++i1, ++i2)
         *i1 -= *i2;
@@ -87,32 +88,32 @@ symbolic_weight& symbolic_weight::operator -=(const symbolic_weight& n)
     return *this;
 }
 
-bool symbolic_weight::operator< (const symbolic_weight& comp) const
+bool symbolic_weight::operator<(const symbolic_weight& comp) const
 {
     return values_ < comp.values_;
 }
 
-bool symbolic_weight::operator<= (const symbolic_weight& comp) const
+bool symbolic_weight::operator<=(const symbolic_weight& comp) const
 {
     return values_ <= comp.values_;
 }
 
-bool symbolic_weight::operator== (const symbolic_weight& comp) const
+bool symbolic_weight::operator==(const symbolic_weight& comp) const
 {
     return values_ == comp.values_;
 }
 
-bool symbolic_weight::operator!= (const symbolic_weight& comp) const
+bool symbolic_weight::operator!=(const symbolic_weight& comp) const
 {
     return values_ != comp.values_;
 }
 
-bool symbolic_weight::operator>= (const symbolic_weight& comp) const
+bool symbolic_weight::operator>=(const symbolic_weight& comp) const
 {
     return values_ >= comp.values_;
 }
 
-bool symbolic_weight::operator> (const symbolic_weight& comp) const
+bool symbolic_weight::operator>(const symbolic_weight& comp) const
 {
     return values_ > comp.values_;
 }
@@ -123,4 +124,3 @@ bool symbolic_weight::is_negative() const
 }
 
 } // namespace rhea
-

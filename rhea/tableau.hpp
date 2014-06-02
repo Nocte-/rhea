@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -25,7 +25,8 @@
 #include "variable.hpp"
 #include "linear_expression.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** A tableau, or augmented matrix, represents the coefficients and
  ** solution of a set of equations.
@@ -59,7 +60,7 @@ namespace rhea {
 class tableau
 {
 public:
-    typedef std::unordered_map<variable, variable_set>      columns_map;
+    typedef std::unordered_map<variable, variable_set> columns_map;
     typedef std::unordered_map<variable, linear_expression> rows_map;
 
 public:
@@ -75,9 +76,9 @@ public:
     bool is_valid() const;
 
 public:
-    tableau() { }
+    tableau() {}
 
-    virtual ~tableau() { }
+    virtual ~tableau() {}
 
     /** Add a new row to the tableau. */
     void add_row(const variable& v, const linear_expression& e);
@@ -105,12 +106,14 @@ public:
     const rows_map& rows() const { return rows_; }
 
     bool columns_has_key(const variable& subj) const
-        { return columns_.count(subj) > 0; }
+    {
+        return columns_.count(subj) > 0;
+    }
 
     /** Get the linear expression that the given row represents. */
     const linear_expression& row_expression(const variable& v) const
     {
-        auto i (rows_.find(v));
+        auto i = rows_.find(v);
         if (i == rows_.end())
             throw row_not_found();
 
@@ -120,7 +123,7 @@ public:
     /** Get the linear expression that the given row represents. */
     linear_expression& row_expression(const variable& v)
     {
-        auto i (rows_.find(v));
+        auto i = rows_.find(v);
         if (i == rows_.end())
             throw row_not_found();
 
@@ -128,33 +131,32 @@ public:
     }
 
     /** Check if v is one of the basic variables. */
-    bool is_basic_var(const variable& v) const
-        { return rows_.count(v) > 0; }
+    bool is_basic_var(const variable& v) const { return rows_.count(v) > 0; }
 
     /** Check if f is one of the parametric (aka. free) variables. */
     bool is_parametric_var(const variable& v) const
-        { return rows_.count(v) == 0; }
+    {
+        return rows_.count(v) == 0;
+    }
 
 protected:
     /** A mapping from variables which occur in expressions to the
      ** rows whose expressions contain them. */
-    columns_map     columns_;
+    columns_map columns_;
 
     /** A mapping from the basic variables to the expressions for that
      ** row in the tableau. */
-    rows_map        rows_;
+    rows_map rows_;
 
     /** The collection of basic variables that have infeasible rows.
      *  This is used internally when optimizing. */
-    variable_set    infeasible_rows_;
+    variable_set infeasible_rows_;
 
     /** A map to quickly find rows with external basic variables. */
-    variable_set    external_rows_;
+    variable_set external_rows_;
 
     /** A map to quickly find rows with external parametric variables. */
-    variable_set    external_parametric_vars_;
-
+    variable_set external_parametric_vars_;
 };
 
 } // namespace rhea
-

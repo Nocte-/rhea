@@ -15,26 +15,27 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include "abstract_variable.hpp"
 #include "tableau.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** A special variable that is used internally by the solver as the
  ** objective to solve for. */
 class objective_variable : public abstract_variable
 {
 public:
-    objective_variable() { }
+    objective_variable() {}
 
-    virtual ~objective_variable() { }
+    virtual ~objective_variable() {}
 
-    virtual bool is_pivotable() const   { return false; }
-    virtual bool is_restricted() const  { return false; }
+    virtual bool is_pivotable() const { return false; }
+    virtual bool is_restricted() const { return false; }
 
     std::string to_string() const { return "objective"; }
 };

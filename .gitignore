@@ -27,7 +27,11 @@ Makefile
 CPackConfig.cmake
 CPackSourceConfig.cmake
 CMakeCache.txt
+CMakeLists.txt.user
+CMakeLists.txt.user.*
 tags
+*.json
+.excludes
 
 # Generated headers
 rhea/version.hpp

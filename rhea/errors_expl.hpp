@@ -15,14 +15,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012-2013, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include "constraint.hpp"
 #include "errors.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** One of the required constraints cannot be satisfied.
  *  This exception extends required_failure with a list of the constraints
@@ -32,19 +33,18 @@ class required_failure_with_explanation : public required_failure
 {
 public:
     required_failure_with_explanation(constraint_list cl)
-        : expl_(std::move(cl))
-    { }
+        : expl_{std::move(cl)}
+    {
+    }
 
-    virtual ~required_failure_with_explanation() throw() { }
+    virtual ~required_failure_with_explanation() throw() {}
 
     const constraint_list& explanation() const { return expl_; }
 
-    void add (constraint c) { expl_.emplace_back(c); }
+    void add(constraint c) { expl_.emplace_back(c); }
 
 protected:
     constraint_list expl_;
 };
 
 } // namespace rhea
-
-

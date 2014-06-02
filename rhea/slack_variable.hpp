@@ -21,7 +21,8 @@
 
 #include "abstract_variable.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** Slack variables are used to turn inequalities into equations.
  * For example, this inequality:
@@ -36,12 +37,15 @@ namespace rhea {
 class slack_variable : public abstract_variable
 {
 public:
-    slack_variable() : abstract_variable() { }
-    ~slack_variable() { }
+    slack_variable()
+        : abstract_variable{}
+    {
+    }
+    ~slack_variable() {}
 
-    virtual bool is_external() const    { return false; }
-    virtual bool is_pivotable() const   { return true; }
-    virtual bool is_restricted() const  { return true; }
+    virtual bool is_external() const { return false; }
+    virtual bool is_pivotable() const { return true; }
+    virtual bool is_restricted() const { return true; }
 
     std::string to_string() const { return "slack"; }
 };

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -23,7 +23,8 @@
 #include "approx.hpp"
 #include "variable.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 class tableau;
 
@@ -45,42 +46,54 @@ expr.evaluate(); // Returns '22'
 class linear_expression
 {
 public:
-    typedef std::unordered_map<variable, double>    terms_map;
+    typedef std::unordered_map<variable, double> terms_map;
 
-    typedef terms_map::value_type   value_type;
-    typedef terms_map::value_type   term;
+    typedef terms_map::value_type value_type;
+    typedef terms_map::value_type term;
 
 public:
     linear_expression(double num = 0);
 
-    linear_expression(const variable& clv, double value = 1, double constant = 0);
+    linear_expression(const variable& clv, double value = 1,
+                      double constant = 0);
 
-    linear_expression& operator*= (double x);
-    linear_expression& operator/= (double x);
-    linear_expression& operator*= (const linear_expression& x);
-    linear_expression& operator/= (const linear_expression& x);
-    linear_expression& operator+= (const linear_expression& x);
-    linear_expression& operator-= (const linear_expression& x);
-    linear_expression& operator+= (const term& x);
-    linear_expression& operator-= (const term& x);
+    linear_expression& operator*=(double x);
+    linear_expression& operator/=(double x);
+    linear_expression& operator*=(const linear_expression& x);
+    linear_expression& operator/=(const linear_expression& x);
+    linear_expression& operator+=(const linear_expression& x);
+    linear_expression& operator-=(const linear_expression& x);
+    linear_expression& operator+=(const term& x);
+    linear_expression& operator-=(const term& x);
 
-    linear_expression& operator+= (const variable& x)
-        { return operator+=(term(x, 1)); }
+    linear_expression& operator+=(const variable& x)
+    {
+        return operator+=(term(x, 1));
+    }
 
-    linear_expression& operator-= (const variable& x)
-        { return operator+=(term(x, -1)); }
+    linear_expression& operator-=(const variable& x)
+    {
+        return operator+=(term(x, -1));
+    }
 
-    linear_expression& operator+= (double x)
-        { constant_ += x; return *this; }
+    linear_expression& operator+=(double x)
+    {
+        constant_ += x;
+        return *this;
+    }
 
-    linear_expression& operator-= (double x)
-        { constant_ -= x; return *this; }
+    linear_expression& operator-=(double x)
+    {
+        constant_ -= x;
+        return *this;
+    }
 
     linear_expression& set(const variable& v, double x)
-        {
-            if (!near_zero(x)) terms_[v] = x;
-            return *this;
-        }
+    {
+        if (!near_zero(x))
+            terms_[v] = x;
+        return *this;
+    }
 
     /** Add \a expr to this expression.
      * Notifies the solver if a variable is added or deleted from this
@@ -102,8 +115,7 @@ public:
                            const variable& subject, tableau& solver);
 
     /** Erase a variable from the expression. */
-    void erase(const variable& v)
-        { terms_.erase(v); }
+    void erase(const variable& v) { terms_.erase(v); }
 
     /** Return a pivotable variable.
      * \pre is_constant() == false
@@ -131,7 +143,8 @@ public:
      * Then, if the current equation is:
      * \f[v_{old} = av_{new} + bv_0 + \ldots + c\f]
      * The new equation will become:
-     * \f[v_{new} = -\frac{1}{a}v_{old} - \frac{b}{a}v_0 - \ldots - \frac{c}{a}\f]
+     * \f[v_{new} = -\frac{1}{a}v_{old} - \frac{b}{a}v_0 - \ldots -
+     *\frac{c}{a}\f]
      *
      * \pre \a new_subj has a nonzero coefficient in this expression.
      */
@@ -161,13 +174,12 @@ public:
      *         in this expression */
     double coefficient(const variable& v) const
     {
-        auto i (terms_.find(v));
+        auto i(terms_.find(v));
         return i == terms_.end() ? 0.0 : i->second;
     }
 
     /** Get the constant \f$c\f$ of the expression. */
-    double constant() const
-        { return constant_; }
+    double constant() const { return constant_; }
 
     /** Set the constant \f$c\f$ to a new value. */
     void set_constant(double c) { constant_ = c; }
@@ -176,144 +188,124 @@ public:
     void increment_constant(double c) { constant_ += c; }
 
     /** Get a map of all terms and their coefficients. */
-    const terms_map& terms() const
-        { return terms_; }
+    const terms_map& terms() const { return terms_; }
 
     /** Returns true iff this expression is constant. */
-    bool is_constant() const
-        { return terms_.empty(); }
+    bool is_constant() const { return terms_.empty(); }
 
 private:
     /** The expression's constant term. */
-    double      constant_;
+    double constant_;
     /** A map of all variables and their coefficients. */
-    terms_map   terms_;
+    terms_map terms_;
 };
 
 //--------------------------------------------------------------------------
 
-inline linear_expression
-operator* (linear_expression e, double x)
+inline linear_expression operator*(linear_expression e, double x)
 {
     return e *= x;
 }
 
-inline linear_expression
-operator* (double x, linear_expression e)
+inline linear_expression operator*(double x, linear_expression e)
 {
     return e *= x;
 }
 
-inline linear_expression
-operator/ (linear_expression e, double x)
+inline linear_expression operator/(linear_expression e, double x)
 {
     return e /= x;
 }
 
-inline linear_expression
-operator* (linear_expression e, const linear_expression& x)
+inline linear_expression operator*(linear_expression e,
+                                   const linear_expression& x)
 {
     return e *= x;
 }
 
-inline linear_expression
-operator/ (linear_expression e, const linear_expression& x)
+inline linear_expression operator/(linear_expression e,
+                                   const linear_expression& x)
 {
     return e /= x;
 }
 
-inline linear_expression
-operator+ (linear_expression e, const linear_expression& x)
+inline linear_expression operator+(linear_expression e,
+                                   const linear_expression& x)
 {
     return e += x;
 }
 
-inline linear_expression
-operator- (linear_expression e, const linear_expression& x)
+inline linear_expression operator-(linear_expression e,
+                                   const linear_expression& x)
 {
     return e -= x;
 }
 
 //--------------------------------------------------------------------------
 
-inline linear_expression
-operator* (const variable& v, double x)
+inline linear_expression operator*(const variable& v, double x)
 {
     return linear_expression(v, x);
 }
 
-inline linear_expression
-operator* (const variable& v, int x)
+inline linear_expression operator*(const variable& v, int x)
 {
     return linear_expression(v, x);
 }
 
-inline linear_expression
-operator* (double x, const variable& v)
+inline linear_expression operator*(double x, const variable& v)
 {
     return linear_expression(v, x);
 }
 
-inline linear_expression
-operator* (int x, const variable& v)
+inline linear_expression operator*(int x, const variable& v)
 {
     return linear_expression(v, x);
 }
 
-inline linear_expression
-operator/ (const variable& v, double x)
+inline linear_expression operator/(const variable& v, double x)
 {
-    return linear_expression(v, 1.0/x);
+    return linear_expression(v, 1.0 / x);
 }
 
-inline linear_expression
-operator+ (const variable& v, double x)
+inline linear_expression operator+(const variable& v, double x)
 {
     return linear_expression(v, 1, x);
 }
 
-inline linear_expression
-operator+ (const variable& v, int x)
+inline linear_expression operator+(const variable& v, int x)
 {
     return linear_expression(v, 1, x);
 }
 
-inline linear_expression
-operator- (const variable& v, double x)
+inline linear_expression operator-(const variable& v, double x)
 {
     return linear_expression(v, 1, -x);
 }
 
-inline linear_expression
-operator- (const variable& v, int x)
+inline linear_expression operator-(const variable& v, int x)
 {
     return linear_expression(v, 1, -x);
 }
 
-inline linear_expression
-operator- (double x, const variable& v)
+inline linear_expression operator-(double x, const variable& v)
 {
     return linear_expression(v, -1, x);
 }
 
-inline linear_expression
-operator- (int x, const variable& v)
+inline linear_expression operator-(int x, const variable& v)
 {
     return linear_expression(v, -1, x);
 }
 
-inline linear_expression
-operator+ (const variable& v, const variable& w)
+inline linear_expression operator+(const variable& v, const variable& w)
 {
     return linear_expression(v) += w;
 }
 
-inline linear_expression
-operator- (const variable& v, const variable& w)
+inline linear_expression operator-(const variable& v, const variable& w)
 {
     return linear_expression(v) -= w;
 }
 
-
 } // namespace rhea
-

@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -24,16 +24,15 @@
 
 #include "float_variable.hpp"
 
-namespace std {
+namespace std
+{
 
-inline
-ostream& operator<< (ostream& str, const rhea::variable& v)
+inline ostream& operator<<(ostream& str, const rhea::variable& v)
 {
     return str << v.to_string();
 }
 
-inline
-istream& operator>> (istream& str, rhea::variable& v)
+inline istream& operator>>(istream& str, rhea::variable& v)
 {
     double temp;
     str >> temp;
@@ -42,4 +41,3 @@ istream& operator>> (istream& str, rhea::variable& v)
 }
 
 } // namespace std
-

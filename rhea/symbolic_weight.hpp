@@ -15,14 +15,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include <cstddef>
 #include <array>
 
-namespace rhea {
+namespace rhea
+{
 
 /** A 3-tuple weight for constraint strengths.
  * In the original implementation this was an n-tuple, but it has been fixed
@@ -44,17 +45,17 @@ public:
     static symbolic_weight zero();
 
     symbolic_weight& negate();
-    symbolic_weight& operator *= (double n);
-    symbolic_weight& operator /= (double n);
-    symbolic_weight& operator += (const symbolic_weight& n);
-    symbolic_weight& operator -= (const symbolic_weight& n);
+    symbolic_weight& operator*=(double n);
+    symbolic_weight& operator/=(double n);
+    symbolic_weight& operator+=(const symbolic_weight& n);
+    symbolic_weight& operator-=(const symbolic_weight& n);
 
-    bool operator<  (const symbolic_weight& comp) const;
-    bool operator<= (const symbolic_weight& comp) const;
-    bool operator== (const symbolic_weight& comp) const;
-    bool operator!= (const symbolic_weight& comp) const;
-    bool operator>  (const symbolic_weight& comp) const;
-    bool operator>= (const symbolic_weight& comp) const;
+    bool operator<(const symbolic_weight& comp) const;
+    bool operator<=(const symbolic_weight& comp) const;
+    bool operator==(const symbolic_weight& comp) const;
+    bool operator!=(const symbolic_weight& comp) const;
+    bool operator>(const symbolic_weight& comp) const;
+    bool operator>=(const symbolic_weight& comp) const;
 
     bool is_negative() const;
 
@@ -63,29 +64,28 @@ public:
         return values_[2] + values_[1] * 10000. + values_[0] * 10000000.;
     }
 
-    size_t levels() const
-        { return values_.size(); }
+    size_t levels() const { return values_.size(); }
 
 private:
     std::array<double, 3> values_;
 };
 
-inline symbolic_weight operator* (symbolic_weight w, double n)
+inline symbolic_weight operator*(symbolic_weight w, double n)
 {
     return w *= n;
 }
 
-inline symbolic_weight operator/ (symbolic_weight w, double n)
+inline symbolic_weight operator/(symbolic_weight w, double n)
 {
     return w /= n;
 }
 
-inline symbolic_weight operator+ (symbolic_weight w, const symbolic_weight& n)
+inline symbolic_weight operator+(symbolic_weight w, const symbolic_weight& n)
 {
     return w += n;
 }
 
-inline symbolic_weight operator- (symbolic_weight w, const symbolic_weight& n)
+inline symbolic_weight operator-(symbolic_weight w, const symbolic_weight& n)
 {
     return w -= n;
 }

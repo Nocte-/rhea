@@ -15,33 +15,37 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include "abstract_constraint.hpp"
 #include "linear_expression.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** Abstract constraint that can be related to a variable, used only as
  ** a base class for edit_constraint and stay_constraint. */
 class edit_or_stay_constraint : public abstract_constraint
 {
 public:
-    edit_or_stay_constraint(const variable& v, strength s = strength::required(),
+    edit_or_stay_constraint(const variable& v,
+                            strength s = strength::required(),
                             double weight = 1.0)
-        : abstract_constraint(s, weight)
-        , var_(v)
-    { }
+        : abstract_constraint{s, weight}
+        , var_{v}
+    {
+    }
 
-    virtual ~edit_or_stay_constraint() { }
+    virtual ~edit_or_stay_constraint() {}
 
-    const variable& var() const
-        { return var_; }
+    const variable& var() const { return var_; }
 
     linear_expression expression() const
-        { return linear_expression(var_, -1, var_.value()); }
+    {
+        return linear_expression(var_, -1, var_.value());
+    }
 
 protected:
     variable var_;

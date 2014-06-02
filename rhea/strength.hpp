@@ -15,14 +15,15 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with Rhea.  If not, see <http://www.gnu.org/licenses/>.
 //
-// Copyright 2012, nocte@hippie.nu
+// Copyright 2012-2014, nocte@hippie.nu
 //---------------------------------------------------------------------------
 #pragma once
 
 #include <string>
 #include "symbolic_weight.hpp"
 
-namespace rhea {
+namespace rhea
+{
 
 /** Every constraint has a strength that determines where it sits in the
  ** hierarchy; strong constraints are always satisfied in preference
@@ -58,48 +59,44 @@ class strength
 public:
     /** */
     strength(const symbolic_weight& weight)
-        : weight_(weight)
-    { }
+        : weight_{weight}
+    {
+    }
 
     /** Construct a strength from three weight factors.
      * \param a  'Strong' weight
      * \param b  'Medium weight
      * \param c  'Weak' weight */
     strength(double a, double b, double c)
-        : weight_(a, b, c)
-    { }
+        : weight_{a, b, c}
+    {
+    }
 
     /** Constraints with this strength must be satisfied.
      *  Used by default for constraints provided by the programmer. */
-    static strength required()
-        { return strength(1000, 1000, 1000); }
+    static strength required() { return {1000, 1000, 1000}; }
 
     /** The default strength for edit constraints. */
-    static strength strong()
-        { return strength(1, 0, 0); }
+    static strength strong() { return {1, 0, 0}; }
 
     /** Medium constraint strength. */
-    static strength medium()
-        { return strength(0, 1, 0); }
+    static strength medium() { return {0, 1, 0}; }
 
     /** The default strength for stay constraints. */
-    static strength weak()
-        { return strength(0, 0, 1); }
+    static strength weak() { return {0, 0, 1}; }
 
     /** Check if this strength signals a required constraint. */
-    virtual bool is_required() const
-        { return weight_ == required().weight_; }
+    virtual bool is_required() const { return weight_ == required().weight_; }
 
     /** Get the 3-tuple symbolic weight. */
-    const symbolic_weight& weight() const
-        { return weight_; }
+    const symbolic_weight& weight() const { return weight_; }
 
     bool operator==(const strength& c) const { return weight_ == c.weight_; }
     bool operator!=(const strength& c) const { return weight_ != c.weight_; }
     bool operator<=(const strength& c) const { return weight_ <= c.weight_; }
-    bool operator< (const strength& c) const { return weight_ <  c.weight_; }
+    bool operator<(const strength& c) const { return weight_ < c.weight_; }
     bool operator>=(const strength& c) const { return weight_ >= c.weight_; }
-    bool operator> (const strength& c) const { return weight_ >  c.weight_; }
+    bool operator>(const strength& c) const { return weight_ > c.weight_; }
 
 private:
     symbolic_weight weight_;
