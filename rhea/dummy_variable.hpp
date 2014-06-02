@@ -33,6 +33,7 @@ public:
         : abstract_variable()
     {
     }
+
     virtual ~dummy_variable() {}
 
     virtual bool is_dummy() const { return true; }

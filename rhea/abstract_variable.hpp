@@ -79,7 +79,7 @@ public:
     // LCOV_EXCL_STOP
 
     /** Get the value as a string. */
-    virtual std::string to_string() const = 0;
+    virtual std::string to_string() const { return "abstract"; }
 };
 
 } // namespace rhea

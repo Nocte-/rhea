@@ -25,13 +25,13 @@ namespace rhea
 {
 
 /** A plain-old-datatype variable. */
-template <typename t>
+template <typename T>
 class pod_variable : public abstract_variable
 {
     typedef abstract_variable super;
 
 public:
-    pod_variable(t value)
+    pod_variable(T value)
         : abstract_variable{}
         , value_{value}
     {
@@ -44,14 +44,14 @@ public:
     virtual bool is_pivotable() const { return false; }
     virtual bool is_restricted() const { return false; }
 
-    virtual void set_value(t new_value) { value_ = new_value; }
+    virtual void set_value(T new_value) { value_ = new_value; }
 
-    virtual void change_value(t new_value) { value_ = new_value; }
+    virtual void change_value(T new_value) { value_ = new_value; }
 
     virtual std::string to_string() const { return std::to_string(value_); }
 
 protected:
-    t value_;
+    T value_;
 };
 
 /** A floating-point variable. */
