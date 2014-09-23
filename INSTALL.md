@@ -20,7 +20,7 @@ Running the unit tests
 To run the unit and performance tests, you need to have the
 [Boost Unit Test framework](http://boost.org/) installed.
 
- * cmake .. -DBUILD_UNITTEST=1
+ * cmake .. -DBUILD_UNITTESTS=1 
  * make
  * cd unit_tests
  * ./unit_tests
