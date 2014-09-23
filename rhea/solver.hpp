@@ -45,7 +45,7 @@ public:
 
     solver& set_autosolve(bool is_auto = true)
     {
-        auto_solve_ = true;
+        auto_solve_ = is_auto;
         if (auto_solve_)
             solve();
 
