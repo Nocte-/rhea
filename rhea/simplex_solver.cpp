@@ -186,10 +186,8 @@ solver& simplex_solver::add_constraint_(const constraint& c)
                                      r.previous_constant);
     }
 
-    if (auto_solve_) {
-        optimize(objective_);
-        set_external_variables();
-    }
+    if (auto_solve_) 
+        solve_();
 
     return *this;
 }
@@ -324,10 +322,8 @@ solver& simplex_solver::remove_constraint_(const constraint& c)
     if (i != error_vars_.end())
         error_vars_.erase(i);
 
-    if (auto_solve_) {
-        optimize(objective_);
-        set_external_variables();
-    }
+    if (auto_solve_)
+        solve_();
 
     return *this;
 }
@@ -368,11 +364,19 @@ void simplex_solver::suggest(const std::list<suggestion>& suggestions)
 
 simplex_solver& simplex_solver::solve()
 {
-    if (needs_solving_) {
-        optimize(objective_);
-        set_external_variables();
-    }
+    if (needs_solving_)
+        solve_();
+    
     return *this;
+}
+
+void simplex_solver::solve_()
+{
+    optimize(objective_);
+    set_external_variables();
+    
+    if (on_resolve)
+        on_resolve(*this);
 }
 
 std::pair<bool, constraint_list>
@@ -767,8 +771,6 @@ void simplex_solver::set_external_variables()
         change(v, row_expression(v).constant());
 
     needs_solving_ = false;
-    if (on_resolve)
-        on_resolve(*this);
 }
 
 bool simplex_solver::is_constraint_satisfied(const constraint& c) const
@@ -818,10 +820,8 @@ void simplex_solver::change_strength_and_weight(constraint c,
     }
     needs_solving_ = true;
 
-    if (auto_solve_) {
-        optimize(objective_);
-        set_external_variables();
-    }
+    if (auto_solve_)
+        solve_();
 }
 
 void simplex_solver::change_strength(constraint c, const strength& s)

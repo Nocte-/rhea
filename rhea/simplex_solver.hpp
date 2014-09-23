@@ -277,11 +277,15 @@ protected:
      * set them. */
     void set_external_variables();
 
+    void solve_();
+    
     void change(variable& v, double n)
     {
-        v.change_value(n);
-        if (on_variable_change)
-            on_variable_change(v, *this);
+        if (n != v.value()) {
+            v.change_value(n);
+            if (on_variable_change)
+                on_variable_change(v, *this);
+        }
     }
 
     constraint_list build_explanation(const variable& v,
