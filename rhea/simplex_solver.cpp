@@ -32,7 +32,7 @@ simplex_solver::simplex_solver()
     : solver()
     , objective_(std::make_shared<objective_variable>())
     , auto_reset_stay_constants_(true)
-    , needs_solving_(true)
+    , needs_solving_(false)
     , explain_failure_(false)
 {
     rows_[objective_]; // Create an empty row for the objective
@@ -186,7 +186,7 @@ solver& simplex_solver::add_constraint_(const constraint& c)
                                      r.previous_constant);
     }
 
-    if (auto_solve_) 
+    if (auto_solve_)
         solve_();
 
     return *this;
@@ -366,7 +366,7 @@ simplex_solver& simplex_solver::solve()
 {
     if (needs_solving_)
         solve_();
-    
+
     return *this;
 }
 
@@ -374,7 +374,7 @@ void simplex_solver::solve_()
 {
     optimize(objective_);
     set_external_variables();
-    
+
     if (on_resolve)
         on_resolve(*this);
 }
@@ -622,8 +622,8 @@ void simplex_solver::optimize(const variable& v)
         double r{0.0};
         for (const variable& v : columns_[entry]) {
             if (v.is_pivotable()) {
-                const auto& expr(row_expression(v));
-                double coeff(expr.coefficient(entry));
+                const auto& expr = row_expression(v);
+                double coeff{expr.coefficient(entry)};
 
                 if (coeff >= 0) // Only consider negative coefficients
                     continue;
@@ -752,9 +752,10 @@ void simplex_solver::reset_stay_constants()
     auto im = stay_minus_error_vars_.begin();
 
     for (; ip != stay_plus_error_vars_.end(); ++ip, ++im) {
+        assert(im != stay_minus_error_vars_.end());
         if (is_basic_var(*ip))
             row_expression(*ip).set_constant(0);
-        else if (is_basic_var(*im))
+        if (is_basic_var(*im))
             row_expression(*im).set_constant(0);
     }
 }
@@ -763,8 +764,13 @@ void simplex_solver::set_external_variables()
 {
     // Set external parametric variables first
     // in case I've screwed up
-    for (variable v : external_parametric_vars_)
-        change(v, 0);
+    for (variable v : external_parametric_vars_) {
+        if (is_basic_var(v)) {
+            assert(false);
+        } else {
+            change(v, 0.0);
+        }
+    }
 
     // Only iterate over the rows w/ external variables
     for (variable v : external_rows_)
