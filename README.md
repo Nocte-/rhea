@@ -10,7 +10,7 @@ originally developed by Greg J. Badros and Alan Borning.  The main
 differences are:
 
  * Allows the programmer to write constraints in a natural way
- * Rewritten in C++11, fixes some bugs and memory leaks
+ * Rewritten in C++11
  * CMake instead of GNU Autoconfig
  * Unit tests use the Boost Test Framework
  * Uses Doxygen for documentation
