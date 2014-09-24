@@ -96,7 +96,7 @@ void tableau::substitute_out(const variable& old,
             infeasible_rows_.insert(v);
     }
 
-    columns_.erase(ic);
+    columns_.erase(old);
 
     if (old.is_external()) {
         if (!columns_[old].empty())
