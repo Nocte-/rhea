@@ -194,7 +194,9 @@ void linear_expression::substitute_out(const variable& var,
                                        const variable& subj, tableau& solver)
 {
     auto it = terms_.find(var);
-    assert(it != terms_.end());
+    if (it == terms_.end())
+        throw std::runtime_error("substitute variable is not part of the expression");
+    
     double multiplier = it->second;
     terms_.erase(it);
 

@@ -39,6 +39,8 @@ public:
         : strength_{std::move(s)}
         , weight_{weight}
     {
+        if (weight_ == 0.0)
+            throw std::runtime_error("constraint weight cannot be zero");
     }
 
     virtual ~abstract_constraint() {}
