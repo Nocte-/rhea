@@ -1,8 +1,8 @@
-rhea (0.1.5) UNRELEASED; urgency=low
+rhea (0.1.6) raring; urgency=low
 
-  * Give Launchpad a push.
+  * Fix a bug with required strength stays and edits (#18).
 
- -- Nocte <nocte@hippie.nu>  Sun, 19 Oct 2014 10:50:05 +0200
+ -- Nocte <nocte@hippie.nu>  Mon, 20 Oct 2014 19:28:18 +0200
 
 rhea (0.1.4) raring; urgency=low
 

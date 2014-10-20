@@ -654,4 +654,37 @@ BOOST_AUTO_TEST_CASE (quad_test)
     BOOST_CHECK_EQUAL(m[3], std::make_pair(150, 50));
 }
 
+BOOST_AUTO_TEST_CASE (required_strength) // issue 18
+{
+    variable v(0);
+    simplex_solver solver;
 
+    solver.add_stay(v, strength::strong());
+
+    BOOST_CHECK_EQUAL(v.value(), 0);
+
+    solver.add_edit_var(v, strength::required());
+    solver.begin_edit();
+    solver.suggest_value(v, 2);
+    solver.end_edit();
+
+    BOOST_CHECK_EQUAL(v.value(), 2);
+}
+
+BOOST_AUTO_TEST_CASE (required_strength2)
+{
+    variable v(0);
+    simplex_solver solver;
+
+    solver.add_stay(v, strength::required());
+    solver.resolve();
+
+    BOOST_CHECK_EQUAL(v.value(), 0);
+
+    solver.add_edit_var(v, strength::strong());
+    solver.begin_edit();
+    solver.suggest_value(v, 2);
+    solver.end_edit();
+
+    BOOST_CHECK_EQUAL(v.value(), 0);
+}

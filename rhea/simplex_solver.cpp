@@ -86,11 +86,21 @@ simplex_solver::make_expression(const constraint& c)
         }
     } else {
         // c is an equality
-        if (c.is_required()) {
+        if (c.is_required()) {           
             // Add a dummy variable to the Expression to serve as a marker
             // for this constraint.  The dummy variable is never allowed to
             // enter the basis when pivoting.
             variable dum{std::make_shared<dummy_variable>()};
+
+            if (c.is_stay_constraint()) {
+                stay_plus_error_vars_.push_back(dum);
+                stay_minus_error_vars_.push_back(dum);
+            } else if (c.is_edit_constraint()) {
+                result.previous_constant = c.expression().constant();
+                result.plus = dum;
+                result.minus = dum;
+            }
+
             expr.set(dum, 1);
             marker_vars_[c] = dum;
             constraints_marked_[dum] = c;
