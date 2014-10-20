@@ -1,3 +1,9 @@
+rhea (0.2.0) raring; urgency=medium
+
+  * Add linked and action variables.
+
+ -- Nocte <nocte@hippie.nu>  Mon, 20 Oct 2014 21:46:28 +0200
+
 rhea (0.1.6) raring; urgency=low
 
   * Fix a bug with required strength stays and edits (#18).

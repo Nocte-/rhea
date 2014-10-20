@@ -278,7 +278,7 @@ protected:
     void set_external_variables();
 
     void solve_();
-    
+
     void change(variable& v, double n)
     {
         if (n != v.value()) {
@@ -293,7 +293,7 @@ protected:
 
 private:
     typedef std::unordered_map<constraint, variable_set>
-    constraint_to_varset_map;
+        constraint_to_varset_map;
     typedef std::unordered_map<constraint, variable> constraint_to_var_map;
     typedef std::unordered_map<variable, constraint> var_to_constraint_map;
 

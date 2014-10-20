@@ -86,7 +86,7 @@ simplex_solver::make_expression(const constraint& c)
         }
     } else {
         // c is an equality
-        if (c.is_required()) {           
+        if (c.is_required()) {
             // Add a dummy variable to the Expression to serve as a marker
             // for this constraint.  The dummy variable is never allowed to
             // enter the basis when pivoting.

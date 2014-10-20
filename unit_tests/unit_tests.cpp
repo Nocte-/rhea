@@ -10,6 +10,7 @@
 #include "../rhea/linear_equation.hpp"
 #include "../rhea/iostream.hpp"
 #include "../rhea/errors_expl.hpp"
+#include "../rhea/link_variable.hpp"
 
 using namespace rhea;
 
@@ -262,6 +263,66 @@ BOOST_AUTO_TEST_CASE (juststay1_test)
 
     BOOST_CHECK_EQUAL(x.value(), 5);
     BOOST_CHECK_EQUAL(y.value(), 10);
+
+    solver.suggest({{x, 6}, {y, 7}});
+
+    BOOST_CHECK_EQUAL(x.value(), 6);
+    BOOST_CHECK_EQUAL(y.value(), 7);
+}
+
+BOOST_AUTO_TEST_CASE (juststaylink1_test)
+{
+    float ox = 5.0f, oy = 10.0f;
+    variable x(ox, linked()), y(oy, linked());
+    simplex_solver solver;
+
+    BOOST_CHECK_EQUAL(x.value(), 5);
+
+    solver.add_stay(x).add_stay(y);
+
+    BOOST_CHECK_EQUAL(ox, 5);
+    BOOST_CHECK_EQUAL(oy, 10);
+
+    solver.suggest({{x, 6}, {y, 7}});
+
+    BOOST_CHECK_EQUAL(x.value(), 6);
+    BOOST_CHECK_EQUAL(ox, 6);
+    BOOST_CHECK_EQUAL(oy, 7);
+}
+
+BOOST_AUTO_TEST_CASE (juststaylink2_test)
+{
+    int ox = 5, oy = 10;
+    variable x(ox, linked()), y(oy, linked());
+    simplex_solver solver;
+
+    solver.add_stay(x).add_stay(y);
+
+    BOOST_CHECK_EQUAL(ox, 5);
+    BOOST_CHECK_EQUAL(oy, 10);
+
+    solver.suggest({{x, 6.2}, {y, 7.4}});
+
+    BOOST_CHECK_EQUAL(ox, 6);
+    BOOST_CHECK_EQUAL(oy, 7);
+}
+
+BOOST_AUTO_TEST_CASE (juststaylink3_test)
+{
+    double ox = 5, oy = 10;
+    variable x ([&](double v){ ox = v; }, 5.0);
+    variable y ([&](double v){ oy = v; }, 10.0);
+    simplex_solver solver;
+
+    solver.add_stay(x).add_stay(y);
+
+    BOOST_CHECK_EQUAL(ox, 5);
+    BOOST_CHECK_EQUAL(oy, 10);
+
+    solver.suggest({{x, 6}, {y, 7}});
+
+    BOOST_CHECK_EQUAL(ox, 6);
+    BOOST_CHECK_EQUAL(oy, 7);
 }
 
 BOOST_AUTO_TEST_CASE (editleak1_test)

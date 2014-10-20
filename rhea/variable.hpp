@@ -29,9 +29,16 @@
 #include "approx.hpp"
 #include "abstract_variable.hpp"
 #include "float_variable.hpp"
+#include "link_variable.hpp"
+#include "action_variable.hpp"
 
 namespace rhea
 {
+
+/** This tag is used in \a variable to link to external variables. */
+struct linked
+{
+};
 
 /** A variable as used in an expression.
  * Variables don't use the normal C++ copy semantics: objects are actually
@@ -74,7 +81,7 @@ class variable
 {
 public:
     variable()
-        : p_{std::make_shared<float_variable>(0.0f)}
+        : p_{std::make_shared<float_variable>(0.0)}
     {
     }
 
@@ -129,11 +136,47 @@ public:
     {
     }
 
-    /** Create a new floating pointe variable.
+    /** Create a new floating point variable.
      * \param value  The variable's initial value
      */
     variable(double value)
         : p_{std::make_shared<float_variable>(value)}
+    {
+    }
+
+    /** Create variable that is linked to an existing integer.
+     *  It is up to you to make sure the linked variable isn't destroyed
+     *  while the solver is still using it.
+     * \param value  This variable will be automatically updated
+     */
+    variable(int& value, const linked&)
+        : p_{std::make_shared<link_int>(value)}
+    {
+    }
+
+    /** Create variable that is linked to an existing float.
+     *  It is up to you to make sure the linked variable isn't destroyed
+     *  while the solver is still using it.
+     * \param value  This variable will be automatically updated
+     */
+    variable(float& value, const linked&)
+        : p_{std::make_shared<link_variable<float>>(value)}
+    {
+    }
+
+    /** Create variable that is linked to an existing double.
+     *  It is up to you to make sure the linked variable isn't destroyed
+     *  while the solver is still using it.
+     * \param value  This variable will be automatically updated
+     */
+    variable(double& value, const linked&)
+        : p_{std::make_shared<link_variable<double>>(value)}
+    {
+    }
+
+    /** Create a variable that calls a function whenever it is updated. */
+    variable(std::function<void(double)> callback, double init_val = 0.0)
+        : p_{std::make_shared<action_variable>(callback, init_val)}
     {
     }
 

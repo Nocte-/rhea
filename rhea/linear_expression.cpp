@@ -195,8 +195,9 @@ void linear_expression::substitute_out(const variable& var,
 {
     auto it = terms_.find(var);
     if (it == terms_.end())
-        throw std::runtime_error("substitute variable is not part of the expression");
-    
+        throw std::runtime_error(
+            "substitute variable is not part of the expression");
+
     double multiplier = it->second;
     terms_.erase(it);
 
