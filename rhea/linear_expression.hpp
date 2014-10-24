@@ -19,7 +19,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
-#include <map>
+#include "flat_map.hpp"
 #include "approx.hpp"
 #include "variable.hpp"
 
@@ -49,7 +49,7 @@ public:
     // It would be nice to use an unordered_map here, but it appears
     // the algorithm is sensitive to the order in which the terms are
     // iterated. (Github issue #16.)
-    typedef std::map<variable, double> terms_map;
+    typedef flat_map<variable, double> terms_map;
 
     typedef terms_map::value_type value_type;
     typedef terms_map::value_type term;

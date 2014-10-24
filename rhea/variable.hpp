@@ -230,7 +230,7 @@ public:
      *  This function is only used for placing variables in hash tables. */
     size_t hash() const
     {
-        return std::hash<std::shared_ptr<abstract_variable>>()(p_);
+        return id();
     }
 
     /** Get a string representation.

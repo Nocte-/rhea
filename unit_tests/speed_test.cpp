@@ -1,4 +1,10 @@
 
+// Does the same speed test as the original C++ version
+//
+// Example (with g++ -O3)
+// Cassowary: add: 5622  edit: 30  resolve: 453  edit: 5ms
+// Rhea:      add: 356   edit: 8   resolve: 423  edit: 6ms
+
 #include <chrono>
 #include <cstdint>
 #include <iostream>
@@ -16,6 +22,12 @@ double grained_rand()
 {
   const double grain (1.0e-4);
   return int(uniform_rand()/grain) * grain;
+}
+
+template <typename v>
+double msec(const v& duration)
+{
+    return std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
 }
 
 int main (int argc, char** argv)
@@ -52,9 +64,9 @@ int main (int argc, char** argv)
             expr += rhea::linear_expression(vars[uniform_rand()*nr_vars]) * coeff;
         }
         if (uniform_rand() < ineq_prob)
-            constraints[j] = new rhea::linear_inequality(std::move(expr));
+            constraints[j] = rhea::linear_inequality(std::move(expr));
         else
-            constraints[j] = new rhea::linear_equation(std::move(expr));
+            constraints[j] = rhea::linear_equation(std::move(expr));
     }
 
     auto timer (clock.now());
@@ -113,10 +125,9 @@ int main (int argc, char** argv)
 
     // ------
 
-    double f (0.001);
-    std::cout << "add: " << time_add.count()*f << "ms  edit: " << time_edit.count()*f
-              << "ms  resolve: " << time_resolve.count()*f << "ms  endedit: "
-              << time_endedit.count()*f << "ms" << std::endl;
+    std::cout << "add: " << msec(time_add) << "  edit: " << msec(time_edit)
+              << "  resolve: " << msec(time_resolve) << "  endedit: "
+              << msec(time_endedit) << std::endl;
 
     return 0;
 }

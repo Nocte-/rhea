@@ -187,7 +187,8 @@ void linear_expression::change_subject(const variable& old_subj,
     if (old_subj.is(new_subj))
         return;
 
-    terms_[old_subj] = new_subject(new_subj);
+    double tmp = new_subject(new_subj);
+    terms_[old_subj] = tmp;
 }
 
 void linear_expression::substitute_out(const variable& var,

@@ -57,6 +57,7 @@ BOOST_AUTO_TEST_CASE (strength_test)
 
 BOOST_AUTO_TEST_CASE (variable_test)
 {
+    variable a;
     variable m (variable::nil_var()), n (variable::nil_var());
     variable x (3.0);
     variable y (x);
@@ -64,6 +65,7 @@ BOOST_AUTO_TEST_CASE (variable_test)
 
     BOOST_CHECK(n.is_nil());
     n = x;
+    a = y;
     BOOST_CHECK(m.is_nil());
     BOOST_CHECK(!n.is_nil());
     BOOST_CHECK(!x.is_nil());
@@ -76,12 +78,14 @@ BOOST_AUTO_TEST_CASE (variable_test)
     BOOST_CHECK_EQUAL(x.value(), 3);
     BOOST_CHECK_EQUAL(x.int_value(), 3);
     BOOST_CHECK_EQUAL(y.value(), 3);
+    BOOST_CHECK_EQUAL(a.value(), 3);
 
     std::hash<variable> h;
     BOOST_CHECK_EQUAL(h(x), h(y));
     BOOST_CHECK(x.is(y));
     BOOST_CHECK(h(x) != h(z));
     BOOST_CHECK(!x.is(z));
+    BOOST_CHECK(a.is(x));
 
     y.set_value(3.7);
     BOOST_CHECK_EQUAL(n.value(), 3.7);
