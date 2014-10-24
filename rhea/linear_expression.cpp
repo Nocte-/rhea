@@ -184,7 +184,6 @@ void linear_expression::change_subject(const variable& old_subj,
                                        const variable& new_subj)
 {
     assert(!new_subj.is_nil());
-    assert(!near_zero(coefficient(new_subj)));
     if (old_subj.is(new_subj))
         return;
 
@@ -201,8 +200,10 @@ void linear_expression::substitute_out(const variable& var,
             "substitute variable is not part of the expression");
     }
     double multiplier = it->second;
-    assert(!near_zero(multiplier));
     terms_.erase(it);
+
+    if (near_zero(multiplier))
+        return;
 
     increment_constant(multiplier * expr.constant());
     for (auto& p : expr.terms()) {
