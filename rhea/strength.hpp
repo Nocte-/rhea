@@ -19,6 +19,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
+#include <limits>
 #include <string>
 #include "symbolic_weight.hpp"
 
@@ -74,7 +75,11 @@ public:
 
     /** Constraints with this strength must be satisfied.
      *  Used by default for constraints provided by the programmer. */
-    static strength required() { return {1000, 1000, 1000}; }
+    static strength required()
+    {
+        constexpr double z = std::numeric_limits<double>::max();
+        return {z, z, z};
+    }
 
     /** The default strength for edit constraints. */
     static strength strong() { return {1, 0, 0}; }

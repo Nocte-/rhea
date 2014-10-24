@@ -30,9 +30,11 @@ namespace rhea
 class abstract_variable
 {
 public:
-    abstract_variable() {}
+    abstract_variable() : id_{++count_} {}
 
     virtual ~abstract_variable() {}
+
+    size_t id() const { return id_; }
 
     /** Return true if this is a floating point variable.
      * \sa float_variable */
@@ -80,6 +82,13 @@ public:
 
     /** Get the value as a string. */
     virtual std::string to_string() const { return "abstract"; }
+
+private:
+    // Not happy with this, but it appears the algorithm needs this to run
+    // with the autosolver turned off.  (Expression terms need a stable
+    // iteration order, see also Github issue #16.)
+    static size_t count_;
+    size_t id_;
 };
 
 } // namespace rhea

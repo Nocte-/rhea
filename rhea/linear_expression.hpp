@@ -19,7 +19,7 @@
 //---------------------------------------------------------------------------
 #pragma once
 
-#include <unordered_map>
+#include <map>
 #include "approx.hpp"
 #include "variable.hpp"
 
@@ -46,7 +46,10 @@ expr.evaluate(); // Returns '22'
 class linear_expression
 {
 public:
-    typedef std::unordered_map<variable, double> terms_map;
+    // It would be nice to use an unordered_map here, but it appears
+    // the algorithm is sensitive to the order in which the terms are
+    // iterated. (Github issue #16.)
+    typedef std::map<variable, double> terms_map;
 
     typedef terms_map::value_type value_type;
     typedef terms_map::value_type term;

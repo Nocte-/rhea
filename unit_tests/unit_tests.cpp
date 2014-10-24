@@ -42,15 +42,30 @@ namespace std
 BOOST_AUTO_TEST_CASE (strength_test)
 {
     BOOST_CHECK(strength::required().is_required());
+    BOOST_CHECK(!strength::strong().is_required());
+    BOOST_CHECK(!strength::medium().is_required());
+    BOOST_CHECK(!strength::weak().is_required());
+
+    BOOST_CHECK(strength::required() > strength::strong());
+    BOOST_CHECK(strength::strong() > strength::medium());
+    BOOST_CHECK(strength::medium() > strength::weak());
+
+    double z = 10000000.0;
+    BOOST_CHECK(strength(0, 0, z) < strength(0, 1, 0));
+    BOOST_CHECK(strength(0, z, z) < strength(1, 0, 0));
 }
 
 BOOST_AUTO_TEST_CASE (variable_test)
 {
+    variable m (variable::nil_var()), n (variable::nil_var());
     variable x (3.0);
     variable y (x);
     variable z (3.0);
 
-    BOOST_CHECK(variable::nil_var().is_nil());
+    BOOST_CHECK(n.is_nil());
+    n = x;
+    BOOST_CHECK(m.is_nil());
+    BOOST_CHECK(!n.is_nil());
     BOOST_CHECK(!x.is_nil());
     BOOST_CHECK(!y.is_nil());
     BOOST_CHECK(!x.is_fd());
@@ -69,6 +84,7 @@ BOOST_AUTO_TEST_CASE (variable_test)
     BOOST_CHECK(!x.is(z));
 
     y.set_value(3.7);
+    BOOST_CHECK_EQUAL(n.value(), 3.7);
     BOOST_CHECK_EQUAL(x.value(), 3.7);
     BOOST_CHECK_EQUAL(x.int_value(), 4);
 
@@ -749,3 +765,57 @@ BOOST_AUTO_TEST_CASE (required_strength2)
 
     BOOST_CHECK_EQUAL(v.value(), 0);
 }
+
+BOOST_AUTO_TEST_CASE (bug_16)
+{
+    variable a(1), b(2);
+    simplex_solver solver;
+
+    solver.set_autosolve(false);
+    solver.add_stay(a);
+    BOOST_CHECK(solver.is_valid());
+
+    solver.add_constraints({ a == b });
+
+    BOOST_CHECK(solver.is_valid());
+    solver.add_edit_var(a);
+
+    solver.begin_edit();
+    solver.suggest_value(a, 3);
+    solver.end_edit();
+
+    BOOST_CHECK(solver.is_valid());
+
+    BOOST_CHECK_EQUAL(a.value(), 3);
+    BOOST_CHECK_EQUAL(b.value(), 3);
+}
+
+BOOST_AUTO_TEST_CASE (bug_16b)
+{
+    simplex_solver solver;
+    variable a, b, c;
+
+    solver.set_autosolve(false);
+
+    solver.add_stays({ a, c });
+
+    solver.add_constraints({
+        a == 10,
+        b == c
+    });
+
+    solver.suggest({{ c, 100 }});
+
+    BOOST_CHECK_EQUAL(a.value(), 10);
+    BOOST_CHECK_EQUAL(b.value(), 100);
+    BOOST_CHECK_EQUAL(c.value(), 100);
+
+    solver.suggest({
+        { c, 90 }
+    });
+
+    BOOST_CHECK_EQUAL(a.value(), 10);
+    BOOST_CHECK_EQUAL(b.value(), 90);
+    BOOST_CHECK_EQUAL(c.value(), 90);
+}
+

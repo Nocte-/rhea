@@ -62,7 +62,7 @@ linear_expression& linear_expression::operator*=(const linear_expression& x)
     if (is_constant())
         return *this = x * constant();
 
-    else if (!x.is_constant())
+    if (!x.is_constant())
         throw nonlinear_expression();
 
     return operator*=(x.constant());
@@ -73,7 +73,7 @@ linear_expression& linear_expression::operator/=(const linear_expression& x)
     if (is_constant())
         return *this = x / constant();
 
-    else if (!x.is_constant())
+    if (!x.is_constant())
         throw nonlinear_expression();
 
     return operator/=(x.constant());
@@ -112,8 +112,9 @@ linear_expression& linear_expression::operator-=(const linear_expression& x)
 linear_expression& linear_expression::operator-=(const term& x)
 {
     auto i = terms_.find(x.first);
-    if (i == terms_.end() && !near_zero(x.second)) {
-        terms_[x.first] = -x.second;
+    if (i == terms_.end()) {
+        if (!near_zero(x.second))
+            terms_[x.first] = -x.second;
     } else if (near_zero(i->second -= x.second)) {
         terms_.erase(i);
     }
@@ -151,6 +152,7 @@ linear_expression& linear_expression::add(const variable& v, double c,
 
 variable linear_expression::find_pivotable_variable() const
 {
+    assert(!is_constant());
     auto found = std::find_if(
         terms_.begin(), terms_.end(),
         [&](const value_type& x) { return x.first.is_pivotable(); });
@@ -194,29 +196,27 @@ void linear_expression::substitute_out(const variable& var,
                                        const variable& subj, tableau& solver)
 {
     auto it = terms_.find(var);
-    if (it == terms_.end())
+    if (it == terms_.end()) {
         throw std::runtime_error(
             "substitute variable is not part of the expression");
-
+    }
     double multiplier = it->second;
+    assert(!near_zero(multiplier));
     terms_.erase(it);
 
     increment_constant(multiplier * expr.constant());
     for (auto& p : expr.terms()) {
         const variable& v = p.first;
-        double c = multiplier * p.second;
+        double mc = multiplier * p.second;
 
         auto oc = terms_.find(v);
         if (oc != terms_.end()) {
-            double new_coeff = oc->second + c;
-            if (near_zero(new_coeff)) {
+            if (near_zero(oc->second += mc)) {
                 solver.note_removed_variable(oc->first, subj);
                 terms_.erase(oc);
-            } else {
-                oc->second = new_coeff;
             }
         } else {
-            terms_[v] = c;
+            terms_[v] = mc;
             solver.note_added_variable(v, subj);
         }
     }

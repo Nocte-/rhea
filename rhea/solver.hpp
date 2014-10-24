@@ -112,16 +112,6 @@ public:
         return *this;
     }
 
-    solver& add_stays(const std::list<variable>& vs,
-                      const strength& s = strength::weak(),
-                      double weight = 1.0)
-    {
-        for (auto& v : vs)
-            add_constraint(std::make_shared<stay_constraint>(v, s, weight));
-
-        return *this;
-    }
-
     solver& remove_constraint(const constraint& c)
     {
         remove_constraint_(c);

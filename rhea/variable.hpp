@@ -212,7 +212,7 @@ public:
     bool is_restricted() const { return p_->is_restricted(); }
 
     /** Get the value of this variable. */
-    double value() const { return p_->value(); }
+    double value() const { assert(!is_nil()); return p_->value(); }
 
     /** Get the value of this variable, converted to an integer. */
     int int_value() const { return p_->int_value(); }
@@ -233,7 +233,9 @@ public:
         return std::hash<std::shared_ptr<abstract_variable>>()(p_);
     }
 
-    /** Get a string representation of the value. */
+    /** Get a string representation.
+     *  For ordinary variables, this will be the value.  Special variables
+     *  will print 'dummy', 'slack', or 'edit'. */
     std::string to_string() const
     {
         return is_nil() ? "NIL" : p_->to_string();
@@ -251,6 +253,13 @@ public:
      * \endcode
      */
     bool is(const variable& x) const { return p_ == x.p_; }
+
+    /** Helper function so rhea::variable can be used in a std::map */
+    bool is_less(const variable& x) const { return id() < x.id(); }
+
+    /** Get the variable's unique ID.
+     *  Do not use: this function may disappear in future versions. */
+    size_t id() const { return p_->id(); }
 
 private:
     struct nil_
@@ -292,8 +301,20 @@ struct equal_to<rhea::variable>
     }
 };
 
-/**  */
-inline std::string to_string(const rhea::variable& v)
+/** Strict weak ordering, required for std::map and set. */
+template <>
+struct less<rhea::variable>
+    : public binary_function<rhea::variable, rhea::variable, bool>
+{
+    bool operator()(const rhea::variable& a, const rhea::variable& b) const
+    {
+        return a.is_less(b);
+    }
+};
+
+
+/** Get a string representation of a variable. */
+inline string to_string(const rhea::variable& v)
 {
     return v.to_string();
 }

@@ -72,7 +72,7 @@ public:
      ** expression, so the column indices can be updated. */
     void note_added_variable(const variable& v, const variable& subj);
 
-    /** Check the internal consistency this data structure. */
+    /** Check the internal consistency of this data structure. */
     bool is_valid() const;
 
 public:

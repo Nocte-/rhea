@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------------
-// solver.cpp
+// simplex_solver.cpp
 //
 // This file is part of Rhea.  Rhea is free software: you can redistribute
 // it and/or modify it under the terms of the GNU Lesser General Public
@@ -39,7 +39,7 @@ simplex_solver::simplex_solver()
     cedcns_.push(0);
 }
 
-template <class container, typename func>
+template <typename container, typename func>
 void remove_from_container_if(container& c, func pred)
 {
     c.erase(std::remove_if(c.begin(), c.end(), pred));
@@ -119,7 +119,7 @@ simplex_solver::make_expression(const constraint& c)
             constraints_marked_[eplus] = c;
 
             auto& rowexp = row_expression(objective_);
-            double coeff{c.adjusted_symbolic_weight()};
+            double coeff = c.adjusted_symbolic_weight();
 
             rowexp.set(eplus, coeff);
             note_added_variable(eplus, objective_);
@@ -172,7 +172,7 @@ solver& simplex_solver::add_constraint_(const constraint& c)
 
     auto r = make_expression(c);
 
-    bool added_ok_directly{false};
+    bool added_ok_directly = false;
     try {
         added_ok_directly = try_adding_directly(r.expr);
     } catch (required_failure&) {
@@ -233,19 +233,19 @@ solver& simplex_solver::remove_constraint_(const constraint& c)
     if (!is_basic_var(marker)) {
         // Try to make this marker variable basic.
         auto& col = columns_[marker];
-        bool exit_var_set{false};
-        double min_ratio{0.0};
+        bool exit_var_set = false;
+        double min_ratio = 0.0;
         variable exit_var{variable::nil_var()};
 
         for (auto& v : col) {
             if (v.is_restricted()) {
                 auto& expr = row_expression(v);
-                double coeff{expr.coefficient(marker)};
+                double coeff = expr.coefficient(marker);
 
                 if (coeff >= 0.0)
                     continue; // Only consider negative coefficients
 
-                double r{-expr.constant() / coeff};
+                double r = -expr.constant() / coeff;
                 if (!exit_var_set || r < min_ratio) {
                     min_ratio = r;
                     exit_var = v;
@@ -266,8 +266,8 @@ solver& simplex_solver::remove_constraint_(const constraint& c)
             for (auto& v : col) {
                 if (v.is_restricted()) {
                     auto& expr = row_expression(v);
-                    double coeff{expr.coefficient(marker)};
-                    double r{expr.constant() / coeff};
+                    double coeff = expr.coefficient(marker);
+                    double r = expr.constant() / coeff;
 
                     if (!exit_var_set || r < min_ratio) {
                         min_ratio = r;
@@ -384,6 +384,7 @@ void simplex_solver::solve_()
 {
     optimize(objective_);
     set_external_variables();
+    needs_solving_ = false;
 
     if (on_resolve)
         on_resolve(*this);
@@ -464,7 +465,7 @@ simplex_solver& simplex_solver::remove_edit_vars_to(size_t n)
 {
     std::queue<variable> qv;
     variable_set still_editing; // Variables that we need to *not* remove
-    size_t i{0};
+    size_t i = 0;
     for (auto it = edit_info_list_.begin();
          it != edit_info_list_.end() && edit_info_list_.size() != n;
          ++it, ++i) {
@@ -524,11 +525,11 @@ simplex_solver& simplex_solver::remove_edit_var(const variable& v)
 variable simplex_solver::choose_subject(linear_expression& expr)
 {
     variable subj{variable::nil_var()};
-    bool found_unrestricted(false), found_new_restricted(false);
+    bool found_unrestricted = false, found_new_restricted = false;
 
     for (auto& term : expr.terms()) {
-        const variable& v{term.first};
-        double c{term.second};
+        const variable& v = term.first;
+        double c = term.second;
 
         if (found_unrestricted) {
             // We have already found an unrestricted variable.  The only
@@ -571,9 +572,9 @@ variable simplex_solver::choose_subject(linear_expression& expr)
 
     // Make one last check -- if all of the variables in expr are dummy
     // variables, then we can pick a dummy variable as the subject.
-    double coeff{0.0};
+    double coeff = 0.0;
     for (auto& term : expr.terms()) {
-        const variable& v{term.first};
+        const variable& v = term.first;
         if (!v.is_dummy())
             return variable::nil_var(); // Nope, no luck.
 
@@ -600,46 +601,45 @@ variable simplex_solver::choose_subject(linear_expression& expr)
 
 void simplex_solver::optimize(const variable& v)
 {
+    std::less<variable> ord;
     auto& row = row_expression(v);
 
     variable entry(variable::nil_var()), exit(variable::nil_var());
 
     while (true) {
-        double coeff{0.0};
         // Find the most negative coefficient in the objective function
         // (ignoring the non-pivotable dummy variables).  If all
         // coefficients are positive we're done.
+        bool found_negative = false;
         for (auto& p : row.terms()) {
-            const variable& v{p.first};
-            double c{p.second};
-
-            if (v.is_pivotable() && c < coeff) {
-                coeff = c;
+            const variable& v = p.first;
+            if (v.is_pivotable() && p.second < 0.0) {
                 entry = v;
+                found_negative = true;
                 break;
             }
         }
 
         // If all coefficients were positive (or if the objective
         // function has no pivotable variables) we are at an optimum.
-        if (coeff >= -1e-8)
+        if (!found_negative)
             return;
 
         // Choose which variable to move out of the basis.
         // Only consider pivotable basic variables
         // (i.e. restricted, non-dummy variables).
         double min_ratio{std::numeric_limits<double>::max()};
-        double r{0.0};
+        double r = 0.0;
         for (const variable& v : columns_[entry]) {
             if (v.is_pivotable()) {
                 const auto& expr = row_expression(v);
-                double coeff{expr.coefficient(entry)};
+                double coeff = expr.coefficient(entry);
 
                 if (coeff >= 0) // Only consider negative coefficients
                     continue;
 
                 r = -expr.constant() / coeff;
-                if (r < min_ratio) {
+                if (r < min_ratio || (approx(r, min_ratio) && ord(v, exit))) {
                     min_ratio = r;
                     exit = v;
                 }
@@ -662,7 +662,7 @@ void simplex_solver::delta_edit_constant(double delta, const variable& plus,
 {
     // Check if the variables are basic
     if (is_basic_var(plus)) {
-        auto& expr(row_expression(plus));
+        auto& expr = row_expression(plus);
         expr.increment_constant(delta);
         if (expr.constant() < 0)
             infeasible_rows_.insert(plus);
@@ -670,7 +670,7 @@ void simplex_solver::delta_edit_constant(double delta, const variable& plus,
         return;
     }
     if (is_basic_var(minus)) {
-        auto& expr(row_expression(minus));
+        auto& expr = row_expression(minus);
         expr.increment_constant(-delta);
         if (expr.constant() < 0)
             infeasible_rows_.insert(minus);
@@ -683,6 +683,7 @@ void simplex_solver::delta_edit_constant(double delta, const variable& plus,
     // in which they occur by finding the column for the minusErrorVar
     // (it doesn't matter whether we look for that one or for
     // plusErrorVar).  Fix the constants in these expressions.
+
     for (auto& v : columns_[minus]) {
         auto& expr(row_expression(v));
         expr.increment_constant(expr.coefficient(minus) * delta);
@@ -709,13 +710,13 @@ void simplex_solver::dual_optimize()
         if (expr.constant() >= 0)
             continue; // Skip this row if it's feasible.
 
-        double ratio{std::numeric_limits<double>::max()};
-        double r{0.0};
+        double ratio = std::numeric_limits<double>::max();
+        double r = 0.0;
         variable entry_var{variable::nil_var()};
 
         for (auto& p : expr.terms()) {
             const variable& v = p.first;
-            double c{p.second};
+            double c = p.second;
             if (c > 0 && v.is_pivotable()) {
                 r = row.coefficient(v) / c;
                 if (r < ratio) {
@@ -815,10 +816,10 @@ void simplex_solver::change_strength_and_weight(constraint c,
     if (ie == error_vars_.end())
         return;
 
-    double old_coeff{c.adjusted_symbolic_weight()};
+    double old_coeff = c.adjusted_symbolic_weight();
     c.set_strength(s);
     c.set_weight(weight);
-    double new_coeff{c.adjusted_symbolic_weight()};
+    double new_coeff = c.adjusted_symbolic_weight();
 
     if (new_coeff == old_coeff)
         return;

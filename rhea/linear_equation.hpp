@@ -107,12 +107,12 @@ inline linear_equation operator==(const variable& lhs,
 
 inline linear_equation operator==(const variable& lhs, const variable& rhs)
 {
-    return linear_expression(lhs) -= rhs;
+    return linear_expression{lhs} -= rhs;
 }
 
 inline linear_equation operator==(const variable& lhs, double rhs)
 {
-    return linear_expression(lhs, 1, -rhs);
+    return linear_expression{lhs, 1, -rhs};
 }
 
 } // namespace rhea
