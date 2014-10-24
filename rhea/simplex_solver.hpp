@@ -95,11 +95,21 @@ public:
      *  after resolve() or end_edit() has been called. */
     simplex_solver& suggest_value(const variable& v, double x);
 
-    /** Suggest new values for a list of variables.
+    /** Suggest a new value for a variables.
+     *  This function calls add_edit_variable(), begin_edit(), and
+     *  end_edit() as well.
      * \code
-     solver.suggest({ { width, 200 }, { height, 150 } });
+     solver.suggest(width, 200);
      * \endcode */
-    void suggest(const std::list<suggestion>& suggestions);
+    simplex_solver& suggest(const variable& v, double x);
+
+    /** Suggest new values for a list of variables.
+     *  This function calls add_edit_variable(), begin_edit(), and
+     *  end_edit() as well.
+     * \code
+     solver.suggest({{ width, 200 }, { height, 150 }});
+     * \endcode */
+    simplex_solver& suggest(const std::list<suggestion>& suggestions);
 
     /** If autosolving has been turned off, client code needs to explicitly
      ** call this function before accessing variables values. */
