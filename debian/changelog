@@ -1,3 +1,9 @@
+rhea (0.2.2) UNRELEASED; urgency=medium
+
+  * Renamed COPYING to LICENSE.md
+
+ -- Nocte <nocte@hippie.nu>  Wed, 05 Nov 2014 22:24:57 +0100
+
 rhea (0.2.1) raring; urgency=medium
 
   * Changed the license to MIT/Expat.
