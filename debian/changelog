@@ -1,3 +1,9 @@
+rhea (0.2.1) raring; urgency=medium
+
+  * Changed the license to MIT/Expat.
+
+ -- Nocte <nocte@hippie.nu>  Wed, 05 Nov 2014 22:03:58 +0100
+
 rhea (0.2.0) raring; urgency=medium
 
   * Add linked and action variables.

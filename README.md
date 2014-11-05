@@ -60,5 +60,5 @@ in an actual application yet.  Use at your own peril.
 License
 -------
 Rhea is free software: you can redistribute it and/or modify it under the
-terms of the [GNU Lesser General Public License version 3](https://www.gnu.org/licenses/lgpl.html).
+terms of the [MIT/Expat license](https://opensource.org/licenses/MIT).
 

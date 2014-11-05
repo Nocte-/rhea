@@ -2,6 +2,7 @@
 /// \file   flat_map.hpp
 /// \brief  Replacement for boost::flat_map (VS2013 workaround)
 //
+// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 // Because VS2013 can't compile boost::flat_map, we use this one as a
