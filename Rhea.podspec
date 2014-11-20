@@ -18,6 +18,7 @@ Pod::Spec.new do |s|
        'CLANG_CXX_LIBRARY' => 'libc++'
     }
     s.platform      = :ios, '6.0'
+    s.requires_arc  = true
 
     s.subspec 'Default' do |ss|
         ss.dependency      'Rhea/Core'
