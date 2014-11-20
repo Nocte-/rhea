@@ -17,7 +17,10 @@ namespace rhea
 class abstract_variable
 {
 public:
-    abstract_variable() : id_{++count_} {}
+    abstract_variable()
+        : id_{++count_}
+    {
+    }
 
     virtual ~abstract_variable() {}
 

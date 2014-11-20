@@ -21,7 +21,7 @@ inline ostream& operator<<(ostream& str, const rhea::variable& v)
 {
     if (v.is_float())
         return str << v.to_string();
-        //return str << "[v" << v.id() << ":" << v.to_string() << "]";
+    // return str << "[v" << v.id() << ":" << v.to_string() << "]";
 
     return str << "[" << v.to_string() << v.id() << "]";
 }
@@ -45,8 +45,7 @@ inline ostream& operator<<(ostream& str, const rhea::linear_expression& v)
 inline ostream& operator<<(ostream& str, const rhea::tableau& v)
 {
     str << "Tableau columns" << std::endl;
-    for (auto& col : v.columns())
-    {
+    for (auto& col : v.columns()) {
         str << "  " << col.first << " : ";
         for (auto& var : col.second)
             str << var << "  ";

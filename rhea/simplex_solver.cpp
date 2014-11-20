@@ -356,7 +356,8 @@ simplex_solver& simplex_solver::suggest(const variable& v, double x)
     return *this;
 }
 
-simplex_solver& simplex_solver::suggest(const std::list<suggestion>& suggestions)
+simplex_solver&
+simplex_solver::suggest(const std::list<suggestion>& suggestions)
 {
     for (auto& sugg : suggestions)
         add_edit_var(sugg.v);

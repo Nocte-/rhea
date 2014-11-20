@@ -18,28 +18,33 @@ struct point
 {
     variable x, y;
 
-    point(double a = 0, double b = 0) : x(a), y(b) { }
+    point(double a = 0, double b = 0)
+        : x(a)
+        , y(b)
+    {
+    }
 
-    bool operator ==(const std::pair<int,int>& p) const
-        { return x.value() == p.first && y.value() == p.second; }
+    bool operator==(const std::pair<int, int>& p) const
+    {
+        return x.value() == p.first && y.value() == p.second;
+    }
 };
 
 namespace std
 {
-    template <typename a, typename b>
-    std::ostream& operator<< (std::ostream& s, const std::pair<a,b>& p)
-    {
-        return s << p.first << "," << p.second;
-    }
-
-    inline
-    std::ostream& operator<< (std::ostream& s, const point& p)
-    {
-        return s << p.x << " " << p.y;
-    }
+template <typename a, typename b>
+std::ostream& operator<<(std::ostream& s, const std::pair<a, b>& p)
+{
+    return s << p.first << "," << p.second;
 }
 
-BOOST_AUTO_TEST_CASE (strength_test)
+inline std::ostream& operator<<(std::ostream& s, const point& p)
+{
+    return s << p.x << " " << p.y;
+}
+}
+
+BOOST_AUTO_TEST_CASE(strength_test)
 {
     BOOST_CHECK(strength::required().is_required());
     BOOST_CHECK(!strength::strong().is_required());
@@ -55,13 +60,13 @@ BOOST_AUTO_TEST_CASE (strength_test)
     BOOST_CHECK(strength(0, z, z) < strength(1, 0, 0));
 }
 
-BOOST_AUTO_TEST_CASE (variable_test)
+BOOST_AUTO_TEST_CASE(variable_test)
 {
     variable a;
-    variable m (variable::nil_var()), n (variable::nil_var());
-    variable x (3.0);
-    variable y (x);
-    variable z (3.0);
+    variable m(variable::nil_var()), n(variable::nil_var());
+    variable x(3.0);
+    variable y(x);
+    variable z(3.0);
 
     BOOST_CHECK(n.is_nil());
     n = x;
@@ -111,23 +116,23 @@ BOOST_AUTO_TEST_CASE (variable_test)
     BOOST_CHECK_EQUAL(objective_variable().to_string(), "objective");
 }
 
-BOOST_AUTO_TEST_CASE (variable_stream_test)
+BOOST_AUTO_TEST_CASE(variable_stream_test)
 {
-    variable x (3.0);
+    variable x(3.0);
     std::stringstream s;
     s << x;
-    BOOST_CHECK_EQUAL(s.str().substr(0,3), "3.0");
+    BOOST_CHECK_EQUAL(s.str().substr(0, 3), "3.0");
 }
 
-BOOST_AUTO_TEST_CASE (linearexpr1_test)
+BOOST_AUTO_TEST_CASE(linearexpr1_test)
 {
-    linear_expression expr1 (5);
+    linear_expression expr1(5);
     BOOST_CHECK_EQUAL(expr1.evaluate(), 5);
     expr1 *= -1;
     BOOST_CHECK_EQUAL(expr1.evaluate(), -5);
 
-    variable x (3.0), y (2.0);
-    linear_expression expr2 (x, 2.0, 1.0);
+    variable x(3.0), y(2.0);
+    linear_expression expr2(x, 2.0, 1.0);
     BOOST_CHECK_EQUAL(expr2.evaluate(), 7);
     BOOST_CHECK_EQUAL((expr2 + 2.0).evaluate(), 9);
     BOOST_CHECK_EQUAL((expr2 - 1.0).evaluate(), 6);
@@ -149,24 +154,24 @@ BOOST_AUTO_TEST_CASE (linearexpr1_test)
     BOOST_CHECK_EQUAL(expr2.evaluate(), -26);
 }
 
-BOOST_AUTO_TEST_CASE (linearexpr2_test)
+BOOST_AUTO_TEST_CASE(linearexpr2_test)
 {
-    variable x (3);
-    linear_expression test1 (x, 5, 2);
-    linear_expression test2 (test1);
+    variable x(3);
+    linear_expression test1(x, 5, 2);
+    linear_expression test2(test1);
 
     BOOST_CHECK_EQUAL(test1.evaluate(), 17);
     BOOST_CHECK_EQUAL(test1.evaluate(), 17);
 
-    linear_expression test3 (std::move(test1));
+    linear_expression test3(std::move(test1));
     BOOST_CHECK_EQUAL(test3.evaluate(), 17);
 }
 
-BOOST_AUTO_TEST_CASE (linearexpr3_test)
+BOOST_AUTO_TEST_CASE(linearexpr3_test)
 {
-    variable x (5), y (2);
+    variable x(5), y(2);
 
-    linear_expression expr (x * 2 + y - 1);
+    linear_expression expr(x * 2 + y - 1);
     BOOST_CHECK_EQUAL(expr.evaluate(), 11);
 
     x.set_value(4);
@@ -178,26 +183,26 @@ BOOST_AUTO_TEST_CASE (linearexpr3_test)
     BOOST_CHECK_EQUAL((x - y).evaluate(), 2);
 }
 
-BOOST_AUTO_TEST_CASE (linear_equation1_test)
+BOOST_AUTO_TEST_CASE(linear_equation1_test)
 {
-    variable x (2.0);
-    linear_expression expr (x, 4.0, 1.0);
-    variable answer (9.0);
+    variable x(2.0);
+    linear_expression expr(x, 4.0, 1.0);
+    variable answer(9.0);
 
-    linear_equation eq1 (expr, answer);
+    linear_equation eq1(expr, answer);
     BOOST_CHECK(eq1.is_satisfied());
 
-    linear_expression expr2 (x, 3.0, 3.0);
-    linear_equation eq2 (expr, expr2);
+    linear_expression expr2(x, 3.0, 3.0);
+    linear_equation eq2(expr, expr2);
     BOOST_CHECK(eq2.is_satisfied());
 
-    linear_equation eq3 (expr, variable(42.0));
+    linear_equation eq3(expr, variable(42.0));
     BOOST_CHECK(!eq3.is_satisfied());
 }
 
-BOOST_AUTO_TEST_CASE (linear_equation2_test)
+BOOST_AUTO_TEST_CASE(linear_equation2_test)
 {
-    variable x (2.0), y (3.0);
+    variable x(2.0), y(3.0);
 
     BOOST_CHECK((x == y - 1).is_satisfied());
     BOOST_CHECK(!(x == y).is_satisfied());
@@ -205,21 +210,21 @@ BOOST_AUTO_TEST_CASE (linear_equation2_test)
     BOOST_CHECK(!(x * 3 == y * 4).is_satisfied());
 }
 
-BOOST_AUTO_TEST_CASE (linear_inequality1_test)
+BOOST_AUTO_TEST_CASE(linear_inequality1_test)
 {
-    variable x (2.0);
-    linear_expression expr (x, 4.0, 1.0);
-    variable answer (5.0);
+    variable x(2.0);
+    linear_expression expr(x, 4.0, 1.0);
+    variable answer(5.0);
 
-    linear_inequality eq1 (answer, relation::leq, expr);
+    linear_inequality eq1(answer, relation::leq, expr);
     BOOST_CHECK(eq1.is_satisfied());
     x.set_value(0);
     BOOST_CHECK(!eq1.is_satisfied());
 }
 
-BOOST_AUTO_TEST_CASE (linear_inequality2_test)
+BOOST_AUTO_TEST_CASE(linear_inequality2_test)
 {
-    variable x (2.0), y (3.0);
+    variable x(2.0), y(3.0);
     BOOST_CHECK((x < y).is_satisfied());
     BOOST_CHECK((x + 1 <= y).is_satisfied());
     BOOST_CHECK((x * 2 + y > 4).is_satisfied());
@@ -229,14 +234,14 @@ BOOST_AUTO_TEST_CASE (linear_inequality2_test)
 
 //-------------------------------------------------------------------------
 
-BOOST_AUTO_TEST_CASE (simple1_test)
+BOOST_AUTO_TEST_CASE(simple1_test)
 {
-    variable x (167);
-    variable y (2);
+    variable x(167);
+    variable y(2);
 
     simplex_solver solver;
 
-    constraint c (std::make_shared<linear_equation>(x, linear_expression(y)));
+    constraint c(std::make_shared<linear_equation>(x, linear_expression(y)));
     solver.add_stay(x);
     solver.add_stay(y);
     solver.add_constraint(c);
@@ -250,31 +255,30 @@ BOOST_AUTO_TEST_CASE (simple1_test)
     BOOST_CHECK(!stay_constraint(x).is_satisfied());
 }
 
-BOOST_AUTO_TEST_CASE (simple2_test)
+BOOST_AUTO_TEST_CASE(simple2_test)
 {
-    variable x (167);
+    variable x(167);
 
     simplex_solver solver;
 
-    BOOST_CHECK_THROW( (solver.add_edit_var(x),
-                        solver.begin_edit(),
-                        solver.suggest_value(x, 100),
-                        solver.end_edit()),
-                        edit_misuse);
+    BOOST_CHECK_THROW((solver.add_edit_var(x), solver.begin_edit(),
+                       solver.suggest_value(x, 100), solver.end_edit()),
+                      edit_misuse);
 
     BOOST_CHECK_EQUAL(std::string(edit_misuse().what()),
                       "edit protocol usage violation");
 }
 
-BOOST_AUTO_TEST_CASE (constraint1_test)
+BOOST_AUTO_TEST_CASE(constraint1_test)
 {
-    variable x (0);
+    variable x(0);
     simplex_solver solver;
-    solver.add_constraint(std::make_shared<linear_equation>(x, 10, strength::weak()));
+    solver.add_constraint(
+        std::make_shared<linear_equation>(x, 10, strength::weak()));
     BOOST_CHECK_EQUAL(x.value(), 10.0);
 }
 
-BOOST_AUTO_TEST_CASE (juststay1_test)
+BOOST_AUTO_TEST_CASE(juststay1_test)
 {
     variable x(5), y(10);
     simplex_solver solver;
@@ -290,7 +294,7 @@ BOOST_AUTO_TEST_CASE (juststay1_test)
     BOOST_CHECK_EQUAL(y.value(), 7);
 }
 
-BOOST_AUTO_TEST_CASE (juststaylink1_test)
+BOOST_AUTO_TEST_CASE(juststaylink1_test)
 {
     float ox = 5.0f, oy = 10.0f;
     variable x(ox, linked()), y(oy, linked());
@@ -310,7 +314,7 @@ BOOST_AUTO_TEST_CASE (juststaylink1_test)
     BOOST_CHECK_EQUAL(oy, 7);
 }
 
-BOOST_AUTO_TEST_CASE (juststaylink2_test)
+BOOST_AUTO_TEST_CASE(juststaylink2_test)
 {
     int ox = 5, oy = 10;
     variable x(ox, linked()), y(oy, linked());
@@ -327,11 +331,11 @@ BOOST_AUTO_TEST_CASE (juststaylink2_test)
     BOOST_CHECK_EQUAL(oy, 7);
 }
 
-BOOST_AUTO_TEST_CASE (juststaylink3_test)
+BOOST_AUTO_TEST_CASE(juststaylink3_test)
 {
     double ox = 5, oy = 10;
-    variable x ([&](double v){ ox = v; }, 5.0);
-    variable y ([&](double v){ oy = v; }, 10.0);
+    variable x([&](double v) { ox = v; }, 5.0);
+    variable y([&](double v) { oy = v; }, 10.0);
     simplex_solver solver;
 
     solver.add_stay(x).add_stay(y);
@@ -345,9 +349,9 @@ BOOST_AUTO_TEST_CASE (juststaylink3_test)
     BOOST_CHECK_EQUAL(oy, 7);
 }
 
-BOOST_AUTO_TEST_CASE (editleak1_test)
+BOOST_AUTO_TEST_CASE(editleak1_test)
 {
-    variable x (0);
+    variable x(0);
     simplex_solver solver;
     solver.add_stay(x);
 
@@ -368,7 +372,7 @@ BOOST_AUTO_TEST_CASE (editleak1_test)
     BOOST_CHECK_EQUAL(solver.rows().size(), 2);
 }
 
-BOOST_AUTO_TEST_CASE (editleak2_test)
+BOOST_AUTO_TEST_CASE(editleak2_test)
 {
     variable x(0), y(0);
     simplex_solver solver;
@@ -394,17 +398,16 @@ BOOST_AUTO_TEST_CASE (editleak2_test)
     BOOST_CHECK_EQUAL(solver.rows().size(), 3);
 }
 
-BOOST_AUTO_TEST_CASE (delete1_test)
+BOOST_AUTO_TEST_CASE(delete1_test)
 {
-    variable x (0);
+    variable x(0);
     simplex_solver solver;
 
-    constraint init (x == 100, strength::weak());
+    constraint init(x == 100, strength::weak());
     solver.add_constraint(init);
     BOOST_CHECK_EQUAL(x.value(), 100);
 
-    constraint c10 (x <= 10),
-               c20 (x <= 20);
+    constraint c10(x <= 10), c20(x <= 20);
 
     solver.add_constraint(c10).add_constraint(c20);
 
@@ -425,18 +428,18 @@ BOOST_AUTO_TEST_CASE (delete1_test)
     BOOST_CHECK_EQUAL(solver.rows().size(), 1);
 }
 
-BOOST_AUTO_TEST_CASE (delete2_test)
+BOOST_AUTO_TEST_CASE(delete2_test)
 {
-    variable x (0), y (0);
+    variable x(0), y(0);
     simplex_solver solver;
 
     solver.add_constraint(x == 100, strength::weak())
-          .add_constraint(y == 120, strength::strong());
+        .add_constraint(y == 120, strength::strong());
 
     BOOST_CHECK_EQUAL(x.value(), 100);
     BOOST_CHECK_EQUAL(y.value(), 120);
 
-    constraint c10 (x <= 10), c20 (x <= 20);
+    constraint c10(x <= 10), c20(x <= 20);
 
     solver.add_constraint(c10).add_constraint(c20);
 
@@ -444,7 +447,7 @@ BOOST_AUTO_TEST_CASE (delete2_test)
     solver.remove_constraint(c10);
     BOOST_CHECK_EQUAL(x.value(), 20);
 
-    constraint cxy (x * 2 == y);
+    constraint cxy(x * 2 == y);
     solver.add_constraint(cxy);
 
     BOOST_CHECK_EQUAL(x.value(), 20);
@@ -459,16 +462,17 @@ BOOST_AUTO_TEST_CASE (delete2_test)
     BOOST_CHECK_EQUAL(y.value(), 120);
 }
 
-BOOST_AUTO_TEST_CASE (delete3_test)
+BOOST_AUTO_TEST_CASE(delete3_test)
 {
-    variable x (0);
+    variable x(0);
     simplex_solver solver;
 
-    solver.add_constraint(x == 100, strength::weak());;
+    solver.add_constraint(x == 100, strength::weak());
+    ;
 
     BOOST_CHECK_EQUAL(x.value(), 100);
 
-    constraint c10 (x <= 10), c10b (x <= 10);
+    constraint c10(x <= 10), c10b(x <= 10);
 
     solver.add_constraint(c10).add_constraint(c10b);
 
@@ -479,87 +483,76 @@ BOOST_AUTO_TEST_CASE (delete3_test)
     BOOST_CHECK_EQUAL(x.value(), 100);
 }
 
-BOOST_AUTO_TEST_CASE (casso1_test)
+BOOST_AUTO_TEST_CASE(casso1_test)
 {
-    variable x (0), y (0);
+    variable x(0), y(0);
     simplex_solver solver;
 
     solver.add_constraint(x <= y)
-          .add_constraint(y == x + 3)
-          .add_constraint(x == 10.0, strength::weak())
-          .add_constraint(y == 10.0, strength::weak());
+        .add_constraint(y == x + 3)
+        .add_constraint(x == 10.0, strength::weak())
+        .add_constraint(y == 10.0, strength::weak());
 
-    BOOST_CHECK(   (x.value() == 10 && y.value() == 13)
-                || (x.value() == 7  && y.value() == 10));
+    BOOST_CHECK((x.value() == 10 && y.value() == 13)
+                || (x.value() == 7 && y.value() == 10));
 }
 
-BOOST_AUTO_TEST_CASE (casso2_test)
+BOOST_AUTO_TEST_CASE(casso2_test)
 {
-    variable x (0), y (0);
+    variable x(0), y(0);
     simplex_solver solver;
 
-    solver.add_constraints(
-    {
-        x <= y, y == x + 3, x == 10
-    });
+    solver.add_constraints({x <= y, y == x + 3, x == 10});
     BOOST_CHECK_EQUAL(x.value(), 10);
     BOOST_CHECK_EQUAL(y.value(), 13);
 }
 
-BOOST_AUTO_TEST_CASE (inconsistent1_test)
+BOOST_AUTO_TEST_CASE(inconsistent1_test)
 {
-    variable x (0);
+    variable x(0);
     simplex_solver solver;
 
     solver.add_constraint(x == 10);
 
-    BOOST_CHECK_THROW(solver.add_constraint(x == 5),
-                      required_failure);
-
+    BOOST_CHECK_THROW(solver.add_constraint(x == 5), required_failure);
 }
 
-BOOST_AUTO_TEST_CASE (inconsistent2_test)
+BOOST_AUTO_TEST_CASE(inconsistent2_test)
 {
-    variable x (0);
+    variable x(0);
     simplex_solver solver;
 
-    BOOST_CHECK_THROW(solver.add_constraints({ x >= 10, x <= 5 }),
+    BOOST_CHECK_THROW(solver.add_constraints({x >= 10, x <= 5}),
                       required_failure);
-
 }
 
-BOOST_AUTO_TEST_CASE (inconsistent3_test)
+BOOST_AUTO_TEST_CASE(inconsistent3_test)
 {
-    variable v (0), w (0), x (0), y (0);
+    variable v(0), w(0), x(0), y(0);
     simplex_solver solver;
 
-    solver.add_constraints({ v >= 10, w >= v, x >= w, y >= x});
+    solver.add_constraints({v >= 10, w >= v, x >= w, y >= x});
     BOOST_CHECK_THROW(solver.add_constraint(y <= 5), required_failure);
 }
 
-BOOST_AUTO_TEST_CASE (inconsistent4_test)
+BOOST_AUTO_TEST_CASE(inconsistent4_test)
 {
-    variable v (0), w (0), x (0), y (0);
+    variable v(0), w(0), x(0), y(0);
     simplex_solver solver;
 
     solver.set_explaining(true);
-    solver.add_constraints({ v >= 10, w >= v, x >= w, y >= x});
+    solver.add_constraints({v >= 10, w >= v, x >= w, y >= x});
 
-    try
-    {
+    try {
         solver.add_constraint(y <= 5);
-    }
-    catch (required_failure_with_explanation& e)
-    {
+    } catch (required_failure_with_explanation& e) {
         BOOST_CHECK_EQUAL(e.explanation().size(), 5);
-    }
-    catch (...)
-    {
+    } catch (...) {
         BOOST_CHECK(false);
     }
 }
 
-BOOST_AUTO_TEST_CASE (multiedit1_test)
+BOOST_AUTO_TEST_CASE(multiedit1_test)
 {
     variable x(3), y(-5), w(0), h(0);
     simplex_solver solver;
@@ -567,28 +560,28 @@ BOOST_AUTO_TEST_CASE (multiedit1_test)
     solver.add_stay(x).add_stay(y).add_stay(w).add_stay(h);
     solver.add_edit_var(x).add_edit_var(y);
     {
-    scoped_edit outer_edit (solver);
+        scoped_edit outer_edit(solver);
 
-    solver.suggest_value(x, 10).suggest_value(y, 20);
-    solver.resolve();
+        solver.suggest_value(x, 10).suggest_value(y, 20);
+        solver.resolve();
 
-    BOOST_CHECK_EQUAL(x.value(), 10);
-    BOOST_CHECK_EQUAL(y.value(), 20);
-    BOOST_CHECK_EQUAL(w.value(),  0);
-    BOOST_CHECK_EQUAL(h.value(),  0);
+        BOOST_CHECK_EQUAL(x.value(), 10);
+        BOOST_CHECK_EQUAL(y.value(), 20);
+        BOOST_CHECK_EQUAL(w.value(), 0);
+        BOOST_CHECK_EQUAL(h.value(), 0);
 
-    solver.add_edit_var(w).add_edit_var(h);
-    {
-    scoped_edit inner_edit (solver);
-    solver.suggest_value(w, 30).suggest_value(h, 40);
-    }
+        solver.add_edit_var(w).add_edit_var(h);
+        {
+            scoped_edit inner_edit(solver);
+            solver.suggest_value(w, 30).suggest_value(h, 40);
+        }
 
-    BOOST_CHECK_EQUAL(x.value(), 10);
-    BOOST_CHECK_EQUAL(y.value(), 20);
-    BOOST_CHECK_EQUAL(w.value(), 30);
-    BOOST_CHECK_EQUAL(h.value(), 40);
+        BOOST_CHECK_EQUAL(x.value(), 10);
+        BOOST_CHECK_EQUAL(y.value(), 20);
+        BOOST_CHECK_EQUAL(w.value(), 30);
+        BOOST_CHECK_EQUAL(h.value(), 40);
 
-    solver.suggest_value(x, 50).suggest_value(y, 60);
+        solver.suggest_value(x, 50).suggest_value(y, 60);
     }
 
     BOOST_CHECK_EQUAL(x.value(), 50);
@@ -597,7 +590,7 @@ BOOST_AUTO_TEST_CASE (multiedit1_test)
     BOOST_CHECK_EQUAL(h.value(), 40);
 }
 
-BOOST_AUTO_TEST_CASE (multiedit2_test)
+BOOST_AUTO_TEST_CASE(multiedit2_test)
 {
     variable x(3), y(0), w(0), h(0);
     simplex_solver solver;
@@ -605,30 +598,29 @@ BOOST_AUTO_TEST_CASE (multiedit2_test)
     solver.add_stay(x).add_stay(y).add_stay(w).add_stay(h);
     solver.add_edit_var(x).add_edit_var(y);
     {
-    scoped_edit outer_edit (solver);
+        scoped_edit outer_edit(solver);
 
-    solver.suggest_value(x, 10).suggest_value(y, 20);
-    solver.resolve();
+        solver.suggest_value(x, 10).suggest_value(y, 20);
+        solver.resolve();
 
-    BOOST_CHECK_EQUAL(x.value(), 10);
-    BOOST_CHECK_EQUAL(y.value(), 20);
-    BOOST_CHECK_EQUAL(w.value(),  0);
-    BOOST_CHECK_EQUAL(h.value(),  0);
+        BOOST_CHECK_EQUAL(x.value(), 10);
+        BOOST_CHECK_EQUAL(y.value(), 20);
+        BOOST_CHECK_EQUAL(w.value(), 0);
+        BOOST_CHECK_EQUAL(h.value(), 0);
 
-    solver.add_edit_var(x).add_edit_var(y)
-          .add_edit_var(w).add_edit_var(h);
+        solver.add_edit_var(x).add_edit_var(y).add_edit_var(w).add_edit_var(h);
 
-    {
-    scoped_edit inner_edit (solver);
-    solver.suggest_value(w, 30).suggest_value(h, 40);
-    }
+        {
+            scoped_edit inner_edit(solver);
+            solver.suggest_value(w, 30).suggest_value(h, 40);
+        }
 
-    BOOST_CHECK_EQUAL(x.value(), 10);
-    BOOST_CHECK_EQUAL(y.value(), 20);
-    BOOST_CHECK_EQUAL(w.value(), 30);
-    BOOST_CHECK_EQUAL(h.value(), 40);
+        BOOST_CHECK_EQUAL(x.value(), 10);
+        BOOST_CHECK_EQUAL(y.value(), 20);
+        BOOST_CHECK_EQUAL(w.value(), 30);
+        BOOST_CHECK_EQUAL(h.value(), 40);
 
-    solver.suggest_value(x, 50).suggest_value(y, 60);
+        solver.suggest_value(x, 50).suggest_value(y, 60);
     }
 
     BOOST_CHECK_EQUAL(x.value(), 50);
@@ -637,7 +629,7 @@ BOOST_AUTO_TEST_CASE (multiedit2_test)
     BOOST_CHECK_EQUAL(h.value(), 40);
 }
 
-BOOST_AUTO_TEST_CASE (bounds_test)
+BOOST_AUTO_TEST_CASE(bounds_test)
 {
     variable x(1);
     simplex_solver solver;
@@ -650,9 +642,9 @@ BOOST_AUTO_TEST_CASE (bounds_test)
     BOOST_CHECK_EQUAL(x.value(), 10);
 }
 
-BOOST_AUTO_TEST_CASE (bug0_test)
+BOOST_AUTO_TEST_CASE(bug0_test)
 {
-    variable x (7), y (8), z(9);
+    variable x(7), y(8), z(9);
     simplex_solver solver;
 
     solver.add_stay(x).add_stay(y).add_stay(z);
@@ -671,39 +663,36 @@ BOOST_AUTO_TEST_CASE (bug0_test)
     solver.end_edit();
 }
 
-BOOST_AUTO_TEST_CASE (quad_test)
+BOOST_AUTO_TEST_CASE(quad_test)
 {
-    std::vector<point> c { {50, 50}, {50, 250}, {250, 250}, {250, 50} };
-    std::vector<point> m (4);
+    std::vector<point> c{{50, 50}, {50, 250}, {250, 250}, {250, 50}};
+    std::vector<point> m(4);
     simplex_solver solver;
 
-    double factor (1);
-    for (point& corner : c)
-    {
+    double factor(1);
+    for (point& corner : c) {
         solver.add_stay(corner.x, strength::weak(), factor);
         solver.add_stay(corner.y, strength::weak(), factor);
         factor *= 2;
     }
 
     // Midpoint constraints
-    for (int i (0); i < 4; ++i)
-    {
-        int j ((i + 1) % 4);
+    for (int i(0); i < 4; ++i) {
+        int j((i + 1) % 4);
         solver.add_constraint(m[i].x == (c[i].x + c[j].x) / 2)
-              .add_constraint(m[i].y == (c[i].y + c[j].y) / 2);
+            .add_constraint(m[i].y == (c[i].y + c[j].y) / 2);
     }
 
     // Don't turn inside out
-    typedef std::vector<std::pair<int,int>> pairs;
-    for (auto a : pairs{{0,2},{0,3},{1,2},{1,3}})
+    typedef std::vector<std::pair<int, int>> pairs;
+    for (auto a : pairs{{0, 2}, {0, 3}, {1, 2}, {1, 3}})
         solver.add_constraint(c[a.first].x + 1 <= c[a.second].x);
 
-    for (auto a : pairs{{0,1},{0,2},{3,1},{3,2}})
+    for (auto a : pairs{{0, 1}, {0, 2}, {3, 1}, {3, 2}})
         solver.add_constraint(c[a.first].y + 1 <= c[a.second].y);
 
     // Limits
-    for (auto& corner : c)
-    {
+    for (auto& corner : c) {
         solver.add_bounds(corner.x, 0, 300);
         solver.add_bounds(corner.y, 0, 300);
     }
@@ -717,7 +706,7 @@ BOOST_AUTO_TEST_CASE (quad_test)
     BOOST_CHECK_EQUAL(m[2], std::make_pair(250, 150));
 
     // Move one of the corners
-    solver.suggest({{ c[0].x, 100 }});
+    solver.suggest({{c[0].x, 100}});
 
     BOOST_CHECK_EQUAL(c[0], std::make_pair(100, 50));
     BOOST_CHECK_EQUAL(m[0], std::make_pair(75, 150));
@@ -727,7 +716,7 @@ BOOST_AUTO_TEST_CASE (quad_test)
     BOOST_CHECK_EQUAL(m[3], std::make_pair(175, 50));
 
     // Move one of the midpoints
-    solver.suggest({{ m[0].x, 50 }, { m[0].y, 150 }});
+    solver.suggest({{m[0].x, 50}, {m[0].y, 150}});
 
     BOOST_CHECK_EQUAL(m[0], std::make_pair(50, 150));
     BOOST_CHECK_EQUAL(c[0], std::make_pair(50, 50));
@@ -735,7 +724,7 @@ BOOST_AUTO_TEST_CASE (quad_test)
     BOOST_CHECK_EQUAL(m[3], std::make_pair(150, 50));
 }
 
-BOOST_AUTO_TEST_CASE (required_strength) // issue 18
+BOOST_AUTO_TEST_CASE(required_strength) // issue 18
 {
     variable v(0);
     simplex_solver solver;
@@ -752,7 +741,7 @@ BOOST_AUTO_TEST_CASE (required_strength) // issue 18
     BOOST_CHECK_EQUAL(v.value(), 2);
 }
 
-BOOST_AUTO_TEST_CASE (required_strength2)
+BOOST_AUTO_TEST_CASE(required_strength2)
 {
     variable v(0);
     simplex_solver solver;
@@ -770,7 +759,7 @@ BOOST_AUTO_TEST_CASE (required_strength2)
     BOOST_CHECK_EQUAL(v.value(), 0);
 }
 
-BOOST_AUTO_TEST_CASE (bug_16)
+BOOST_AUTO_TEST_CASE(bug_16)
 {
     variable a(1), b(2);
     simplex_solver solver;
@@ -779,7 +768,7 @@ BOOST_AUTO_TEST_CASE (bug_16)
     solver.add_stay(a);
     BOOST_CHECK(solver.is_valid());
 
-    solver.add_constraints({ a == b });
+    solver.add_constraints({a == b});
 
     BOOST_CHECK(solver.is_valid());
     solver.add_edit_var(a);
@@ -794,32 +783,26 @@ BOOST_AUTO_TEST_CASE (bug_16)
     BOOST_CHECK_EQUAL(b.value(), 3);
 }
 
-BOOST_AUTO_TEST_CASE (bug_16b)
+BOOST_AUTO_TEST_CASE(bug_16b)
 {
     simplex_solver solver;
     variable a, b, c;
 
     solver.set_autosolve(false);
 
-    solver.add_stays({ a, c });
+    solver.add_stays({a, c});
 
-    solver.add_constraints({
-        a == 10,
-        b == c
-    });
+    solver.add_constraints({a == 10, b == c});
 
-    solver.suggest({{ c, 100 }});
+    solver.suggest({{c, 100}});
 
     BOOST_CHECK_EQUAL(a.value(), 10);
     BOOST_CHECK_EQUAL(b.value(), 100);
     BOOST_CHECK_EQUAL(c.value(), 100);
 
-    solver.suggest({
-        { c, 90 }
-    });
+    solver.suggest({{c, 90}});
 
     BOOST_CHECK_EQUAL(a.value(), 10);
     BOOST_CHECK_EQUAL(b.value(), 90);
     BOOST_CHECK_EQUAL(c.value(), 90);
 }
-

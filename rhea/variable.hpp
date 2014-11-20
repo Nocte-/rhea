@@ -199,7 +199,11 @@ public:
     bool is_restricted() const { return p_->is_restricted(); }
 
     /** Get the value of this variable. */
-    double value() const { assert(!is_nil()); return p_->value(); }
+    double value() const
+    {
+        assert(!is_nil());
+        return p_->value();
+    }
 
     /** Get the value of this variable, converted to an integer. */
     int int_value() const { return p_->int_value(); }
@@ -215,10 +219,7 @@ public:
 
     /** Calculate a hash value.
      *  This function is only used for placing variables in hash tables. */
-    size_t hash() const
-    {
-        return id();
-    }
+    size_t hash() const { return id(); }
 
     /** Get a string representation.
      *  For ordinary variables, this will be the value.  Special variables
@@ -298,7 +299,6 @@ struct less<rhea::variable>
         return a.is_less(b);
     }
 };
-
 
 /** Get a string representation of a variable. */
 inline string to_string(const rhea::variable& v)
