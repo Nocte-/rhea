@@ -1,4 +1,10 @@
-rhea (0.2.2) UNRELEASED; urgency=medium
+rhea (0.2.3) raring; urgency=medium
+
+  * Bugfix: throw when denominator is not constant (#26)
+
+ -- Nocte <nocte@hippie.nu>  Thu, 27 Nov 2014 09:20:54 +0100
+
+rhea (0.2.2) raring; urgency=medium
 
   * Renamed COPYING to LICENSE.md
 
