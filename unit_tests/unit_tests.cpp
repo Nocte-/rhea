@@ -806,3 +806,12 @@ BOOST_AUTO_TEST_CASE(bug_16b)
     BOOST_CHECK_EQUAL(b.value(), 90);
     BOOST_CHECK_EQUAL(c.value(), 90);
 }
+
+BOOST_AUTO_TEST_CASE(nonlinear) // issue 26
+{
+    variable x, y;
+    simplex_solver solver;
+
+    BOOST_CHECK_THROW(solver.add_constraint(x == 5 / y), nonlinear_expression);
+    BOOST_CHECK_THROW(solver.add_constraint(x == y * y), nonlinear_expression);
+}

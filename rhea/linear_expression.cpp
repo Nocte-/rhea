@@ -57,9 +57,6 @@ linear_expression& linear_expression::operator*=(const linear_expression& x)
 
 linear_expression& linear_expression::operator/=(const linear_expression& x)
 {
-    if (is_constant())
-        return *this = x / constant();
-
     if (!x.is_constant())
         throw nonlinear_expression();
 
