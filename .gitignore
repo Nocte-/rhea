@@ -23,10 +23,9 @@
 
 # CMake cruft
 /build/
-CMakeFiles/*
+CMakeFiles
 Makefile
-CPackConfig.cmake
-CPackSourceConfig.cmake
+*.cmake
 CMakeCache.txt
 CMakeLists.txt.user
 CMakeLists.txt.user.*
