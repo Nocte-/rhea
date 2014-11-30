@@ -5,6 +5,7 @@
 
 # Compiled Dynamic libraries
 *.so
+*.dylib
 
 # Compiled Static libraries
 *.lai
@@ -35,4 +36,3 @@ tags
 
 # Generated headers
 rhea/version.hpp
-
