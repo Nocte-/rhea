@@ -24,7 +24,7 @@ public:
     {
     }
 
-    virtual ~required_failure_with_explanation() throw() {}
+    virtual ~required_failure_with_explanation() noexcept {}
 
     const constraint_list& explanation() const { return expl_; }
 

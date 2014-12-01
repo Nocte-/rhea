@@ -5,6 +5,7 @@
 
 # Compiled Dynamic libraries
 *.so
+*.dylib
 
 # Compiled Static libraries
 *.lai
@@ -22,10 +23,9 @@
 
 # CMake cruft
 /build/
-CMakeFiles/*
+CMakeFiles
 Makefile
-CPackConfig.cmake
-CPackSourceConfig.cmake
+*.cmake
 CMakeCache.txt
 CMakeLists.txt.user
 CMakeLists.txt.user.*
@@ -35,4 +35,3 @@ tags
 
 # Generated headers
 rhea/version.hpp
-
