@@ -64,7 +64,7 @@ public:
      *  Used by default for constraints provided by the programmer. */
     static strength required()
     {
-        constexpr double z = std::numeric_limits<double>::max();
+        const double z = std::numeric_limits<double>::max();
         return {z, z, z};
     }
 
