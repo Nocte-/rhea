@@ -18,10 +18,10 @@ class variable;
 class error : public std::exception
 {
 public:
-    virtual ~error() noexcept {}
+    virtual ~error() throw() {}
 
     // LCOV_EXCL_START
-    virtual const char* what() const noexcept { return "unspecified error"; }
+    virtual const char* what() const throw() { return "unspecified error"; }
     // LCOV_EXCL_STOP
 };
 
@@ -36,9 +36,9 @@ public:
     {
     }
 
-    virtual ~internal_error() noexcept {}
+    virtual ~internal_error() throw() {}
 
-    virtual const char* what() const noexcept { return msg.c_str(); }
+    virtual const char* what() const throw() { return msg.c_str(); }
 };
 
 /** Thrown whenever the usual ordering of setting up edit constraints is
@@ -63,9 +63,9 @@ public:
         : var_{&v}
     {
     }
-    virtual ~edit_misuse() noexcept {}
+    virtual ~edit_misuse() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "edit protocol usage violation";
     }
@@ -86,9 +86,9 @@ public:
     {
     }
 
-    virtual ~too_difficult() noexcept {}
+    virtual ~too_difficult() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return msg.empty() ? "the constraints are too difficult to solve"
                            : msg.c_str();
@@ -100,9 +100,9 @@ public:
 class readonly_not_allowed : public too_difficult
 {
 public:
-    virtual ~readonly_not_allowed() noexcept {}
+    virtual ~readonly_not_allowed() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "the read-only annotation is not permitted by the solver";
     }
@@ -112,9 +112,9 @@ public:
 class cycle_not_allowed : public too_difficult
 {
 public:
-    virtual ~cycle_not_allowed() noexcept {}
+    virtual ~cycle_not_allowed() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "a cyclic constraint graph is not permitted by the solver";
     }
@@ -127,9 +127,9 @@ public:
 class strict_inequality_not_allowed : public too_difficult
 {
 public:
-    virtual ~strict_inequality_not_allowed() noexcept {}
+    virtual ~strict_inequality_not_allowed() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "the strict inequality is not permitted by the solver";
     }
@@ -139,9 +139,9 @@ public:
 class required_failure : public error
 {
 public:
-    virtual ~required_failure() noexcept {}
+    virtual ~required_failure() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "a required constraint cannot be satisfied";
     }
@@ -152,9 +152,9 @@ public:
 class not_enough_stays : public error
 {
 public:
-    virtual ~not_enough_stays() noexcept {}
+    virtual ~not_enough_stays() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "there are not enough stays to give specific values to every "
                "variable";
@@ -167,9 +167,9 @@ public:
 class nonlinear_expression : public error
 {
 public:
-    virtual ~nonlinear_expression() noexcept {}
+    virtual ~nonlinear_expression() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "the resulting expression would be nonlinear";
     }
@@ -180,9 +180,9 @@ public:
 class constraint_not_found : public error
 {
 public:
-    virtual ~constraint_not_found() noexcept {}
+    virtual ~constraint_not_found() throw() {}
 
-    virtual const char* what() const noexcept
+    virtual const char* what() const throw()
     {
         return "tried to remove a constraint that was never added";
     }
@@ -192,9 +192,9 @@ public:
 class row_not_found : public error
 {
 public:
-    virtual ~row_not_found() noexcept {}
+    virtual ~row_not_found() throw() {}
 
-    virtual const char* what() const noexcept { return "row does not exist"; }
+    virtual const char* what() const throw() { return "row does not exist"; }
 };
 
 } // namespace rhea
