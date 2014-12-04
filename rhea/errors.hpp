@@ -82,7 +82,7 @@ public:
     too_difficult() {}
 
     too_difficult(std::string m)
-        : msg{m}
+        : msg(m)
     {
     }
 

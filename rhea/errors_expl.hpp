@@ -20,7 +20,7 @@ class required_failure_with_explanation : public required_failure
 {
 public:
     required_failure_with_explanation(constraint_list cl)
-        : expl_{std::move(cl)}
+        : expl_(std::move(cl))
     {
     }
 

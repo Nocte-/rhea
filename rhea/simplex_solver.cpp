@@ -610,9 +610,9 @@ void simplex_solver::optimize(const variable& v)
         // coefficients are positive we're done.
         bool found_negative = false;
         for (auto& p : row.terms()) {
-            const variable& v = p.first;
-            if (v.is_pivotable() && p.second < 0.0) {
-                entry = v;
+            const auto& var = p.first;
+            if (var.is_pivotable() && p.second < 0.0) {
+                entry = var;
                 found_negative = true;
                 break;
             }
@@ -884,9 +884,9 @@ simplex_solver::build_explanation(const variable& v,
         result.push_back(found->second);
 
     for (auto& term : expr.terms()) {
-        auto found = constraints_marked_.find(term.first);
-        if (found != constraints_marked_.end())
-            result.push_back(found->second);
+        auto found2 = constraints_marked_.find(term.first);
+        if (found2 != constraints_marked_.end())
+            result.push_back(found2->second);
     }
 
     return result;
