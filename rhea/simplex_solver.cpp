@@ -628,18 +628,18 @@ void simplex_solver::optimize(const variable& v)
         // (i.e. restricted, non-dummy variables).
         double min_ratio{std::numeric_limits<double>::max()};
         double r = 0.0;
-        for (const variable& v : columns_[entry]) {
-            if (v.is_pivotable()) {
-                const auto& expr = row_expression(v);
+        for (const variable& var : columns_[entry]) {
+            if (var.is_pivotable()) {
+                const auto& expr = row_expression(var);
                 double coeff = expr.coefficient(entry);
 
                 if (coeff >= 0) // Only consider negative coefficients
                     continue;
 
                 r = -expr.constant() / coeff;
-                if (r < min_ratio || (approx(r, min_ratio) && ord(v, exit))) {
+                if (r < min_ratio || (approx(r, min_ratio) && ord(var, exit))) {
                     min_ratio = r;
-                    exit = v;
+                    exit = var;
                 }
             }
         }
