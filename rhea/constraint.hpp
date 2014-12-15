@@ -66,8 +66,6 @@ public:
 
     bool is_inequality() const { return p_->is_inequality(); }
 
-    bool is_strict_inequality() const { return p_->is_strict_inequality(); }
-
     bool is_required() const { return p_->is_required(); }
 
     bool is_stay_constraint() const { return p_->is_stay_constraint(); }
@@ -76,19 +74,7 @@ public:
 
     double weight() const { return p_->weight(); }
 
-    const variable_set& read_only_variables() const
-    {
-        return p_->read_only_variables();
-    }
-
     bool is_satisfied() const { return p_->is_satisfied(); }
-
-    bool is_okay_for_simplex_solver() const
-    {
-        return p_->is_okay_for_simplex_solver();
-    }
-
-    bool is_read_only(const variable& v) const { return p_->is_read_only(v); }
 
     void change_strength(const strength& new_strength)
     {
@@ -96,18 +82,6 @@ public:
     }
 
     void change_weight(double new_weight) { p_->change_weight(new_weight); }
-
-    constraint& mark_as_readonly(const variable& v)
-    {
-        p_->mark_as_readonly(v);
-        return *this;
-    }
-
-    constraint& mark_as_readonly(const variable_set& vars)
-    {
-        p_->mark_as_readonly(vars);
-        return *this;
-    }
 
     symbolic_weight get_symbolic_weight() const
     {
@@ -144,9 +118,15 @@ public:
         return *this;
     }
 
-    bool operator==(const constraint& other) const { return p_ == other.p_; }
+    virtual bool operator==(const constraint& other) const
+    {
+        return p_ == other.p_;
+    }
 
-    bool operator!=(const constraint& other) const { return p_ != other.p_; }
+    virtual bool operator!=(const constraint& other) const
+    {
+        return p_ != other.p_;
+    }
 
     size_t hash() const
     {

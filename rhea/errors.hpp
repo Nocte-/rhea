@@ -95,19 +95,6 @@ public:
     }
 };
 
-/** Read-only constraints are not allowed by this particular solver
- ** implementation. */
-class readonly_not_allowed : public too_difficult
-{
-public:
-    virtual ~readonly_not_allowed() throw() {}
-
-    virtual const char* what() const throw()
-    {
-        return "the read-only annotation is not permitted by the solver";
-    }
-};
-
 /** Cyclic dependencies between constraints are not allowed. */
 class cycle_not_allowed : public too_difficult
 {
@@ -117,21 +104,6 @@ public:
     virtual const char* what() const throw()
     {
         return "a cyclic constraint graph is not permitted by the solver";
-    }
-};
-
-/** This solver cannot handle strict inequalities.
- * Strict inequalities are \f$<\f$ and \f$>\f$.  They can be solved in the
- * finite domain, but the simplex solver can only deal with \f$\leq\f$ and
- * \f$\geq\f$. */
-class strict_inequality_not_allowed : public too_difficult
-{
-public:
-    virtual ~strict_inequality_not_allowed() throw() {}
-
-    virtual const char* what() const throw()
-    {
-        return "the strict inequality is not permitted by the solver";
     }
 };
 

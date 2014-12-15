@@ -23,7 +23,7 @@ inline ostream& operator<<(ostream& str, const rhea::variable& v)
         return str << v.to_string();
     // return str << "[v" << v.id() << ":" << v.to_string() << "]";
 
-    return str << "[" << v.to_string() << v.id() << "]";
+    return str << "[" << v.to_string() << "]";
 }
 
 inline istream& operator>>(istream& str, rhea::variable& v)

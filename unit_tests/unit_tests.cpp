@@ -225,11 +225,11 @@ BOOST_AUTO_TEST_CASE(linear_inequality1_test)
 BOOST_AUTO_TEST_CASE(linear_inequality2_test)
 {
     variable x(2.0), y(3.0);
-    BOOST_CHECK((x < y).is_satisfied());
+    BOOST_CHECK((x <= y).is_satisfied());
     BOOST_CHECK((x + 1 <= y).is_satisfied());
-    BOOST_CHECK((x * 2 + y > 4).is_satisfied());
+    BOOST_CHECK((x * 2 + y >= 4).is_satisfied());
     BOOST_CHECK((x * 3 >= y * 2).is_satisfied());
-    BOOST_CHECK(!(x > y).is_satisfied());
+    BOOST_CHECK(!(x >= y).is_satisfied());
 }
 
 BOOST_AUTO_TEST_CASE(constraint_map_test)
@@ -263,8 +263,6 @@ BOOST_AUTO_TEST_CASE(simple1_test)
     solver.add_constraint(c);
 
     BOOST_CHECK(solver.is_valid());
-    BOOST_CHECK(c.is_okay_for_simplex_solver());
-    BOOST_CHECK(!c.is_read_only(x));
     BOOST_CHECK_EQUAL(x.value(), y.value());
 
     BOOST_CHECK(!edit_constraint(x).is_satisfied());

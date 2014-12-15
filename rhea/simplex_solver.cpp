@@ -137,12 +137,6 @@ simplex_solver::make_expression(const constraint& c)
 
 solver& simplex_solver::add_constraint_(const constraint& c)
 {
-    if (c.is_strict_inequality())
-        throw strict_inequality_not_allowed();
-
-    if (!c.read_only_variables().empty())
-        throw readonly_not_allowed();
-
     if (c.is_edit_constraint()) {
         auto& ec = c.as<edit_constraint>();
         const auto& v = ec.var();

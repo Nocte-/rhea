@@ -40,9 +40,6 @@ public:
     /** Check if this is a linear_inequality. */
     virtual bool is_inequality() const { return false; }
 
-    /** Check if this is a strict linear_inequality. */
-    virtual bool is_strict_inequality() const { return false; }
-
     /** Check if this is a required constraint. */
     virtual bool is_required() const { return strength_.is_required(); }
 
@@ -55,22 +52,9 @@ public:
     /** Get the weight of this constraint. */
     virtual double weight() const { return weight_; }
 
-    /** Get the set of variables from this constraint's expression that
-     ** are marked as read-only. */
-    const variable_set& read_only_variables() const { return readonly_vars_; }
-
 public:
     /** Returns true iff this constraint is satisfied. */
     virtual bool is_satisfied() const = 0;
-
-    /** Check if this constraint can be used in a simplex_solver. */
-    virtual bool is_okay_for_simplex_solver() const { return true; }
-
-    /** Check if a variable is marked as read-only. */
-    virtual bool is_read_only(const variable& v) const
-    {
-        return readonly_vars_.count(v) != 0;
-    }
 
 public:
     /** Change the strength.
@@ -85,20 +69,6 @@ public:
      *  Note that Rhea does not allow changing the weight of a constraint
      *  that is already part of a solver. */
     void change_weight(double new_weight) { weight_ = new_weight; }
-
-    /** Mark a variables as read-only. */
-    abstract_constraint& mark_as_readonly(const variable& v)
-    {
-        readonly_vars_.insert(v);
-        return *this;
-    }
-
-    /** Mark a set of variables as read-only. */
-    abstract_constraint& mark_as_readonly(const variable_set& vars)
-    {
-        readonly_vars_.insert(vars.begin(), vars.end());
-        return *this;
-    }
 
     /** Get the symbolic weight. */
     symbolic_weight get_symbolic_weight() const { return strength_.weight(); }
@@ -117,18 +87,9 @@ public:
      * \see change_weight */
     void set_weight(double n) { weight_ = n; }
 
-    /** Notify this constraint that it has been added to a solver. */
-    // void add_to(solver&)
-    //    { ++times_added_; }
-
-    /** Notify this constraint that it has been removed from a solver. */
-    // void remove_from(solver&)
-    //    { --times_added_; }
-
 protected:
     strength strength_;
     double weight_;
-    variable_set readonly_vars_;
 };
 
 } // namespace rhea

@@ -18,16 +18,10 @@ public:
     typedef enum {
         /** Equal to. */
         eq = 0,
-        /** Not equal to. */
-        neq = 100,
         /** Less than or equal to. */
-        leq = 2,
+        leq = 1,
         /** Greater than or equal to. */
-        geq = -2,
-        /** Less than. */
-        lt = 3,
-        /** Greater than. */
-        gt = -3
+        geq = -1,
     } comp_t;
 
 public:
@@ -38,26 +32,17 @@ public:
 
     comp_t type() const { return type_; }
 
-    relation reverse_inequality() const
-    {
-        return type_ == neq ? type_ : comp_t(-(int)type_);
-    }
+    relation reverse_inequality() const { return comp_t(-(int)type_); }
 
     std::string to_string() const
     {
         switch (type_) {
         case eq:
             return "==";
-        case neq:
-            return "!=";
         case leq:
             return "<=";
         case geq:
             return ">=";
-        case lt:
-            return "<";
-        case gt:
-            return ">";
         default:
             assert(false);
             return "?";
