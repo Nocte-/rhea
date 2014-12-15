@@ -232,6 +232,22 @@ BOOST_AUTO_TEST_CASE(linear_inequality2_test)
     BOOST_CHECK(!(x > y).is_satisfied());
 }
 
+BOOST_AUTO_TEST_CASE(constraint_map_test)
+{
+    variable x;
+    constraint c1{x == 1};
+    std::unordered_map<constraint, int> map;
+    map[c1] = 5;
+
+    constraint c2 = c1;
+    BOOST_CHECK(c1 == c2);
+
+    std::hash<constraint> hasher;
+    BOOST_CHECK(hasher(c1) == hasher(c2));
+    BOOST_CHECK(map.count(c1) == 1);
+    BOOST_CHECK(map.count(c2) == 1);
+}
+
 //-------------------------------------------------------------------------
 
 BOOST_AUTO_TEST_CASE(simple1_test)
@@ -814,4 +830,32 @@ BOOST_AUTO_TEST_CASE(nonlinear) // issue 26
 
     BOOST_CHECK_THROW(solver.add_constraint(x == 5 / y), nonlinear_expression);
     BOOST_CHECK_THROW(solver.add_constraint(x == y * y), nonlinear_expression);
+}
+
+BOOST_AUTO_TEST_CASE(change_strength_test) // issue 33
+{
+    variable x;
+    simplex_solver solver;
+
+    constraint c1{x == 1, strength::weak()};
+    constraint c2{x == 2, strength::medium()};
+    solver.add_constraints({c1, c2});
+    BOOST_CHECK_EQUAL(x.value(), 2);
+
+    solver.change_strength(c1, strength::strong());
+    BOOST_CHECK_EQUAL(x.value(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(change_weight_test) // issue 33
+{
+    variable x;
+    simplex_solver solver;
+
+    constraint c1{x == 1, strength::strong(), 1};
+    constraint c2{x == 2, strength::strong(), 2};
+    solver.add_constraints({c1, c2});
+    BOOST_CHECK_EQUAL(x.value(), 2);
+
+    solver.change_weight(c1, 3);
+    BOOST_CHECK_EQUAL(x.value(), 1);
 }
