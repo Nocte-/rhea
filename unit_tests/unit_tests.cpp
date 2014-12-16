@@ -127,7 +127,8 @@ BOOST_AUTO_TEST_CASE(constraint_stream_test)
 {
     std::stringstream s;
     s << constraint{ variable{1} + 42 == variable{2} };
-    BOOST_CHECK_EQUAL("linear [required, 1] {var11:2}*-1 + {var12:1}*1 + 42 == 0", s.str());
+    BOOST_CHECK(   s.str() == "linear [required, 1] {var11:2}*-1 + {var12:1}*1 + 42 == 0"
+                || s.str() == "linear [required, 1] {var11:1}*1 + {var12:2}*-1 + 42 == 0");
 }
 
 BOOST_AUTO_TEST_CASE(strength_stream_test)
