@@ -87,3 +87,4 @@ inline ostream& operator<<(ostream& str, const rhea::tableau& v)
 }
 
 } // namespace std
+
