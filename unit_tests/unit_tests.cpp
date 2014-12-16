@@ -119,20 +119,22 @@ BOOST_AUTO_TEST_CASE(variable_test)
 BOOST_AUTO_TEST_CASE(variable_stream_test)
 {
     std::stringstream s;
-    s << variable{};
+    s << variable{3};
+    BOOST_CHECK_EQUAL("{var10:3}", s.str());
 }
 
 BOOST_AUTO_TEST_CASE(constraint_stream_test)
 {
     std::stringstream s;
-    s << constraint{};
-    s << constraint{ variable{} + 42 == variable{} };
+    s << constraint{ variable{1} + 42 == variable{2} };
+    BOOST_CHECK_EQUAL("linear [required, 1] {var11:2}*-1 + {var12:1}*1 + 42 == 0", s.str());
 }
 
 BOOST_AUTO_TEST_CASE(strength_stream_test)
 {
     std::stringstream s;
     s << strength::required();
+    BOOST_CHECK_EQUAL(s.str(), "required");
 }
 
 BOOST_AUTO_TEST_CASE(linearexpr1_test)
