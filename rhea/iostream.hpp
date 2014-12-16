@@ -19,12 +19,6 @@ namespace std
 
 inline ostream& operator<<(ostream& str, const rhea::variable& v)
 {
-    if (v.is_float())
-        return str << v.to_string();
-    // return str << "[v" << v.id() << ":" << v.to_string() << "]";
-
-    return str << "[" << v.to_string() << v.id() << "]";
-}
     return v.is_nil()
         ? str << "NIL"
         : str << "{" << v.to_string() << v.id() << ":" << v.value() << "}";

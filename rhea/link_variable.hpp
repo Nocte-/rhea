@@ -51,7 +51,7 @@ public:
         return static_cast<int>(value_ + (value_ > T(0.0) ? T(0.5) : T(-0.5)));
     }
 
-    virtual std::string to_string() const { return std::to_string(value_); }
+    virtual std::string to_string() const { return "link"; }
 
 protected:
     T& value_;
