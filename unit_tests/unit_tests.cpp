@@ -122,6 +122,13 @@ BOOST_AUTO_TEST_CASE(variable_stream_test)
     s << variable{};
 }
 
+BOOST_AUTO_TEST_CASE(constraint_stream_test)
+{
+    std::stringstream s;
+    s << constraint{};
+    s << constraint{ variable{} + 42 == variable{} };
+}
+
 BOOST_AUTO_TEST_CASE(strength_stream_test)
 {
     std::stringstream s;

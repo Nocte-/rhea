@@ -14,6 +14,7 @@
 #include "linear_expression.hpp"
 #include "tableau.hpp"
 #include "strength.hpp"
+#include "constraint.hpp"
 
 namespace std
 {
@@ -41,6 +42,30 @@ inline ostream& operator<<(ostream& str, const rhea::strength& s)
         s == rhea::strength::medium()   ? str << "medium" :
         s == rhea::strength::weak()     ? str << "weak" :
         /* else */                        str << s.weight().as_double();
+}
+
+inline ostream& operator<<(ostream& str, const rhea::abstract_constraint& c)
+{
+    return str
+        << (c.is_edit_constraint() ? "edit" :
+            c.is_stay_constraint() ? "stay" :
+            /* else */               "linear")
+        << " [" << c.get_strength() << ", " << c.weight() << "] "
+        << c.expression()
+        << (c.is_inequality()        ? " > " :
+            c.is_strict_inequality() ? " >= " :
+            /* else */                 " == ")
+        << "0";
+}
+
+inline ostream& operator<<(ostream& str, const rhea::constraint& c)
+{
+    if (c.is_nil())
+        str << "NIL";
+    else
+        str << c.as<rhea::abstract_constraint>();
+
+    return str;
 }
 
 inline ostream& operator<<(ostream& str, const rhea::tableau& v)
