@@ -43,6 +43,7 @@ x.set_value(2);
 // both x and y are now 2
 
  * \endcode
+ *
  * Also note that a variable is nullable.  A variable that has been
  * constructed without a type cannot be used in expressions.
  *
