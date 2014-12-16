@@ -122,6 +122,12 @@ BOOST_AUTO_TEST_CASE(variable_stream_test)
     s << variable{};
 }
 
+BOOST_AUTO_TEST_CASE(strength_stream_test)
+{
+    std::stringstream s;
+    s << strength::required();
+}
+
 BOOST_AUTO_TEST_CASE(linearexpr1_test)
 {
     linear_expression expr1(5);

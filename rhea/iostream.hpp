@@ -13,6 +13,7 @@
 #include "float_variable.hpp"
 #include "linear_expression.hpp"
 #include "tableau.hpp"
+#include "strength.hpp"
 
 namespace std
 {
@@ -30,6 +31,16 @@ inline ostream& operator<<(ostream& str, const rhea::linear_expression& v)
         str << t.first << "*" << t.second << " + ";
 
     return str << v.constant();
+}
+
+inline ostream& operator<<(ostream& str, const rhea::strength& s)
+{
+    return
+        s == rhea::strength::required() ? str << "required" :
+        s == rhea::strength::strong()   ? str << "strong" :
+        s == rhea::strength::medium()   ? str << "medium" :
+        s == rhea::strength::weak()     ? str << "weak" :
+        /* else */                        str << s.weight().as_double();
 }
 
 inline ostream& operator<<(ostream& str, const rhea::tableau& v)
