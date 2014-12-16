@@ -196,7 +196,12 @@ a storage mechanism to hold details about buttons::
         variable left, width;
 
         linear_expression right() const { return left + width; }
+        linear_expression center() const { return left + width * 0.5; }
     };
+
+The button's edges, width, and center are all interrelated, so we don't have
+to create variables for everything. We could also make variables for left and
+right, and define width as an expression.
 
 We then define our two buttons, and the variables describing the size of the
 window on which the buttons will be placed::
