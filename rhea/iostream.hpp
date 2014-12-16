@@ -52,8 +52,7 @@ inline ostream& operator<<(ostream& str, const rhea::abstract_constraint& c)
             /* else */               "linear")
         << " [" << c.get_strength() << ", " << c.weight() << "] "
         << c.expression()
-        << (c.is_inequality()        ? " > " :
-            c.is_strict_inequality() ? " >= " :
+        << (c.is_inequality()        ? " >= " :
             /* else */                 " == ")
         << "0";
 }
