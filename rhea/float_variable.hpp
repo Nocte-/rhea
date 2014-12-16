@@ -35,7 +35,7 @@ public:
 
     virtual void change_value(T new_value) { value_ = new_value; }
 
-    virtual std::string to_string() const { return std::to_string(value_); }
+    virtual std::string to_string() const { return "var"; }
 
 protected:
     T value_;
