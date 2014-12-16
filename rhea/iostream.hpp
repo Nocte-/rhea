@@ -25,13 +25,9 @@ inline ostream& operator<<(ostream& str, const rhea::variable& v)
 
     return str << "[" << v.to_string() << v.id() << "]";
 }
-
-inline istream& operator>>(istream& str, rhea::variable& v)
-{
-    double temp;
-    str >> temp;
-    v.set_value(temp);
-    return str;
+    return v.is_nil()
+        ? str << "NIL"
+        : str << "{" << v.to_string() << v.id() << ":" << v.value() << "}";
 }
 
 inline ostream& operator<<(ostream& str, const rhea::linear_expression& v)
