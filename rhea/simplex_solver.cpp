@@ -140,7 +140,7 @@ solver& simplex_solver::add_constraint_(const constraint& c)
     if (c.is_edit_constraint()) {
         auto& ec = c.as<edit_constraint>();
         const auto& v = ec.var();
-        if (!v.is_external() || (!is_basic_var(v) && !columns_has_key(v)))
+        if (!v.is_external())
             throw edit_misuse(v);
 
         auto i(std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
