@@ -912,3 +912,17 @@ BOOST_AUTO_TEST_CASE(add_constraints_after_marking_edit_variable)
     BOOST_CHECK_EQUAL(v.value(), 3);
     BOOST_CHECK(solver.is_valid());
 }
+
+BOOST_AUTO_TEST_CASE(contains_constraint)
+{
+    auto c = constraint{ variable{} == 42 };
+    auto solver = simplex_solver{};
+
+    BOOST_CHECK(!solver.contains_constraint(c));
+
+    solver.add_constraint(c);
+    BOOST_CHECK(solver.contains_constraint(c));
+
+    solver.remove_constraint(c);
+    BOOST_CHECK(!solver.contains_constraint(c));
+}
