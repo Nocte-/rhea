@@ -6,8 +6,8 @@ Cassowary is the algorithm that forms the core of the OS X and iOS `user
 interface layout mechanism`_. Rhea is a lighter, friendlier version of the
 original implementation by Greg J. Badros and Alan Borning.
 
-This manual is based on `Pybee Cassowary`_'s documentation, written by Russell
-Magee.
+This manual is based on `PyBee Cassowary`_'s documentation, written by Russell
+Keith-Magee.
 
 .. _Cassowary constraint-solving algorithm: http://www.cs.washington.edu/research/constraints/cassowary/
 .. _user interface layout mechanism: https://developer.apple.com/library/ios/documentation/UserExperience/Conceptual/AutolayoutPG/Introduction/Introduction.html
