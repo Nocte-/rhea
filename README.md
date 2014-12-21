@@ -54,8 +54,8 @@ to move it over to 5 so all the constraints can be met.
 
 Status
 ------
-This software is alpha.  It does pass all unit tests, but it hasn't been used
-in an actual application yet.  Use at your own peril.
+This software is beta.  It does pass all unit tests, it is in active use
+by several applications, but the interface is not stable yet.
 
 License
 -------
