@@ -2,10 +2,12 @@
 Developers:
   Nocte <nocte@hippie.nu>
 
+Documentation:
+  Russell Keith-Magee <russell@keith-magee.com>
+
 Contributors:
   Håvard Fossli <hfossli@gmail.com>
   Juan Pedro Bolívar Puuente <jbo@ableton.com>
-
 
 
 This library is based on the Cassowary Constraint Solving Toolkit,

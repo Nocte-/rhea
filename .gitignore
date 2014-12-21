@@ -32,6 +32,7 @@ CMakeLists.txt.user.*
 tags
 *.json
 .excludes
+krb5doxy.tag
 
 # Generated headers
 rhea/version.hpp
