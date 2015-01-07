@@ -110,6 +110,14 @@ public:
         return columns_has_key(v) || is_basic_var(v);
     }
 
+    /** Check if the solver knows of a given constraint.
+     * \param c The constraint to check for
+     * \return True iff c has been added to the solver */
+    bool contains_constraint(const constraint& c)
+    {
+        return marker_vars_.find(c) != marker_vars_.end();
+    }
+
     /** Check if this constraint was satisfied. */
     bool is_constraint_satisfied(const constraint& c) const;
 

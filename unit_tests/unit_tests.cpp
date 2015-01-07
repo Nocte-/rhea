@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE(simple2_test)
 
     simplex_solver solver;
 
-    BOOST_CHECK_THROW((solver.add_edit_var(x), solver.begin_edit(),
+    BOOST_CHECK_THROW((solver.begin_edit(),
                        solver.suggest_value(x, 100), solver.end_edit()),
                       edit_misuse);
 
@@ -870,4 +870,59 @@ BOOST_AUTO_TEST_CASE(change_weight_test) // issue 33
 
     solver.change_weight(c1, 3);
     BOOST_CHECK_EQUAL(x.value(), 1);
+}
+
+BOOST_AUTO_TEST_CASE(edit_unconstrained_variable)
+{
+    auto v = variable{ 0 };
+    auto solver = simplex_solver{};
+
+    solver.add_edit_var(v);
+    BOOST_CHECK_EQUAL(v.value(), 0);
+    BOOST_CHECK(solver.is_valid());
+
+    solver.suggest_value(v, 2);
+    solver.resolve();
+    BOOST_CHECK_EQUAL(v.value(), 2);
+    BOOST_CHECK(solver.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(add_constraints_after_marking_edit_variable)
+{
+    auto v = variable{ 0 };
+    auto solver = simplex_solver{};
+
+    solver.add_edit_var(v);
+    solver.suggest_value(v, 2);
+    solver.resolve();
+    BOOST_CHECK_EQUAL(v.value(), 2);
+    BOOST_CHECK(solver.is_valid());
+
+    // Constraint overrides users desire
+    auto fixed = constraint { v == 42 };
+    solver.add_constraint(fixed);
+    BOOST_CHECK_EQUAL(v.value(), 42);
+    solver.suggest_value(v, 3);
+    solver.resolve();
+    BOOST_CHECK_EQUAL(v.value(), 42);
+    BOOST_CHECK(solver.is_valid());
+
+    // Goes back to last edited value
+    solver.remove_constraint(fixed);
+    BOOST_CHECK_EQUAL(v.value(), 3);
+    BOOST_CHECK(solver.is_valid());
+}
+
+BOOST_AUTO_TEST_CASE(contains_constraint)
+{
+    auto c = constraint{ variable{} == 42 };
+    auto solver = simplex_solver{};
+
+    BOOST_CHECK(!solver.contains_constraint(c));
+
+    solver.add_constraint(c);
+    BOOST_CHECK(solver.contains_constraint(c));
+
+    solver.remove_constraint(c);
+    BOOST_CHECK(!solver.contains_constraint(c));
 }
