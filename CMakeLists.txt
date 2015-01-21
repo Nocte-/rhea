@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8.3)
 
 set(SOVERSION     "1")
 set(VERSION_MAJOR "0")
-set(VERSION_MINOR "2")
-set(VERSION_PATCH "3")
+set(VERSION_MINOR "3")
+set(VERSION_PATCH "0")
 set(VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 set(CPACK_PACKAGE_NAME "librhea${SOVERSION}")
@@ -39,7 +39,7 @@ else() # Most likely gcc or clang
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
     endif()
 
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wno-strict-aliasing")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wno-strict-aliasing -Wno-parentheses")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
     set(CMAKE_CXX_FLAGS_DEBUG   "-g")
 endif()
@@ -90,4 +90,3 @@ elseif(WIN32)
 endif()
 
 include(CPack)
-

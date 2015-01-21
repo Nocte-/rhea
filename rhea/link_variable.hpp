@@ -2,7 +2,7 @@
 /// \file   link_variable.hpp
 /// \brief  An external variable that can be used in an expression
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -18,28 +18,15 @@ namespace rhea
 template <typename T>
 class link_variable : public abstract_variable
 {
-    typedef abstract_variable super;
-
 public:
     link_variable(T& value)
-        : abstract_variable{}
-        , value_{value}
+        : value_{value}
     {
     }
 
     virtual ~link_variable() {}
 
-    virtual bool is_dummy() const { return false; }
-    virtual bool is_external() const { return true; }
-    virtual bool is_pivotable() const { return false; }
-    virtual bool is_restricted() const { return false; }
-    virtual bool is_float() const { return true; }
-
     virtual void set_value(double new_value)
-    {
-        value_ = static_cast<T>(new_value);
-    }
-    virtual void change_value(double new_value)
     {
         value_ = static_cast<T>(new_value);
     }
@@ -81,7 +68,7 @@ public:
         ivalue_ = int_value();
     }
 
-    virtual void change_value(double new_value) { set_value(new_value); }
+    virtual std::string to_string() const { return "link"; }
 
 protected:
     int& ivalue_;

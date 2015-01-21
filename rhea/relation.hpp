@@ -2,7 +2,7 @@
 /// \file   relation.hpp
 /// \brief  Relation between two sides in an equation or inequality
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -13,8 +13,7 @@ namespace rhea
 class relation
 {
 public:
-    /** This enumeration is set up in such a way that additive inverse flips
-     ** the direction of the inequality. */
+    /** The relation types. */
     typedef enum {
         /** Equal to. */
         eq = 0,
@@ -45,7 +44,6 @@ public:
             return ">=";
         default:
             assert(false);
-            return "?";
         }
     }
 

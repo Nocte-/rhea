@@ -2,7 +2,7 @@
 /// \file   action_variable.hpp
 /// \brief  A variable that calls a function whenever it changes
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -30,8 +30,6 @@ public:
         value_ = new_value;
         callback_(new_value);
     }
-
-    virtual void change_value(double new_value) { set_value(new_value); }
 
 protected:
     std::function<void(double)> callback_;

@@ -1,13 +1,15 @@
 //---------------------------------------------------------------------------
-// abstract_variable.cpp
+/// \file   symbol.hpp
+/// \brief  A symbol in the tableau
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
-#include "abstract_variable.hpp"
+
+#include "symbol.hpp"
 
 namespace rhea
 {
 
-size_t abstract_variable::count_ = 0;
+uint32_t symbol::count_ = 0;
 
 } // namespace rhea

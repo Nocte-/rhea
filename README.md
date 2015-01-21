@@ -4,8 +4,8 @@ Rhea
 
 About
 -----
-Rhea is an incremental constraint solver based on 
-[Cassowary](http://www.cs.washington.edu/research/constraints/cassowary), 
+Rhea is an incremental constraint solver based on
+[Cassowary](http://www.cs.washington.edu/research/constraints/cassowary),
 originally developed by Greg J. Badros and Alan Borning.  The main
 differences are:
 
@@ -14,9 +14,10 @@ differences are:
  * CMake instead of GNU Autoconfig
  * Unit tests use the Boost Test Framework
  * Uses Doxygen for documentation
- * Expression parser based on Boost Spirit
- * Does not have a finite domain subsolver 
+ * Does not have a finite domain subsolver
 
+Rhea also incorporates some ideas and optimizations from the
+[Kiwi](https://github.com/nucleic/kiwi) library by S. Chris Colbert.
 
 Quick example
 -------------
@@ -61,4 +62,3 @@ License
 -------
 Rhea is free software: you can redistribute it and/or modify it under the
 terms of the [MIT/Expat license](https://opensource.org/licenses/MIT).
-

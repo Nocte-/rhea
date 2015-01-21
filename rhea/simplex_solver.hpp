@@ -2,38 +2,38 @@
 /// \file   simplex_solver.hpp
 /// \brief  Implementation of a solver using a simplex algorithm
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
 #include <functional>
-#include <list>
-#include <stack>
+#include <initializer_list>
+#include <iosfwd>
+#include <unordered_map>
 #include <vector>
 
-#include "edit_constraint.hpp"
-#include "linear_expression.hpp"
-#include "linear_inequality.hpp"
-#include "solver.hpp"
-#include "stay_constraint.hpp"
-#include "tableau.hpp"
-#include "objective_variable.hpp"
+#include "constraint.hpp"
+#include "strength.hpp"
+#include "symbol.hpp"
+
+namespace rhea
+{
+class simplex_solver;
+}
+
+namespace std
+{
+ostream& operator<< (ostream&, const rhea::simplex_solver&);
+}
 
 namespace rhea
 {
 
+using row = expression<symbol>;
+
 /** Solver that implements the Cassowary incremental simplex algorithm. */
-class simplex_solver : public solver, public tableau
-{
-public:
-    typedef std::function<void(simplex_solver&)> event_cb;
-    typedef std::function<void(const variable&, simplex_solver&)> variable_cb;
-
-    /** Gets called whenever the tableau is resolved. */
-    event_cb on_resolve;
-    /** Gets called whenever a variable has changed. */
-    variable_cb on_variable_change;
-
+class simplex_solver
+{    
 public:
     /** This struct is used as a parameter for the suggest() function. */
     struct suggestion
@@ -45,165 +45,109 @@ public:
 public:
     simplex_solver();
 
-    virtual ~simplex_solver() {}
+    constraint add_constraint(const constraint& c);
+
+    void add_constraints(std::initializer_list<constraint> list);
+
+    void set_constant(const constraint& c, double constant);
+
+    void remove_constraint(const constraint& c);
+
+    void remove_constraints(std::initializer_list<constraint> list);
+
+    bool has_constraint(const constraint& c) const;
 
     /** Add an edit constraint for a given variable.
      * The application should call this for every variable it is planning
-     * to suggest a new value for, before calling begin_edit(). */
+     * to suggest a new value for. Edit constraints cannot be required. */
     simplex_solver& add_edit_var(const variable& v,
-                                 const strength& s = strength::strong(),
-                                 double weight = 1.0)
-    {
-        add_constraint(std::make_shared<edit_constraint>(v, s, weight));
-        return *this;
-    }
+                                 strength s = strength::strong());
 
-    /** Begin suggesting new values for edit variables.
-     * The application should call add_edit_var() first for every variable
-     * it is planning to call suggest_value() for. In most cases, it is
-     * more convenient to use suggest() instead. */
-    simplex_solver& begin_edit();
+    void add_edit_vars(std::initializer_list<variable> list,
+                       strength s = strength::strong());
 
-    /** We're done with the edit variables, resolve the constraints. */
-    simplex_solver& end_edit();
+    void remove_edit_var(const variable& v);
 
-    simplex_solver& remove_edit_var(const variable& v);
+    void remove_edit_vars(std::initializer_list<variable> list);
 
-    simplex_solver& remove_edit_vars_to(size_t n);
-
-    simplex_solver& remove_all_edit_vars() { return remove_edit_vars_to(0); }
-
-    void resolve();
+    bool has_edit_var(const variable& v) const;
 
     /** Suggest a new value for an edit variable.
-     *  The variable needs to be added as an edit variable,
-     *  and begin_edit() needs to be called first.
-     *  The tableau will not be solved completely until
-     *  after resolve() or end_edit() has been called. */
+     *  The variable needs to be added as an edit variable first. */
     simplex_solver& suggest_value(const variable& v, double x);
 
-    /** Suggest a new value for a variables.
-     *  This function calls add_edit_variable(), begin_edit(), and
-     *  end_edit() as well.
-     * \code
-     solver.suggest(width, 200);
-     * \endcode */
-    simplex_solver& suggest(const variable& v, double x);
+    /** Suggest a new value for an edit variable.
+     *  This function will register the variable for you if needed,
+     *  suggest the value, and call update_variables() afterward. */
+    void suggest(const variable& v, double value);
 
-    /** Suggest new values for a list of variables.
-     *  This function calls add_edit_variable(), begin_edit(), and
-     *  end_edit() as well.
-     * \code
-     solver.suggest({{ width, 200 }, { height, 150 }});
-     * \endcode */
-    simplex_solver& suggest(const std::list<suggestion>& suggestions);
+    /** Suggest new values for a set of edit variables.
+     *  This function will register the variables for you if needed,
+     *  suggest the values, and call update_variables() afterward. */
+    void suggest(std::initializer_list<suggestion> list);
 
-    /** If autosolving has been turned off, client code needs to explicitly
-     ** call this function before accessing variables values. */
-    simplex_solver& solve();
+    bool has_variable(const variable& v) const;
 
-    /** Check if the solver knows of a given variable.
-     * \param v The variable to check for
-     * \return True iff v is a column in the tableau or a basic variable */
-    bool contains_variable(const variable& v)
-    {
-        return columns_has_key(v) || is_basic_var(v);
-    }
-
-    /** Check if this constraint was satisfied. */
-    bool is_constraint_satisfied(const constraint& c) const;
-
-    /** Reset all external variables to their current values.
-     * Note: this triggers all callbacks, which might be used to copy the
-     * variable's value to another variable. */
-    void update_external_variables() { set_external_variables(); }
-
-    void change_strength_and_weight(constraint c, const strength& s,
-                                    double weight);
-    void change_strength(constraint c, const strength& s);
-    void change_weight(constraint c, double weight);
-
-    /** Reset all stay constraint constants.
-     * Each of the non-required stays will be represented by the equation
-     * \f$v = v' + e_{plus} - e_{minus}\f$, where \f$v\f$ is the variable
-     * associated with the stay, \f$v'\f$ is the previous value of
-     * \f$v\f$, and \f$e_{plus}\f$ and \f$e_{minus}\f$ are slack variables
-     * that hold the error for satisfying the constraint.
-     *
-     * We are about to change something, and we want to fix the constants
-     * in the equations representing the stays.  If both \f$e_{plus}\f$
-     * and \f$e_{minus}\f$ are nonbasic, they are zero in the current
-     * solution, meaning the previous stay was exactly satisfied.  In this
-     * case nothing needs to be changed.  Otherwise one of them is basic,
-     * and the other must occur only in the expression for that basic error
-     * variable.  In that case, the constant in the expression is set to
-     * zero. */
-    void reset_stay_constants();
-
-    simplex_solver& set_auto_reset_stay_constants(bool f = true)
-    {
-        auto_reset_stay_constants_ = f;
-        if (f)
-            reset_stay_constants();
-
-        return *this;
-    }
-
-    bool is_auto_reset_stay_constants() const
-    {
-        return auto_reset_stay_constants_;
-    }
-
-    void set_explaining(bool flag) { explain_failure_ = flag; }
-
-    bool is_explaining() const { return explain_failure_; }
-
-protected:
-    solver& add_constraint_(const constraint& c);
-    solver& remove_constraint_(const constraint& c);
-
-    /** This is a privately-used struct that bundles a constraint, its
-     ** positive and negative error variables, and its prior edit constant.
+    /** Write the values from the tableau back to the external
+     ** variables.
+     * If you're not using auto_update, you'll have to call this function
+     * right before you want to start using the results in your variables.
      */
-    struct edit_info
+    void update_external_variables();
+
+    void change_strength(const constraint& c, strength new_strength);
+
+    /** Turn auto-updating on or off. */
+    void auto_update(bool flag);
+
+    /** Query the auto-update state. */
+    bool auto_update() const;
+
+private:
+    void add_constraint_(const constraint& c);
+    void set_constant_(const constraint& c, double constant);
+    void remove_constraint_(const constraint& c);
+
+    /** Keep track of the constraints' marker and slack variables. */
+    struct constraint_info
     {
-        edit_info(const variable& v_, constraint c_, variable plus_,
-                  variable minus_, double prev_constant_)
-            : v{v_}
-            , c{c_}
-            , plus{plus_}
-            , minus{minus_}
-            , prev_constant{prev_constant_}
-        {
-        }
-
-        bool operator==(const variable& comp) const { return v.is(comp); }
-
-        variable v;
-        constraint c;
-        variable plus;
-        variable minus;
+        symbol marker;
+        symbol other;
         double prev_constant;
     };
 
-    /** Bundles an expression, a plus and minus slack variable, and a
-     ** prior edit constant.
-     *  This struct is only used as a return variable of make_epression().*/
-    struct expression_result
+    /** Bundles a constraint, positive and negative error variables, and a
+     ** prior edit constant for edit variables. */
+    struct edit_info
     {
-        linear_expression expr;
-        variable minus;
-        variable plus;
-        double previous_constant;
+        bool operator==(const symbol& comp) const { return plus.is(comp); }
 
-        expression_result()
-            : minus{variable::nil_var()}
-            , plus{variable::nil_var()}
-            , previous_constant{0.0}
-        {
-        }
+        constraint c;
+        symbol plus;
+        symbol minus;
+        double prev_constant;
     };
 
+    /** Internal bookkeeping of the constraint and error variables introduced
+     ** by a stay on a variable. */
+    struct stay_info
+    {
+        constraint c;
+        symbol plus;
+        symbol minus;
+    };
+
+    /** The result of make_expression(), a row and its variables.
+     * For required constraints, var1 and var2 hold the marker and slack.
+     * For non-required ones, they hold the error variables. */
+    struct expression_result
+    {
+        row r;
+        symbol var1;
+        symbol var2;
+    };
+
+private:
     /** Make a new linear expression representing the constraint c,
      ** replacing any basic variables with their defining expressions.
      * Normalize if necessary so that the constant is non-negative.  If
@@ -213,18 +157,13 @@ protected:
 
     /** Add the constraint \f$expr = 0\f$ to the inequality tableau using
      ** an artificial variable.
-     * To do this, create an artificial variable \f$a_0\f$, and add the
-     * expression \f$a_0 = expr\f$ to the inequality tableau.
-     * Then we try to solve for \f$a_0 = 0\f$, the return value indicates
+     * To do this, create an artificial variable \f$a\f$, and add the
+     * expression \f$a = expr\f$ to the inequality tableau.
+     * Then we try to solve for \f$a = 0\f$, the return value indicates
      * whether this has succeeded or not.
-     * @return True iff the expression could be added.
-     *         False and a list of the constraints involved if not */
-    std::pair<bool, constraint_list>
-    add_with_artificial_variable(linear_expression& expr);
-
-    /** Add the constraint \f$expr = 0\f$ to the inequality tableau.
-     * @return True iff the expression could be added */
-    bool try_adding_directly(linear_expression& expr);
+     * @return True if the expression could be added.
+     *         False if the constraint could not be satisfied. */
+    bool add_with_artificial_variable(const row& r);
 
     /** Try to choose a subject (that is, a variable to become basic) from
      ** among the current variables in \a expr.
@@ -236,7 +175,7 @@ protected:
      * If expr contains only restricted variables, if there is a restricted
      * variable with a negative coefficient that is new to the solver we can
      * make that the subject.  Otherwise we return nil, and have to add an
-     * artificial variable and use that variable as the subject -- this is
+     * artificial variable and use that variable as the subject &mdash; this is
      * done outside this method though.
      *
      * Note: in checking for variables that are new to the solver, we
@@ -246,105 +185,51 @@ protected:
      *
      * \param expr  The expression that is being added to the solver
      * \return An appropriate subject, or nil */
-    variable choose_subject(linear_expression& expr);
+    symbol choose_subject(const expression_result& expr);
 
-    void delta_edit_constant(double delta, const variable& v1,
-                             const variable& v2);
-
-    /** Optimize using the dual algorithm. */
+    /** Optimize using the dual of the simplex algorithm. */
     void dual_optimize();
 
-    /** Minimize the value of an objective.
+    /** Minimize the value of the given objective.
      * \pre The tableau is feasible.
      * \param z The objective to optimize for */
-    void optimize(const variable& z);
+    void optimize(const row& z);
 
-    /** Perform a pivot operation.
-     *  Move entry into the basis (i.e. make it a basic variable), and move
-     *  exit out of the basis (i.e., make it a parametric variable).
-     */
-    void pivot(const variable& entry, const variable& exit);
+    void suggest_value_(const variable& v, double value);
 
-    /** Set the external variables known to this solver to their appropriate
-     ** values.
-     * Set each external basic variable to its value, and set each
-     * external parametric variable to zero.  Variables that are internal
-     * to the solver don't actually store values &mdash; their
-     * values are just implicit in the tableu &mdash; so we don't need to
-     * set them. */
-    void set_external_variables();
+    void reset_stay_constants();
 
-    void solve_();
+    /** Get the symbol for the given variable.
+     * If a symbol does not exist for the variable, one will be created. */
+    symbol get_var_symbol(const variable& v);
 
-    void change(variable& v, double n)
-    {
-        if (n != v.value()) {
-            v.change_value(n);
-            if (on_variable_change)
-                on_variable_change(v, *this);
-        }
-    }
+    /** Substitute the parametric symbol with the given row.
+     * This method will substitute all instances of the parametric symbol
+     * in the tableau and the objective function with the given row. */
+    void substitute_out(const symbol& s, const row& r);
 
-    constraint_list build_explanation(const variable& v,
-                                      const linear_expression& expr) const;
+    std::unordered_map<symbol, row>::iterator
+    get_marker_leaving_row(const symbol& marker);
+
+    void add(row& r, symbol sym, double coeff);
+
+    void autoupdate();
 
 private:
-    typedef std::unordered_map<constraint, variable_set>
-        constraint_to_varset_map;
-    typedef std::unordered_map<constraint, variable> constraint_to_var_map;
-    typedef std::unordered_map<variable, constraint> var_to_constraint_map;
-
-    // The arrays of positive and negative error vars for the stay
-    // constraints.  (We need to keep positive and negative separate,
-    // since the error vars are always non-negative.)
-    std::vector<variable> stay_minus_error_vars_;
-    std::vector<variable> stay_plus_error_vars_;
-
-    constraint_to_varset_map error_vars_;
-    constraint_to_var_map marker_vars_;
-    var_to_constraint_map constraints_marked_;
-
-    variable objective_;
-
-    // Map edit variables to their constraints, errors, and prior value.
-    std::list<edit_info> edit_info_list_;
-
-    bool auto_reset_stay_constants_;
-    bool needs_solving_;
-    bool explain_failure_;
-
-    std::stack<size_t> cedcns_;
-};
-
-/** Scoped edit action.
- * This class calls begin_edit() on a simplex_solver upon construction,
- * and end_edit() as it goes out of scope.  This can be used as an
- * alternative to calling these two functions manually.
- *
- * \code
-
-variable x(4), y(6);
-simplex_solver solv;
-
-solv.add_edit_variable(x).add_edit_variable(y);
-{
-scoped_edit user_input(solv);
-solv.suggest_value(x, 2)
-    .suggest_value(y, 7);
-}
-// 'user_input' goes out of scope here and calls solv.end_edit()
- * \endcode */
-class scoped_edit
-{
-public:
-    scoped_edit(simplex_solver& s)
-        : s_(s.begin_edit())
-    {
-    }
-    ~scoped_edit() { s_.end_edit(); }
+    friend std::ostream& std::operator<< (std::ostream&, const simplex_solver&);
 
 private:
-    simplex_solver& s_;
+    bool auto_update_;
+    std::unordered_map<variable, symbol> vars_;
+    std::unordered_map<symbol, row> rows_;
+    std::unordered_map<constraint, constraint_info> constraints_;
+    std::vector<symbol> infeasible_rows_;
+
+    std::unordered_map<variable, edit_info> edits_;
+    std::unordered_map<variable, stay_info> stays_;
+
+    row objective_;
+    row artificial_;
 };
 
 } // namespace rhea

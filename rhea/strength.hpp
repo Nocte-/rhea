@@ -2,13 +2,9 @@
 /// \file   strength.hpp
 /// \brief  The strength of a constraint
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
-
-#include <limits>
-#include <string>
-#include "symbolic_weight.hpp"
 
 namespace rhea
 {
@@ -45,43 +41,45 @@ namespace rhea
 class strength
 {
 public:
-    /** */
-    strength(const symbolic_weight& weight)
-        : weight_{weight}
-    {
-    }
-
-    /** Construct a strength from three weight factors.
-     * \param a  'Strong' weight
-     * \param b  'Medium weight
-     * \param c  'Weak' weight */
-    strength(double a, double b, double c)
-        : weight_{a, b, c}
-    {
-    }
+    operator double() const { return weight_; }
 
     /** Constraints with this strength must be satisfied.
      *  Used by default for constraints provided by the programmer. */
-    static strength required()
+    static strength required() { return {10000. * 10000. * 10000.}; }
+
+    /** Strong constraint, the default for edit constraints. */
+    static strength strong() { return {10000. * 10000.}; }
+    /** Medium strength constraint. */
+    static strength medium() { return {10000.}; }
+    /** Weak constraint, the default strength for stay constraints. */
+    static strength weak() { return {1.}; }
+
+    /** Strong constraint strength with weight factor.
+     * \param weight A 1..10000 weight factor */
+    static strength strong(double weight)
     {
-        const double z = std::numeric_limits<double>::max();
-        return {z, z, z};
+        check_(weight);
+        return {weight * 10000. * 10000.};
     }
 
-    /** The default strength for edit constraints. */
-    static strength strong() { return {1, 0, 0}; }
+    /** Medium constraint strength with weight factor.
+    * \param weight A 1..10000 weight factor */
+    static strength medium(double weight)
+    {
+        check_(weight);
+        return {weight * 10000.};
+    }
 
-    /** Medium constraint strength. */
-    static strength medium() { return {0, 1, 0}; }
-
-    /** The default strength for stay constraints. */
-    static strength weak() { return {0, 0, 1}; }
+    /** Weak constraint strength with weight factor.
+    * \param weight A 1..10000 weight factor */
+    static strength weak(double weight)
+    {
+        check_(weight);
+        return {weight};
+    }
 
     /** Check if this strength signals a required constraint. */
-    virtual bool is_required() const { return weight_ == required().weight_; }
-
-    /** Get the 3-tuple symbolic weight. */
-    const symbolic_weight& weight() const { return weight_; }
+    bool is_required() const { return weight_ == required().weight_; }
 
     bool operator==(const strength& c) const { return weight_ == c.weight_; }
     bool operator!=(const strength& c) const { return weight_ != c.weight_; }
@@ -90,8 +88,22 @@ public:
     bool operator>=(const strength& c) const { return weight_ >= c.weight_; }
     bool operator>(const strength& c) const { return weight_ > c.weight_; }
 
+    strength operator-() const { return {-weight_}; }
+
 private:
-    symbolic_weight weight_;
+    strength(double w)
+        : weight_{w}
+    {
+    }
+
+    static void check_(double v)
+    {
+        if (v < 1.0 || v >= 10000.)
+            throw bad_weight{};
+    }
+
+private:
+    double weight_;
 };
 
 } // namespace rhea

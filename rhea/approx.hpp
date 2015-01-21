@@ -2,7 +2,7 @@
 /// \file   approx.hpp
 /// \brief  See if two values are equal within a margin
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 

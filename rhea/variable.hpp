@@ -2,19 +2,13 @@
 /// \file   variable.hpp
 /// \brief  A variable as used in an expression
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
 #include <cassert>
 #include <memory>
-#include <set>
-#include <string>
-#include <unordered_map>
-#include <unordered_set>
 
-#include "approx.hpp"
-#include "abstract_variable.hpp"
 #include "float_variable.hpp"
 #include "link_variable.hpp"
 #include "action_variable.hpp"
@@ -29,9 +23,8 @@ struct linked
 
 /** A variable as used in an expression.
  * Variables don't use the normal C++ copy semantics: objects are actually
- * counted references to an abstract_variable.  The following example
+ * counted references to an \a abstract_variable.  The following example
  * illustrates this:
- *
  * \code
 
 variable x(1), y(0);
@@ -47,11 +40,9 @@ x.set_value(2);
  * Also note that a variable is nullable.  A variable that has been
  * constructed without a type cannot be used in expressions.
  *
- * Another caveat: "x == y" is not a boolean, but a linear_equality that
- * can be evaluated and used in constraints.  There are two ways to compare
- * two variables, depending on whether you want to test for equality or
- * equivalence:
- *
+ * Another caveat: "x == y" is not a boolean, but a \a constraint.  There are
+ * two ways to compare two variables, depending on whether you want to test for
+ * equality or equivalence:
  * \code
 
 variable x(2), y(x), z(2);
@@ -135,6 +126,13 @@ public:
     /** Create variable that is linked to an existing integer.
      *  It is up to you to make sure the linked variable isn't destroyed
      *  while the solver is still using it.
+     * \code
+     * int some_integer;
+     * rhea::variable x {some_integer, rhea::linked()};
+     * x = 8;
+     * // some_integer is now 8
+     * \endcode
+     *
      * \param value  This variable will be automatically updated
      */
     variable(int& value, const linked&)
@@ -145,6 +143,13 @@ public:
     /** Create variable that is linked to an existing float.
      *  It is up to you to make sure the linked variable isn't destroyed
      *  while the solver is still using it.
+     * \code
+     * float some_float;
+     * rhea::variable x {some_float, rhea::linked()};
+     * x = 8.0f;
+     * // some_float is now 8
+     * \endcode
+     *
      * \param value  This variable will be automatically updated
      */
     variable(float& value, const linked&)
@@ -162,7 +167,14 @@ public:
     {
     }
 
-    /** Create a variable that calls a function whenever it is updated. */
+    /** Create a variable that calls a function whenever it is updated.
+     * \code
+     * rhea::variable x {[](double v)
+     *                   { std::cout << "x is " << v << std::endl; }};
+     * x = 6.5;
+     * // prints: "x is 6.5"
+     * \endcode
+     */
     variable(std::function<void(double)> callback, double init_val = 0.0)
         : p_{std::make_shared<action_variable>(callback, init_val)}
     {
@@ -180,31 +192,8 @@ public:
         return *this;
     }
 
-    /** Check if this variable is of the type float_variable. */
-    bool is_float() const { return p_->is_float(); }
-
-    /** Check if this variable is used in the finite domain subsolver. */
-    bool is_fd() const { return p_->is_fd(); }
-
-    /** Check if this variable is a dummy variable. */
-    bool is_dummy() const { return p_->is_dummy(); }
-
-    /** Check if this variable is used outside the solver. */
-    bool is_external() const { return p_->is_external(); }
-
-    /** Check if this variable can be used as a pivot element in a tableau. */
-    bool is_pivotable() const { return p_->is_pivotable(); }
-
-    /** Check if this variable is restricted, or in other words, if it is
-     ** a dummy or a slack variable. */
-    bool is_restricted() const { return p_->is_restricted(); }
-
     /** Get the value of this variable. */
-    double value() const
-    {
-        assert(!is_nil());
-        return p_->value();
-    }
+    double value() const { return p_ ? p_->value() : 0.0; }
 
     /** Get the value of this variable, converted to an integer. */
     int int_value() const { return p_->int_value(); }
@@ -212,19 +201,12 @@ public:
     /** Set this variable to a new value. */
     void set_value(double x) { p_->set_value(x); }
 
-    /** Change this variable's value. */
-    void change_value(double x) { p_->change_value(x); }
-
     /** Check if this is a nil variable. */
     bool is_nil() const { return p_ == nullptr; }
 
-    /** Calculate a hash value.
-     *  This function is only used for placing variables in hash tables. */
-    size_t hash() const { return id(); }
-
-    /** Get a string representation.
-     *  For ordinary variables, this will be the value.  Special variables
-     *  will print 'dummy', 'slack', or 'edit'. */
+    /** Get a string representation of the variable type.
+     * Normal variables will return "var", linked variables will return
+     * "link". */
     std::string to_string() const
     {
         return is_nil() ? "NIL" : p_->to_string();
@@ -243,12 +225,11 @@ public:
      */
     bool is(const variable& x) const { return p_ == x.p_; }
 
-    /** Helper function so rhea::variable can be used in a std::map */
-    bool is_less(const variable& x) const { return id() < x.id(); }
-
-    /** Get the variable's unique ID.
-     *  Do not use: this function may disappear in future versions. */
-    size_t id() const { return p_->id(); }
+    size_t hash() const
+    {
+        assert(!is_nil());
+        return std::hash<std::shared_ptr<abstract_variable>>()(p_);
+    }
 
 private:
     struct nil_
@@ -262,9 +243,6 @@ private:
     std::shared_ptr<abstract_variable> p_;
 };
 
-/** Convenience typedef for sets of variables. */
-typedef std::unordered_set<variable> variable_set;
-
 } // namespace rhea
 
 //-------------------------------------------------------------------------
@@ -272,14 +250,12 @@ typedef std::unordered_set<variable> variable_set;
 namespace std
 {
 
-/** Hash function, required for std::unordered_map and -set. */
 template <>
 struct hash<rhea::variable> : public unary_function<rhea::variable, size_t>
 {
     size_t operator()(const rhea::variable& v) const { return v.hash(); }
 };
 
-/** Equality test, required for std::unordered_map and -set. */
 template <>
 struct equal_to<rhea::variable>
     : public binary_function<rhea::variable, rhea::variable, bool>
@@ -290,21 +266,10 @@ struct equal_to<rhea::variable>
     }
 };
 
-/** Strict weak ordering, required for std::map and set. */
-template <>
-struct less<rhea::variable>
-    : public binary_function<rhea::variable, rhea::variable, bool>
-{
-    bool operator()(const rhea::variable& a, const rhea::variable& b) const
-    {
-        return a.is_less(b);
-    }
-};
-
 /** Get a string representation of a variable. */
 inline string to_string(const rhea::variable& v)
 {
-    return v.to_string();
+    return v.is_nil() ? "NIL" : to_string(v.value());
 }
 
 } // namespace std

@@ -2,7 +2,7 @@
 /// \file   iostream.hpp
 /// \brief  Standard Library iostream support for variables
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -10,80 +10,92 @@
 #include <string>
 #include <unordered_map>
 
-#include "float_variable.hpp"
-#include "linear_expression.hpp"
-#include "tableau.hpp"
-#include "strength.hpp"
 #include "constraint.hpp"
+#include "linear_expression.hpp"
+#include "simplex_solver.hpp"
+#include "strength.hpp"
+#include "variable.hpp"
 
 namespace std
 {
 
 inline ostream& operator<<(ostream& str, const rhea::variable& v)
 {
-    return v.is_nil()
-        ? str << "NIL"
-        : str << "{" << v.to_string() << v.id() << ":" << v.value() << "}";
+    if (v.is_nil())
+        return str << "NIL";
+
+    return str << "{" << v.to_string() << ":" << v.value() << "}";
 }
 
-inline ostream& operator<<(ostream& str, const rhea::linear_expression& v)
+inline ostream& operator<<(ostream& str, const rhea::symbol& s)
 {
-    for (auto& t : v.terms())
+    if (s.is_nil())
+        return str << "--";
+
+    return str << static_cast<char>(s.type()) << s.id();
+}
+
+template <typename T>
+ostream& operator<<(ostream& str, const rhea::expression<T>& e)
+{
+    for (auto& t : e.terms())
         str << t.first << "*" << t.second << " + ";
 
-    return str << v.constant();
+    return str << e.constant();
 }
 
 inline ostream& operator<<(ostream& str, const rhea::strength& s)
 {
-    return
-        s == rhea::strength::required() ? str << "required" :
-        s == rhea::strength::strong()   ? str << "strong" :
-        s == rhea::strength::medium()   ? str << "medium" :
-        s == rhea::strength::weak()     ? str << "weak" :
-        /* else */                        str << s.weight().as_double();
-}
+    if (s.is_required())
+        return str << "required";
 
-inline ostream& operator<<(ostream& str, const rhea::abstract_constraint& c)
-{
-    return str
-        << (c.is_edit_constraint() ? "edit" :
-            c.is_stay_constraint() ? "stay" :
-            /* else */               "linear")
-        << " [" << c.get_strength() << ", " << c.weight() << "] "
-        << c.expression()
-        << (c.is_inequality()        ? " >= " :
-            /* else */                 " == ")
-        << "0";
+    if (s >= rhea::strength::strong())
+        return str << "strong";
+
+    if (s >= rhea::strength::medium())
+        return str << "medium";
+
+    return str << "weak";
 }
 
 inline ostream& operator<<(ostream& str, const rhea::constraint& c)
 {
-    if (c.is_nil())
-        str << "NIL";
-    else
-        str << c.as<rhea::abstract_constraint>();
-
-    return str;
+    str << c.expr();
+    switch (c.oper().type()) {
+    case rhea::relation::eq:
+        str << " == 0";
+        break;
+    case rhea::relation::leq:
+        str << " <= 0";
+        break;
+    case rhea::relation::geq:
+        str << " >= 0";
+        break;
+    default:
+        assert(false);
+    }
+    return str << " | " << c.get_strength();
 }
 
-inline ostream& operator<<(ostream& str, const rhea::tableau& v)
+inline ostream& operator<<(ostream& str, const rhea::simplex_solver& s)
 {
-    str << "Tableau columns" << std::endl;
-    for (auto& col : v.columns()) {
-        str << "  " << col.first << " : ";
-        for (auto& var : col.second)
-            str << var << "  ";
+    str << "Variables:\n";
+    for (auto&& v : s.vars_)
+        str << v.first << " : " << v.second << "\n";
 
-        str << std::endl;
-    }
+    str << "Constraints:\n";
+    for (auto&& c : s.constraints_)
+        str << c.second.marker << " : " << c.first << "\n";
 
-    str << "Tableau rows" << std::endl;
-    for (auto& row : v.rows())
-        str << "  " << row.first << " : " << row.second << std::endl;
+    str << "Rows:\n";
+    for (auto&& r : s.rows_)
+        str << r.first << " : " << r.second << "\n";
 
-    return str;
+    str << "Infeasible:\n";
+    for (auto&& r : s.infeasible_rows_)
+        str << r << "  ";
+
+    return str << "\nObjective:\n" << s.objective_ << "\n";
 }
 
 } // namespace std
-

@@ -1,14 +1,14 @@
 Pod::Spec.new do |s|
     s.name         = "Rhea"
-    s.version      = '0.2.3'
+    s.version      = '0.3.0'
     s.summary      = "A modern c++ constraint solver based on Cassowary."
     s.homepage     = "https://github.com/Nocte-/rhea"
-    s.authors      = { 
+    s.authors      = {
     	"Nocte" => "nocte@hippie.nu"
     	}
     s.license      = 'MIT'
-    s.source       = { 
-        :git => "https://github.com/Nocte-/rhea.git", 
+    s.source       = {
+        :git => "https://github.com/Nocte-/rhea.git",
         :tag => s.version.to_s
         }
     s.default_subspec = 'Default'
@@ -28,4 +28,3 @@ Pod::Spec.new do |s|
         ss.source_files     = 'rhea/**/*.{h,hpp,cpp,c,m}'
     end
 end
-
