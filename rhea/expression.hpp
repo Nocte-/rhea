@@ -152,10 +152,7 @@ public:
 
     expression& operator*=(const expression& x)
     {
-        if (is_constant())
-            return *this = x * constant();
-
-        if (!x.is_constant())
+        if (!is_constant() || !x.is_constant())
             throw nonlinear_expression{};
 
         return operator*=(x.constant());

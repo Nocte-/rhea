@@ -29,7 +29,7 @@ ostream& operator<< (ostream&, const rhea::simplex_solver&);
 namespace rhea
 {
 
-using row = expression<symbol>;
+typedef expression<symbol> row;
 
 /** Solver that implements the Cassowary incremental simplex algorithm. */
 class simplex_solver

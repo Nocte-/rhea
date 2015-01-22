@@ -20,7 +20,7 @@ public:
         /** Less than or equal to. */
         leq = 1,
         /** Greater than or equal to. */
-        geq = -1,
+        geq = -1
     } comp_t;
 
 public:
