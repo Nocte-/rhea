@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
     s.name         = "Rhea"
-    s.version      = '0.2.3'
+    s.version      = '0.2.4'
     s.summary      = "A modern c++ constraint solver based on Cassowary."
     s.homepage     = "https://github.com/Nocte-/rhea"
     s.authors      = { 
