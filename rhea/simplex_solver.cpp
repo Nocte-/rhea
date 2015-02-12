@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // simplex_solver.cpp
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2012-2015, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #include "simplex_solver.hpp"
 

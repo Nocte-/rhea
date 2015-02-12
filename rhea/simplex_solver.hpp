@@ -2,7 +2,7 @@
 /// \file   simplex_solver.hpp
 /// \brief  Implementation of a solver using a simplex algorithm
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2012-2015, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
