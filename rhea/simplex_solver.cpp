@@ -505,11 +505,12 @@ bool simplex_solver::try_adding_directly(linear_expression& expr)
 
 simplex_solver& simplex_solver::remove_edit_var(const variable& v)
 {
-    auto i = std::find(edit_info_list_.begin(), edit_info_list_.end(), v);
-    if (i == edit_info_list_.end())
+    auto i = std::find(edit_info_list_.rbegin(), edit_info_list_.rend(), v);
+    if (i == edit_info_list_.rend())
         throw edit_misuse(v);
 
-    remove_constraint(i->c);
+    if (!i->c.is_nil())
+        remove_constraint(i->c);
 
     return *this;
 }

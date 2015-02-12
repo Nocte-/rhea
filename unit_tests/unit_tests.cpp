@@ -657,6 +657,34 @@ BOOST_AUTO_TEST_CASE(multiedit2_test)
     BOOST_CHECK_EQUAL(h.value(), 40);
 }
 
+BOOST_AUTO_TEST_CASE(a_variable_can_be_made_editable_multiple_times_stack_like_test)
+{
+    variable x;
+    simplex_solver solver;
+
+    solver.add_stay(x);
+    solver.add_edit_var(x);
+    {
+        solver.add_edit_var(x);
+        solver.suggest_value(x, 10);
+        solver.resolve();
+        solver.remove_edit_var(x);
+    }
+    BOOST_CHECK_EQUAL(x.value(), 10);
+
+    solver.suggest_value(x, 20);
+    solver.resolve();
+    BOOST_CHECK_EQUAL(x.value(), 20);
+
+    {
+        solver.add_edit_var(x);
+        solver.suggest_value(x, 30);
+        solver.resolve();
+        solver.remove_edit_var(x);
+    }
+    BOOST_CHECK_EQUAL(x.value(), 30);
+}
+
 BOOST_AUTO_TEST_CASE(bounds_test)
 {
     variable x(1);
