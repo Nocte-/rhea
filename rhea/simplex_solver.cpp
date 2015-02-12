@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // simplex_solver.cpp
 //
-// Copyright 2012-2014, nocte@hippie.nu       Released under the MIT License.
+// Copyright 2012-2015, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #include "simplex_solver.hpp"
 
@@ -142,13 +142,6 @@ solver& simplex_solver::add_constraint_(const constraint& c)
         const auto& v = ec.var();
         if (!v.is_external())
             throw edit_misuse(v);
-
-        auto i(std::find(edit_info_list_.begin(), edit_info_list_.end(), v));
-        if (i != edit_info_list_.end()) {
-            edit_info_list_.emplace_back(v, constraint(), variable::nil_var(),
-                                         variable::nil_var(), 0);
-            return *this;
-        }
     }
 
     auto r = make_expression(c);
@@ -301,9 +294,8 @@ solver& simplex_solver::remove_constraint_(const constraint& c)
             remove_from_container_if(stay_minus_error_vars_, pred);
         }
     } else if (c.is_edit_constraint()) {
-        auto& ec = c.as<edit_constraint>();
         auto ei = std::find(edit_info_list_.begin(), edit_info_list_.end(),
-                            ec.var());
+                            c);
         assert(ei != edit_info_list_.end());
         remove_column(ei->minus);
         // ei->plus is a marker and will be removed later
@@ -330,13 +322,16 @@ void simplex_solver::resolve()
 
 simplex_solver& simplex_solver::suggest_value(const variable& v, double x)
 {
-    auto ei = std::find(edit_info_list_.begin(), edit_info_list_.end(), v);
-    if (ei == edit_info_list_.end())
+    auto ei = std::find(edit_info_list_.rbegin(), edit_info_list_.rend(), v);
+    if (ei == edit_info_list_.rend())
         throw edit_misuse(v);
 
-    double delta{x - ei->prev_constant};
-    ei->prev_constant = x;
-    delta_edit_constant(delta, ei->plus, ei->minus);
+    while (ei != edit_info_list_.rend()) {
+        double delta{x - ei->prev_constant};
+        ei->prev_constant = x;
+        delta_edit_constant(delta, ei->plus, ei->minus);
+        ei = std::find(std::next(ei), edit_info_list_.rend(), v);
+    }
 
     return *this;
 }
@@ -455,36 +450,9 @@ simplex_solver::add_with_artificial_variable(linear_expression& expr)
 
 simplex_solver& simplex_solver::remove_edit_vars_to(size_t n)
 {
-    std::queue<variable> qv;
-    variable_set still_editing; // Variables that we need to *not* remove
-    size_t i = 0;
-    for (auto it = edit_info_list_.begin();
-         it != edit_info_list_.end() && edit_info_list_.size() != n;
-         ++it, ++i) {
-        if (i >= n && !it->c.is_nil())
-            qv.push(it->v);
-        else
-            still_editing.insert(it->v);
+    while (edit_info_list_.size() > n) {
+        remove_edit_var(edit_info_list_.back().v);
     }
-
-    while (!qv.empty()) {
-        // only remove the variable if it's not in the set of variable
-        // from a previous nested outer edit
-        // e.g., if I do:
-        // Edit x,y
-        // Edit w,h,x,y
-        // EndEdit
-        // The end edit needs to only get rid of the edits on w,h
-        // not the ones on x,y
-        auto& f(qv.front());
-        if (still_editing.count(f) == 0)
-            remove_edit_var(f);
-
-        qv.pop();
-    }
-
-    while (edit_info_list_.size() > n)
-        edit_info_list_.pop_back();
 
     return *this;
 }
@@ -505,8 +473,8 @@ bool simplex_solver::try_adding_directly(linear_expression& expr)
 
 simplex_solver& simplex_solver::remove_edit_var(const variable& v)
 {
-    auto i = std::find(edit_info_list_.begin(), edit_info_list_.end(), v);
-    if (i == edit_info_list_.end())
+    auto i = std::find(edit_info_list_.rbegin(), edit_info_list_.rend(), v);
+    if (i == edit_info_list_.rend())
         throw edit_misuse(v);
 
     remove_constraint(i->c);

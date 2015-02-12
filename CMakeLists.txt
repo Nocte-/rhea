@@ -17,6 +17,13 @@ set(BUILD_UNITTESTS 0 CACHE BOOL "Build the unit tests")
 set(BUILD_COVERAGE  0 CACHE BOOL "Generate a coverage report (gcc only)")
 set(BUILD_DOCUMENTATION 0 CACHE BOOL "Generate Doxygen documentation")
 
+# Prevent problems with RPATH on mac
+#
+if(POLICY CMP0042)
+  cmake_policy(SET CMP0042 NEW)
+endif()
+set(CMAKE_MACOSX_RPATH ON)
+
 # Set up the compiler
 #
 if(MSVC)
@@ -90,4 +97,3 @@ elseif(WIN32)
 endif()
 
 include(CPack)
-
