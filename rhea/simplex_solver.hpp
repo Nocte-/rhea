@@ -186,6 +186,7 @@ protected:
         }
 
         bool operator==(const variable& comp) const { return v.is(comp); }
+        bool operator==(const constraint& comp) const { return c == comp; }
 
         variable v;
         constraint c;
