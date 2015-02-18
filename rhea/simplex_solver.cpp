@@ -336,6 +336,23 @@ simplex_solver& simplex_solver::suggest_value(const variable& v, double x)
     return *this;
 }
 
+simplex_solver& simplex_solver::suggest_value(const constraint& c, double x)
+{
+    if (!c.is_edit_constraint()) {
+        throw edit_misuse();
+    }
+    auto& e = c.as<edit_constraint>();
+    auto ei = std::find(edit_info_list_.rbegin(), edit_info_list_.rend(), c);
+    if (ei == edit_info_list_.rend())
+        throw edit_misuse(e.var());
+
+    double delta{x - ei->prev_constant};
+    ei->prev_constant = x;
+    delta_edit_constant(delta, ei->plus, ei->minus);
+
+    return *this;
+}
+
 simplex_solver& simplex_solver::suggest(const variable& v, double x)
 {
     add_edit_var(v);

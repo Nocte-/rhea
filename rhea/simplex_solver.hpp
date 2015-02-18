@@ -82,6 +82,12 @@ public:
      *  after resolve() or end_edit() has been called. */
     simplex_solver& suggest_value(const variable& v, double x);
 
+    /** Suggest a new value for an edit constraint.
+     *  The constraint needs to be an edit constraint and needs to
+     *  have been added before.  The tableau will not be solved
+     *  completely until resolve() or end_edit() has been called. */
+    simplex_solver& suggest_value(const constraint& v, double x);
+
     /** Suggest a new value for a variables.
      *  This function calls add_edit_variable(), begin_edit(), and
      *  end_edit() as well.
