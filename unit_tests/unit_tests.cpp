@@ -995,3 +995,35 @@ BOOST_AUTO_TEST_CASE(contains_constraint)
     solver.remove_constraint(c);
     BOOST_CHECK(!solver.contains_constraint(c));
 }
+
+BOOST_AUTO_TEST_CASE(independent_values_can_be_suggested_for_concurrent_edits)
+{
+    simplex_solver s;
+    variable v;
+    constraint e1 = std::make_shared<edit_constraint>(v);
+    constraint e2 = std::make_shared<edit_constraint>(v, strength::medium());
+
+    s.add_constraint(e1);
+    s.add_constraint(e2);
+
+    s.suggest_value(e1, 42);
+    s.suggest_value(e2, 21);
+    s.resolve();
+    BOOST_CHECK_EQUAL(v.value(), 42);
+
+    // Other edit becomes visible after highest priority one is
+    // removed from the solver
+    s.remove_constraint(e1);
+    BOOST_CHECK_EQUAL(v.value(), 21);
+
+    // Edits are only remembered while the constraint is active
+    s.add_constraint(e1);
+    BOOST_CHECK_EQUAL(v.value(), 21);
+
+    // Multiple edits respect strength changes
+    s.suggest_value(e1, 50);
+    s.resolve();
+    BOOST_CHECK_EQUAL(v.value(), 50);
+    s.change_strength(e1, strength::weak());
+    BOOST_CHECK_EQUAL(v.value(), 21);
+}
