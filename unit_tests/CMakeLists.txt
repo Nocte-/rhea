@@ -11,7 +11,7 @@ find_package(Boost 1.46 REQUIRED COMPONENTS unit_test_framework)
 
 include_directories(${Boost_INCLUDE_DIRS})
 
-target_link_libraries(${EXE} rhea ${Boost_LIBRARIES})
+target_link_libraries(${EXE} rhea-s ${Boost_LIBRARIES})
 if(BUILD_COVERAGE AND "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   target_link_libraries(${EXE} -fprofile-arcs -ftest-coverage)
 endif()
