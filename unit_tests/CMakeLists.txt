@@ -2,8 +2,6 @@ project (unit-tests)
 cmake_minimum_required (VERSION 2.8.3)
 set(EXE unit_tests)
 
-add_definitions(-DBOOST_TEST_DYN_LINK)
-
 add_executable(${EXE} unit_tests.cpp)
 # add_executable(speed_test speed_test.cpp)
 
