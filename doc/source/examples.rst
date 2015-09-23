@@ -114,7 +114,7 @@ layout questions. The most obvious question -- where are the midpoints?
     {
         ostream& operator<< (ostream& in, const point& p)
         {
-            return in << "(" << in.x << ", " << in.y << ")";
+            return in << "(" << p.x << ", " << p.y << ")";
         }
     }
 
@@ -138,7 +138,7 @@ These relationships will be maintained if we then edit the position of the
 corners. Lets move the position of the bottom right corner (point 2). We mark
 the variables associated with that corner as being **Edit variables**::
 
-    solver.suggest({{point[2].x, 300}, {p[2].y, 400}});
+    solver.suggest({{p[2].x, 300}, {p[2].y, 400}});
 
 As a result of this edit, the midpoints have automatically been updated::
 
