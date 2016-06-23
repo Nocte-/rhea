@@ -7,6 +7,7 @@
 #include <boost/range/algorithm.hpp>
 
 #include "rhea/simplex_solver.hpp"
+#include "rhea/stays.hpp"
 #include "rhea/iostream.hpp"
 #include "rhea/linear_expression.hpp"
 #include "rhea/link_variable.hpp"
@@ -634,6 +635,36 @@ BOOST_AUTO_TEST_CASE(nonlinear) // issue 26
 
     linear_expression const2{2};
     BOOST_CHECK_NO_THROW(solver.add_constraint(x == y / const2));
+}
+
+BOOST_AUTO_TEST_CASE(stays1)
+{
+    simplex_solver solver;
+    stays st{solver};
+    variable a, b;
+
+    solver.add_constraints({a >= b, a >= 0, a <= 10});
+    st.add(a);
+
+    solver.suggest(b, 3);
+    st.update();
+    BOOST_CHECK_EQUAL(a.value(), 3);
+    BOOST_CHECK_EQUAL(b.value(), 3);
+
+    solver.suggest(b, 1);
+    st.update();
+    BOOST_CHECK_EQUAL(a.value(), 3);
+    BOOST_CHECK_EQUAL(b.value(), 1);
+
+    solver.suggest(b, 5);
+    st.update();
+    BOOST_CHECK_EQUAL(a.value(), 5);
+    BOOST_CHECK_EQUAL(b.value(), 5);
+
+    solver.suggest(b, 2);
+    st.update();
+    BOOST_CHECK_EQUAL(a.value(), 5);
+    BOOST_CHECK_EQUAL(b.value(), 2);
 }
 
 /*
