@@ -1,7 +1,7 @@
 //---------------------------------------------------------------------------
 // simplex_solver.cpp
 //
-// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
+// Copyright 2015-2016, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #include "simplex_solver.hpp"
 
@@ -10,7 +10,6 @@
 
 #include "errors.hpp"
 
-#include "iostream.hpp"
 namespace rhea
 {
 namespace
@@ -34,36 +33,6 @@ symbol pivotable_symbol(const row& r)
 inline row operator*(row e, double x)
 {
     return e *= x;
-}
-
-inline row operator*(double x, row e)
-{
-    return e *= x;
-}
-
-inline row operator/(row e, double x)
-{
-    return e /= x;
-}
-
-inline row operator*(row e, const row& x)
-{
-    return e *= x;
-}
-
-inline row operator/(row e, const row& x)
-{
-    return e /= x;
-}
-
-inline row operator+(row e, const row& x)
-{
-    return e += x;
-}
-
-inline row operator-(row e, const row& x)
-{
-    return e -= x;
 }
 
 } // anonymous namespace
