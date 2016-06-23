@@ -28,7 +28,7 @@ class stays
 
 public:
     stays(simplex_solver& solver)
-        : solver_{solver}
+        : solver_(solver)
     {
     }
 
