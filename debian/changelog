@@ -1,3 +1,9 @@
+rhea (0.3.1) raring; urgency=medium
+
+  * Bugfix: limit strength to 1..1000 (#49)
+
+ -- Nocte <nocte@hippie.nu>  Sun, 16 Apr 2017 19:42:02 +0100
+
 rhea (0.2.3) raring; urgency=medium
 
   * Bugfix: throw when denominator is not constant (#26)

@@ -2,7 +2,7 @@
 /// \file   strength.hpp
 /// \brief  The strength of a constraint
 //
-// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
+// Copyright 2015-2017, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -45,29 +45,29 @@ public:
 
     /** Constraints with this strength must be satisfied.
      *  Used by default for constraints provided by the programmer. */
-    static strength required() { return {10000. * 10000. * 10000.}; }
+    static strength required() { return {1000. * 1000. * 1000.}; }
 
     /** Strong constraint, the default for edit constraints. */
-    static strength strong() { return {10000. * 10000.}; }
+    static strength strong() { return {1000. * 1000.}; }
     /** Medium strength constraint. */
-    static strength medium() { return {10000.}; }
+    static strength medium() { return {1000.}; }
     /** Weak constraint, the default strength for stay constraints. */
     static strength weak() { return {1.}; }
 
     /** Strong constraint strength with weight factor.
-     * \param weight A 1..10000 weight factor */
+     * \param weight A 1..1000 weight factor */
     static strength strong(double weight)
     {
         check_(weight);
-        return {weight * 10000. * 10000.};
+        return {weight * 1000. * 1000.};
     }
 
     /** Medium constraint strength with weight factor.
-    * \param weight A 1..10000 weight factor */
+    * \param weight A 1..1000 weight factor */
     static strength medium(double weight)
     {
         check_(weight);
-        return {weight * 10000.};
+        return {weight * 1000.};
     }
 
     /** Weak constraint strength with weight factor.
@@ -98,7 +98,7 @@ private:
 
     static void check_(double v)
     {
-        if (v < 1.0 || v >= 10000.)
+        if (v < 1.0 || v >= 1000.)
             throw bad_weight{};
     }
 

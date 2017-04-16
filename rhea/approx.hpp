@@ -2,7 +2,7 @@
 /// \file   approx.hpp
 /// \brief  See if two values are equal within a margin
 //
-// Copyright 2015, nocte@hippie.nu            Released under the MIT License.
+// Copyright 2015-2017, nocte@hippie.nu       Released under the MIT License.
 //---------------------------------------------------------------------------
 #pragma once
 
@@ -14,7 +14,7 @@ namespace rhea
 /** Return true iff a and b are approximately the same. */
 inline bool approx(double a, double b)
 {
-    const double epsilon = 1.0e-8;
+    const double epsilon = 1.0e-6;
     if (a > b) {
         return (a - b) < epsilon;
     } else {

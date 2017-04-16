@@ -57,10 +57,10 @@ BOOST_AUTO_TEST_CASE(strength_test)
     BOOST_CHECK(strength::strong() > strength::medium());
     BOOST_CHECK(strength::medium() > strength::weak());
 
-    BOOST_CHECK(strength::required() > strength::strong(1000));
+    BOOST_CHECK(strength::required() > strength::strong(999));
     BOOST_CHECK(strength::strong(100) > strength::strong(10));
-    BOOST_CHECK(strength::strong(1) > strength::medium(1000));
-    BOOST_CHECK(strength::medium(1) > strength::weak(1000));
+    BOOST_CHECK(strength::strong(1) > strength::medium(999));
+    BOOST_CHECK(strength::medium(1) > strength::weak(999));
 }
 
 BOOST_AUTO_TEST_CASE(variable_test)
